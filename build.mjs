@@ -1524,6 +1524,38 @@ function policyCenterPage() {
   }, body);
 }
 
+
+/* ---------- admin shell --------------------------------------------------- */
+
+function adminPage() {
+  /* Deliberately not built with page(). The admin has no public header,
+     no footer and no navigation into the rest of the site: it is a tool,
+     not a page of the website. */
+  return `<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Chamber admin</title>
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#002734">
+<link rel="icon" href="/assets/favicon.ico" sizes="any">
+<link rel="stylesheet" href="/admin/admin.css">
+</head>
+<body>
+<header class="bar">
+  <div class="wrap">
+    <strong>Chamber admin</strong>
+    <span class="who" id="whoami"></span>
+    <button id="signout" hidden>Sign out</button>
+  </div>
+</header>
+<main class="wrap" id="admin"></main>
+<script type="module" src="/admin/app.js"></script>
+</body>
+</html>`;
+}
+
 /* ---------- write it out -------------------------------------------------- */
 
 async function put(rel, html) {
@@ -1565,6 +1597,14 @@ async function main() {
   }
   await writeFile(path.join(OUT, 'events', 'chamber.ics'), feedIcs(dated, SITE));
 
+  /* The admin is a tool, not a page. It is not in the sitemap, it is
+     disallowed in robots.txt, and it carries noindex. */
+  await mkdir(path.join(OUT, 'admin'), { recursive: true });
+  await writeFile(path.join(OUT, 'admin', 'index.html'), adminPage());
+  for (const f of ['app.js', 'schema.js', 'admin.css']) {
+    await cp(path.join('admin', f), path.join(OUT, 'admin', f));
+  }
+
   await put('policy-center', policyCenterPage());
   await mkdir(path.join(OUT, 'policy-center'), { recursive: true });
   await cp(path.join('policy', 'app.js'), path.join(OUT, 'policy-center', 'app.js'));
@@ -1590,6 +1630,7 @@ ${urls.map(u => `  <url><loc>${SITE.url}${u}</loc></url>`).join('\n')}
 `User-agent: *
 Allow: /
 Disallow: /policy-center/
+Disallow: /admin/
 Disallow: /api/
 
 Sitemap: ${SITE.url}/sitemap.xml

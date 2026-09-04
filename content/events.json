@@ -1,0 +1,135 @@
+{
+  "timezone": "America/Chicago",
+  "recurring": [
+    {
+      "title": "Monthly chamber luncheon",
+      "when": "Second Wednesday of the month, 11:30 am",
+      "where": "Tournament Club of Iowa",
+      "summary": "Lunch, a short program, and the closest thing the chamber has to a standing meeting.",
+      "detail": "Pay and pick your meal ahead of time through the club. Registering in advance matters more than it sounds, because the kitchen builds the order off that list.",
+      "cost": "$20, tax and gratuity included",
+      "rsvp": {
+        "label": "Register and pick a meal",
+        "href": "https://tcofiowa.com/product/2026-chamber-of-commerce-meetings/"
+      },
+      "audience": "public",
+      "season": "sun"
+    },
+    {
+      "title": "Coffee and Connections",
+      "when": "Fourth Thursday of the month, 7:45 am",
+      "where": "Rising Sun Cafe",
+      "summary": "An hour of networking before the working day starts. No program, no speaker.",
+      "cost": "Free, buy your own coffee",
+      "audience": "public",
+      "season": "winter"
+    },
+    {
+      "title": "Ribbon cuttings",
+      "when": "Scheduled as needed",
+      "where": "Your place of business",
+      "summary": "A photo, a crowd, and a post that reaches several thousand people locally.",
+      "detail": "Open to any chamber member opening, moving, expanding, or hitting a milestone. The chamber brings the oversized scissors and handles the promotion.",
+      "cost": "Included with membership",
+      "rsvp": {
+        "label": "Ask for a ribbon cutting",
+        "href": "mailto:admin@polkcitychamber.com?subject=Ribbon%20cutting%20request"
+      },
+      "audience": "members",
+      "season": "spring"
+    }
+  ],
+  "calendar": [
+    {
+      "id": "luncheon-2026-09-09",
+      "date": "2026-09-09",
+      "start": "11:30",
+      "end": "13:00",
+      "title": "Polk City Area Chamber Luncheon",
+      "where": "Tournament Club of Iowa",
+      "address": "1000 Tradition Dr, Polk City, IA 50226",
+      "venue": "tournament-club-of-iowa",
+      "summary": "The monthly luncheon. Register through the club ahead of the date and pick your meal.",
+      "cost": "$20",
+      "rsvp": {
+        "label": "Register",
+        "href": "https://tcofiowa.com/product/2026-chamber-of-commerce-meetings/"
+      },
+      "audience": "public",
+      "season": "sun"
+    },
+    {
+      "id": "coffee-2026-09-24",
+      "date": "2026-09-24",
+      "start": "07:45",
+      "end": "09:00",
+      "title": "Coffee and Connections",
+      "where": "Rising Sun Cafe",
+      "address": "107 N 2nd St, Polk City, IA 50226",
+      "summary": "Early networking before the day starts. Turn up, buy a coffee, talk to people.",
+      "cost": "Free",
+      "audience": "public",
+      "season": "winter"
+    },
+    {
+      "id": "luncheon-2026-10-14",
+      "date": "2026-10-14",
+      "start": "11:30",
+      "end": "13:00",
+      "title": "Polk City Area Chamber Luncheon",
+      "where": "Tournament Club of Iowa",
+      "address": "1000 Tradition Dr, Polk City, IA 50226",
+      "venue": "tournament-club-of-iowa",
+      "summary": "The monthly luncheon. Register through the club ahead of the date and pick your meal.",
+      "cost": "$20",
+      "rsvp": {
+        "label": "Register",
+        "href": "https://tcofiowa.com/product/2026-chamber-of-commerce-meetings/"
+      },
+      "audience": "public",
+      "season": "sun"
+    },
+    {
+      "id": "trunk-or-treat-2026-10-25",
+      "date": "2026-10-25",
+      "start": "16:00",
+      "end": "18:00",
+      "title": "Chamber Trunk or Treat",
+      "where": "Polk City Town Square",
+      "address": "107 S 3rd St, Polk City, IA 50226",
+      "summary": "A community event for Polk City area residents, with local businesses handing out candy.",
+      "detail": "Attendees can vote for their favourite decorated trunk at the chamber table. A sign-up link for businesses will go out by email.",
+      "cost": "Free",
+      "audience": "public",
+      "season": "autumn"
+    },
+    {
+      "id": "coffee-2026-10-29",
+      "date": "2026-10-29",
+      "start": "07:45",
+      "end": "09:00",
+      "title": "Coffee and Connections",
+      "where": "Rising Sun Cafe",
+      "address": "107 N 2nd St, Polk City, IA 50226",
+      "summary": "Early networking before the day starts. Turn up, buy a coffee, talk to people.",
+      "cost": "Free",
+      "audience": "public",
+      "season": "winter"
+    },
+    {
+      "id": "mixer-2026-10-29",
+      "date": "2026-10-29",
+      "start": "17:30",
+      "end": "19:30",
+      "title": "Chamber Connections: Networking and Membership Mixer",
+      "where": "Arcadia",
+      "address": "1010 Tyler St #4, Polk City, IA 50226",
+      "venue": "arcadia",
+      "summary": "An evening for current members, past members, and any business thinking about joining.",
+      "detail": "Hors d’oeuvres, networking, and a chance to hear how the chamber can help your business. Come whether or not you are a member.",
+      "cost": "Free",
+      "audience": "public",
+      "season": "autumn"
+    }
+  ]
+}

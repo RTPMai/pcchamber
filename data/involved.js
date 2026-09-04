@@ -1,3 +1,5 @@
+import { readFileSync } from 'node:fs';
+
 /* ==========================================================================
    GET INVOLVED and PRIVACY
 
@@ -43,32 +45,7 @@ export const INVOLVED = {
     }
   ],
 
-  /* The board, as shown on the chamber website.
-
-     Where a director's business is a chamber member, "member" is their
-     slug from members.js and their name links to their directory page.
-     Two are listed as community members rather than representing a
-     business, which is how the chamber describes them.
-
-     photo is the filename in assets/board/, without the extension. Run
-     tools/board-photos.py over a folder of headshots and it crops, resizes
-     and writes them. Someone with no photo shows their initial instead.
-
-     The Administrative Director seat is open. Leaving it visible rather
-     than hiding it is deliberate: it is a real vacancy, it explains why
-     things move at the pace they do, and somebody reading this page is
-     exactly who might fill it. */
-  board: [
-    { name: 'Shawn Comer',      role: 'President',        business: "Papa's Pizzeria", member: 'papas-pizzeria', photo: 'shawn' },
-    { name: 'Susie Sheldahl',   role: 'Vice President',   business: 'Realty One Group Impact', member: 'susie-sheldahl-realty-one-group-impact', photo: 'susie' },
-    { name: 'Jake Lundgren',    role: 'Treasurer',        business: 'Knapp Properties', member: 'knapp-properties', photo: 'jake' },
-    { name: 'Brandon Converse', role: 'Secretary',        business: 'Luana Savings Bank', member: 'luana-savings-bank', photo: 'brandon' },
-    { name: 'Laramie Sandquist', role: 'Director',        business: 'Community member', photo: 'laramie' },
-    { name: 'Brian Nelson',     role: 'Director',         business: "Nelson's Automotive", photo: 'brian' },
-    { name: 'Ryan Toney',       role: 'Director',         business: 'P&M Apparel', member: 'p-and-m-apparel', photo: 'ryan' },
-    { name: 'Mary Treanor',     role: 'Fiscal Agent',     business: 'Community member', photo: 'mary' },
-    { name: 'Administrative Director', role: 'Staff',     business: 'Position open', vacant: true }
-  ]
+  board: JSON.parse(readFileSync(new URL('../content/board.json', import.meta.url), 'utf8')).board
 };
 
 export const PRIVACY = {

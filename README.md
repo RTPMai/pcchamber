@@ -26,7 +26,8 @@ This is the front half of the platform. Dues collection, member logins, and even
 
 | File | What is in it |
 | --- | --- |
-| `data/members.js` | The member directory. 61 real members, imported 4 September. |
+| `content/*.json` | **All the content the admin edits.** Members, events, jobs, news, board, referrals. |
+| `data/*.js` | Thin loaders over those JSON files, plus the documentation. Not content. |
 | `data/events.js` | The event calendar. Times are local wall-clock, always. |
 | `data/membership.js` | Tiers, prices, benefits. **Placeholder pricing.** |
 | `data/pages.js` | About text, FAQ, and the resources sections |
@@ -156,6 +157,45 @@ The page also carries `noindex` and is excluded from the sitemap and disallowed 
 **Membership is not in here.** It lives on the public site at `/membership/` and nowhere else, so there is one file to edit and nothing to drift. The Policy Center's own membership section, its two-door landing page, and its top navigation rail were removed, and `#/membership` now redirects to `/membership/` so old links and bookmarks still land somewhere sensible. The Policy Center opens straight onto its section cards.
 
 **Its stylesheet is scoped, automatically.** `policy.css` was written for a standalone site: it styles `body`, `html`, and eleven class names the chamber site also uses, including `wrap`, `foot`, `hero` and `brand`. Dropped on the page as-is it would restyle the chamber header and footer. `tools/scope-policy-css.mjs` rewrites every rule under `#policyapp` at build time, including pinning its `:root` variables to that container. Edit `policy/policy.css` normally and the scoping happens on build.
+
+---
+
+## The admin
+
+At `/admin/`. Built so somebody with no technical background can change the site without seeing GitHub, a terminal, or a line of code.
+
+**How it works.** The admin reads and writes the JSON files in `content/` through the GitHub API. Saving makes a real commit, Vercel notices, and the site rebuilds. About a minute end to end. So there is no database, nothing new to back up, and every change has an author, a timestamp and an undo, because it is all git history.
+
+The admin says the minute out loud. Somebody who reloads the site five seconds after saving and sees nothing will assume it failed and do it again.
+
+### Set these in Vercel before it works
+
+    ADMIN_PASSCODE   what you give whoever is doing the editing.
+                     Different from MEMBER_PASSCODE. Do not reuse it.
+    GITHUB_TOKEN     a fine-grained personal access token, scoped to
+                     Contents: Read and write, on THIS repository only
+    GITHUB_REPO      owner/repository
+    GITHUB_BRANCH    optional, defaults to main
+
+Until all three are set, the admin says exactly which one is missing rather than failing silently.
+
+### The risk, plainly
+
+That token can rewrite the site. Scope it to this one repository and never to an account, give it an expiry, and rotate it whenever the person holding the admin passcode changes. If it ever leaks, revoke it on GitHub and the problem stops immediately.
+
+The passcode is shared, not per-person. That is why signing in asks for a name and puts it in the commit: it gives a record of who changed what. A record, not a security boundary. Anybody with the passcode could type any name.
+
+Two edits at once are handled. Every save carries the file version it was based on, so if somebody else saved first, GitHub rejects it and the admin says so rather than quietly overwriting their work.
+
+### Why content moved to JSON
+
+The `data/*.js` files carry most of the explanation of how this site works. A machine writing over them would strip every comment on the first save. So the content lives in `content/*.json` and the `.js` files became thin loaders. Edit through the admin or edit the JSON directly; both end in the same place.
+
+### Adding a field
+
+`admin/schema.js` describes every collection. Adding a field is a line there, not a change to the interface. Add it to the matching JSON too, or existing entries show it blank.
+
+References and web addresses are generated from the name and date when somebody adds something, because they live in the collapsed advanced section and asking a first-time user to fill in a box they cannot see is how a tool gets abandoned. They are only generated on add, never on an existing entry, since changing one after publishing breaks every link to it.
 
 ---
 
