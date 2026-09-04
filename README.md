@@ -34,7 +34,10 @@ This is the front half of the platform. Dues collection, member logins, and even
 | `data/involved.js` | Get Involved page and the privacy policy. **Board list is placeholder.** |
 | `data/news.js` | Chamber news and member spotlights |
 | `data/jobs.js` | The job board. Postings drop off on their own. |
-| `data/referrals.js` | Who the chamber points people at, by situation. Shared with the Policy Center. |
+| `data/referrals.js` | Who the chamber points people at, by situation |
+| `data/forms.js` | The join form and the event submission form |
+| `api/_policy/content.js` | **Policy Center entries.** Members only, so it lives here, not in the site. |
+| `api/_policy/membership.js` | The Policy Center's own membership content |
 
 Everything else builds itself from those five files.
 
@@ -100,6 +103,12 @@ Node 18 or newer. No dependencies to install.
 
 **Replace the board list.** `data/involved.js` has placeholder names and roles on the Get Involved page.
 
+**Set MEMBER_PASSCODE in Vercel** or the Policy Center will refuse everyone.
+
+**Set formEndpoint** or the join and event forms stay in email fallback.
+
+**Vote on the membership structure.** `data/membership.js` has `draft: true`, which puts a red banner on the page. Turn it off after the board votes, not before.
+
 **Fill in the real referrals.** `data/referrals.js` drives the Who to call block and the referral badges. Two categories are honestly marked as gaps: no accountant or CPA, and no attorney. Leave them marked until somebody joins. A referral to nobody is worse than an admitted gap.
 
 **Empty the job board and the news list, or fill them.** The three jobs and three posts in there are examples. A job board with fake postings is worse than an empty one.
@@ -107,6 +116,36 @@ Node 18 or newer. No dependencies to install.
 **Point the Policy Center link at the live address.** `SITE.policyCenterUrl`.
 
 **Decide about slugs.** A member's address is `/directory/their-slug/`. Once it is public and indexed, changing a slug breaks every link to it. Get them right the first time, or plan redirects.
+
+---
+
+## The Policy Center
+
+It now lives at `/policy-center/` inside this site rather than at its own address, and it is gated because access is a paid benefit at every membership level.
+
+**Set the passcode before deploying.** In Vercel: Project, Settings, Environment Variables.
+
+    MEMBER_PASSCODE = whatever you tell members
+
+Without it the endpoint refuses everyone, which is the safe way for it to fail.
+
+**Why it is a server function and not a JavaScript password box.** A password checked in the browser is theatre: the content still downloads to everyone and anyone can read it with View Source. If members are paying for this, the content genuinely must not be sent to people who have not paid. So the entries live in `api/_policy/`, outside the built site, and `api/policy.js` only releases them after the passcode checks out on the server. You can confirm this yourself: search `dist/` for any entry text after a build and you will not find it.
+
+**What this is not.** One shared passcode for the whole membership, not per-member accounts. A member who leaves can still use it until you change it, and one member can pass it to a friend. That is a real limitation and a deliberate trade: it keeps the content off the public web, costs nothing, and adds no database. Per-member logins belong with dues collection, which the board has not decided yet. Change the passcode when the membership year turns over.
+
+The page also carries `noindex` and is excluded from the sitemap and disallowed in `robots.txt`.
+
+**One thing to resolve.** Membership content now exists twice: `data/membership.js` drives the public membership page, and `api/_policy/membership.js` drives the Policy Center's own membership section. They will drift. Either point the Policy Center's membership link at `/membership/` and delete its copy, or accept that two files need editing together.
+
+---
+
+## Forms
+
+`data/site.js` has a `formEndpoint`. Any service that accepts a plain POST works: Formspree, Basin, Getform, Tally. Formspree's free tier covers fifty submissions a month, which is more than this chamber will use.
+
+Leave it empty and both forms fall back to an email link rather than a button that silently does nothing.
+
+Both forms carry a honeypot field positioned off screen rather than hidden with `display:none`, which bots detect.
 
 ---
 

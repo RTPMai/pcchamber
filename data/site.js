@@ -30,8 +30,22 @@ export const SITE = {
   demoBannerText:
     'Demo site. Layout and features are real. Member listings and a few dates are placeholders until the live data is loaded in.',
 
-  // The Policy Center is a separate project. Point this at its live address.
-  policyCenterUrl: 'https://policy-center.vercel.app',
+  /* FORMS
+     The join form and the event form post here. Any form service that
+     accepts a plain POST works: Formspree, Basin, Getform, Tally.
+
+     Leave it empty and both forms fall back to opening an email instead,
+     so nothing breaks before it is set up.
+
+     Formspree free tier handles 50 submissions a month, which is more
+     than this chamber will use. Create a form, paste the endpoint here.  */
+  formEndpoint: '',
+
+  /* POLICY CENTER
+     Now part of this site at /policy-center/ rather than a separate
+     address, and gated because access is a paid member benefit.
+     See api/policy.js and the README section on it. */
+  policyCenterUrl: '/policy-center/',
 
   // Every page gets one season color from the chamber logo roundel.
   // sun, autumn, spring, winter, navy

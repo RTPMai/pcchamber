@@ -1,78 +1,147 @@
 /* ==========================================================================
    MEMBERSHIP
 
-   PRICING BELOW IS PLACEHOLDER. Swap in the board-approved figures before
-   this goes anywhere near the public.
+   Taken from "Membership levels and benefits", the proposal currently in
+   front of the board.
 
-   The design decision worth defending: prices are on the page. Peer chambers
-   hide them behind an application form, which makes a prospective member
-   ask a person before they know whether they can afford it. That is one
-   more reason to close the tab.
+   THE DRAFT SWITCH
+
+   draft stays true until the board votes. While it is true a red banner
+   sits at the top of the membership page and the prices are marked as not
+   final. Turn it off only after the vote.
    ========================================================================== */
+
+export const MEMBERSHIP = {
+  draft: true,
+  draftNote:
+    'This structure is a proposal under review by the chamber board. Prices and benefits are not final and should not be quoted to prospective members yet.'
+};
 
 export const TIER_LIST = [
   {
     id: 'individual',
     season: 'winter',
-    name: 'Individual',
-    price: '$75',
+    name: 'Individual Membership',
+    price: '$100 to $125',
     per: 'a year',
-    who: 'Residents, retirees, and people who want to support local business without running one.',
+    who: 'For a person rather than a business. Residents, retirees, job seekers, and people who want to be part of the local business community without owning a business.',
     includes: [
-      'Luncheons at the member rate',
-      'The monthly member email',
-      'A vote at the annual meeting'
+      'Networking event access',
+      'Educational programs and workshops',
+      'Volunteer and committee opportunities',
+      'Chamber news and updates',
+      'New member social recognition',
+      'Business Policy Center access'
     ]
   },
   {
     id: 'basic',
     season: 'spring',
-    name: 'Member',
-    price: '$200',
-    per: 'a year',
-    who: 'Sole proprietors and businesses with a handful of employees.',
-    includes: [
-      'A page in the member directory that shows up in search',
-      'Luncheons at the member rate',
-      'Ribbon cutting when you open, move, or expand',
-      'Post your events on the community calendar'
-    ]
-  },
-  {
-    id: 'pro',
-    season: 'autumn',
-    name: 'Pro',
-    price: '$450',
-    per: 'a year',
+    name: 'Basic Business',
+    price: '$200 to $600',
+    per: 'a year, by size',
     highlight: true,
-    who: 'Established businesses that want the chamber working for them, not just listing them.',
+    who: 'The working level of chamber membership. Everything a local business needs to be found, referred and connected.',
+    /* Priced by headcount rather than one flat number, so a sole trader is
+       not paying what a thirty-person employer pays. */
+    scale: [
+      { label: 'Under 5 employees', price: '$200' },
+      { label: '5 to 15 employees', price: '$400' },
+      { label: '16 or more employees', price: '$600' },
+      { label: 'Nonprofit, any size', price: '$150' }
+    ],
     includes: [
-      'Everything in Member',
-      'Higher placement in the directory',
-      'Two luncheon tickets included',
-      'One member spotlight a year across chamber social and email',
-      'Named as the referral for your category on the Business Policy Center'
+      'Directory listing, chamber and NP Living',
+      'Chamber window cling',
+      'Referral exclusivity',
+      'Referral growth credit',
+      'Business Policy Center access',
+      'Reciprocal Greater Des Moines Partnership membership',
+      'Ribbon cuttings',
+      'Events calendar listing',
+      'Luncheon access',
+      'Coffee and Connections',
+      'Notary access'
     ]
   },
   {
-    id: 'premier',
+    id: 'partner',
     season: 'sun',
-    name: 'Premier',
-    price: '$1,000',
+    name: 'Community Partner',
+    price: '$750',
     per: 'a year',
-    who: 'Businesses treating the chamber as a marketing channel and wanting to be visible all year.',
+    who: 'For businesses that want visibility and a seat at the table, not just a listing.',
+    builds: 'Basic Business',
     includes: [
-      'Everything in Pro',
-      'Logo on the home page and in the footer of every chamber email',
-      'Four luncheon tickets included',
-      'A hole sponsorship at the golf tournament',
-      'First call on sponsorship of new chamber programs'
+      'Logo on the Get Involved page',
+      '3 luncheon tickets',
+      'Invitation to the legislator coffee',
+      'Host a networking event at your business',
+      'Contribute to the New Member Welcome Kit'
+    ]
+  },
+  {
+    id: 'investor',
+    season: 'winter',
+    name: 'Community Investor',
+    price: '$1,750',
+    per: 'a year',
+    who: 'For businesses using the chamber as a marketing channel, with recurring exposure to the full membership.',
+    builds: 'Community Partner',
+    includes: [
+      'Email signature logo and newsletter recognition',
+      'Golf hole sponsorship',
+      '$250 sponsorship credit',
+      '6 luncheon tickets total, not 6 more',
+      '2 social media spotlights a year',
+      'Stand-alone email to the full membership',
+      'Negotiated financial institution rate'
+    ]
+  },
+  {
+    id: 'sponsor',
+    season: 'autumn',
+    name: 'Community Sponsor',
+    price: '$3,500',
+    per: 'a year',
+    who: 'For businesses making a substantial investment in the chamber, and who want to see what it returned.',
+    builds: 'Community Investor',
+    includes: [
+      'Golf tournament foursome',
+      '$500 sponsorship credit',
+      'Quarterly social media spotlights',
+      'Annual member plaque',
+      'Digital chamber member badge',
+      'Logo on event signage',
+      'Quarterly impact report',
+      'Priority slot in the Welcome Kit'
+    ]
+  },
+  {
+    id: 'champion',
+    season: 'navy',
+    name: 'Community Champion',
+    price: '$6,000',
+    per: 'a year',
+    flag: 'Invitation only, capped at 3 members',
+    who: 'The top level, deliberately scarce. Influence over chamber priorities and access to the people making local decisions.',
+    builds: 'Community Sponsor',
+    includes: [
+      'Seat at the Chamber Priorities roundtable',
+      'Naming sponsorship of a signature event',
+      'Feature profile in an annual chamber publication',
+      'Community Champion plaque',
+      'Priority scheduling',
+      'Two golf foursomes',
+      '$1,000 sponsorship credit',
+      '12 luncheon tickets total',
+      'Monthly social media spotlight rotation',
+      'In-person annual impact report presentation'
     ]
   }
 ];
 
-/* The honest version of what a chamber membership is, written for someone
-   deciding whether to spend the money. */
+/* Why a business here pays for this, written for someone deciding. */
 export const WHY = [
   {
     season: 'spring',
@@ -81,13 +150,13 @@ export const WHY = [
   },
   {
     season: 'sun',
-    title: 'You meet the people who refer work',
-    body: 'In a town this size most business arrives by referral. The luncheon is a low-effort way to be the name that comes to mind when somebody gets asked who to call.'
+    title: 'You are the one referred',
+    body: 'Referral exclusivity means that when the chamber gets a call asking who to use for what you do, you are the answer. In a town this size that is most of the value.'
   },
   {
     season: 'winter',
     title: 'Somebody reads the boring documents',
-    body: 'The chamber tracks what the legislature, the county, and the city are doing to businesses here, and writes it in plain language on the Business Policy Center.'
+    body: 'The chamber tracks what the legislature, the county, and the city are doing to businesses here and writes it in plain language in the Business Policy Center. That is a member benefit, not a public page.'
   },
   {
     season: 'autumn',
@@ -96,15 +165,22 @@ export const WHY = [
   }
 ];
 
-/* Straight answers to the questions people actually ask before joining. */
 export const JOIN_FAQ = [
   {
     q: 'Do I have to be in Polk City?',
     a: 'No. The chamber covers the wider area, including Alleman, Elkhart, and Sheldahl, and plenty of members are based elsewhere in the metro and do business here.'
   },
   {
+    q: 'How is Basic Business priced?',
+    a: 'By headcount, so a one-person business is not paying what a thirty-person employer pays. Nonprofits pay $150 at any size.'
+  },
+  {
+    q: 'What does referral exclusivity actually mean?',
+    a: 'When somebody asks the chamber who to call for what you do, you are the name given. It is the one benefit a larger chamber cannot copy, because it only works when the list is short.'
+  },
+  {
     q: 'Can I come to a luncheon before I join?',
-    a: 'Yes. Guests are welcome at the luncheon at the guest rate. Come to one before you spend anything.'
+    a: 'Yes. Guests are welcome at the guest rate. Come to one before you spend anything.'
   },
   {
     q: 'What happens after I apply?',
@@ -113,9 +189,5 @@ export const JOIN_FAQ = [
   {
     q: 'Is this the same as the city?',
     a: 'No. The chamber is an independent nonprofit. The city is at polkcityia.gov.'
-  },
-  {
-    q: 'Can I pay monthly?',
-    a: 'Not currently. Dues are annual. If cost is the obstacle, say so, because the board would rather have you in at a lower tier than not at all.'
   }
 ];

@@ -4,18 +4,86 @@
   "cleanUrls": true,
   "trailingSlash": true,
   "redirects": [
-    { "source": "/home-3", "destination": "/", "permanent": true },
-    { "source": "/get-involved-1", "destination": "/get-involved/", "permanent": true },
-    { "source": "/business-membership", "destination": "/membership/", "permanent": true },
-    { "source": "/individual-membership", "destination": "/membership/", "permanent": true },
-    { "source": "/business-member-directory", "destination": "/directory/", "permanent": true },
-    { "source": "/chamber-member-events", "destination": "/events/", "permanent": true },
-    { "source": "/community-events", "destination": "/events/", "permanent": true },
-    { "source": "/add-your-event-1", "destination": "/events/", "permanent": true },
-    { "source": "/chamber-golf-tournament", "destination": "/events/", "permanent": true },
-    { "source": "/meaningful-connections", "destination": "/events/", "permanent": true },
-    { "source": "/business-resources", "destination": "/resources/", "permanent": true },
-    { "source": "/contact", "destination": "/about/", "permanent": true },
-    { "source": "/privacy-policy", "destination": "/privacy/", "permanent": true }
+    {
+      "source": "/home-3",
+      "destination": "/",
+      "permanent": true
+    },
+    {
+      "source": "/get-involved-1",
+      "destination": "/get-involved/",
+      "permanent": true
+    },
+    {
+      "source": "/business-membership",
+      "destination": "/membership/",
+      "permanent": true
+    },
+    {
+      "source": "/individual-membership",
+      "destination": "/membership/",
+      "permanent": true
+    },
+    {
+      "source": "/business-member-directory",
+      "destination": "/directory/",
+      "permanent": true
+    },
+    {
+      "source": "/chamber-member-events",
+      "destination": "/events/",
+      "permanent": true
+    },
+    {
+      "source": "/community-events",
+      "destination": "/events/",
+      "permanent": true
+    },
+    {
+      "source": "/add-your-event-1",
+      "destination": "/events/",
+      "permanent": true
+    },
+    {
+      "source": "/chamber-golf-tournament",
+      "destination": "/events/",
+      "permanent": true
+    },
+    {
+      "source": "/meaningful-connections",
+      "destination": "/events/",
+      "permanent": true
+    },
+    {
+      "source": "/business-resources",
+      "destination": "/resources/",
+      "permanent": true
+    },
+    {
+      "source": "/contact",
+      "destination": "/about/",
+      "permanent": true
+    },
+    {
+      "source": "/privacy-policy",
+      "destination": "/privacy/",
+      "permanent": true
+    }
+  ],
+  "functions": {
+    "api/policy.js": {
+      "includeFiles": "api/_policy/**"
+    }
+  },
+  "headers": [
+    {
+      "source": "/policy-center/(.*)",
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, nofollow"
+        }
+      ]
+    }
   ]
 }

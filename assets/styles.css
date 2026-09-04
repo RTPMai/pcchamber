@@ -148,15 +148,7 @@ a:hover{ color:var(--tint-ink); }
 .wordmark{ display:block; width:178px; height:auto; }
 
 .brand-text{ display:block; }
-.brand-text span{
-  display:block; font-family:'Public Sans',sans-serif;
-  font-size:.66rem; font-weight:500; color:#9FB6BE;
-  letter-spacing:.04em; margin-top:5px;
-}
-@media (max-width:420px){
-  .wordmark{ width:140px; }
-  .brand-text span{ display:none; }
-}
+@media (max-width:420px){ .wordmark{ width:140px; } }
 
 .menu{ margin-left:auto; display:flex; align-items:center; gap:2px; }
 .menu a{
@@ -328,7 +320,38 @@ a:hover{ color:var(--tint-ink); }
   text-decoration:none;
 }
 .listing:hover{ background:var(--tint-wash); border-color:var(--tint); }
+/* Class rules beat the browser's own [hidden] rule, so display:flex above
+   silently defeated it. Every filter ran and nothing ever hid. */
+.listing[hidden], .event[hidden]{ display:none; }
 .listing .body{ flex:1; min-width:0; }
+.listing .logo{
+  flex:0 0 auto; width:64px; height:64px; border-radius:9px;
+  background:var(--paper-warm); border:1px solid var(--rule);
+  display:flex; align-items:center; justify-content:center;
+  overflow:hidden; align-self:center;
+}
+.listing .logo img{ max-width:78%; max-height:78%; display:block; }
+/* No logo yet: the initial, set in the member's own season colour. */
+.listing .logo .initial{
+  font-family:'Fraunces',Georgia,serif; font-size:1.5rem; font-weight:600;
+  color:var(--tint-ink);
+}
+@media (max-width:520px){
+  .listing .logo{ width:48px; height:48px; }
+  .listing .logo .initial{ font-size:1.2rem; }
+}
+
+/* Same plate, larger, on the member's own page. */
+.memberhead .logo{
+  width:96px; height:96px; border-radius:12px; background:#fff;
+  border:1px solid var(--rule); display:flex; align-items:center;
+  justify-content:center; overflow:hidden; margin-bottom:18px;
+}
+.memberhead .logo img{ max-width:78%; max-height:78%; display:block; }
+.memberhead .logo .initial{
+  font-family:'Fraunces',Georgia,serif; font-size:2.4rem; font-weight:600;
+  color:var(--tint-ink);
+}
 .listing h3{ margin:0 0 3px; font-size:1.12rem; color:var(--navy); }
 .listing p{ margin:0; font-size:.96rem; color:var(--navy-mid); max-width:68ch; }
 .listing .cat{
@@ -404,32 +427,68 @@ a:hover{ color:var(--tint-ink); }
 .event p{ font-size:.98rem; color:var(--navy-mid); }
 .event .cost{ font-weight:600; color:var(--navy); }
 
-/* ---------- Membership tiers -------------------------------------------- */
+/* ---------- Membership levels ------------------------------------------- */
 
-.tiers{ display:grid; grid-template-columns:repeat(auto-fit,minmax(232px,1fr)); gap:16px; }
-.tier{
-  border:1px solid var(--rule); border-top:6px solid var(--tint);
-  border-radius:var(--radius); padding:24px 22px; background:var(--paper);
-  display:flex; flex-direction:column;
+.draft{
+  border:1px solid var(--alert); border-left:5px solid var(--alert);
+  background:#FDF0EE; color:#8C2416; border-radius:0 var(--radius) var(--radius) 0;
+  padding:15px 20px; margin:0 0 28px;
 }
-.tier.pick{ background:var(--tint-wash); }
-.tier h3{ margin-bottom:2px; }
-.tier .price{
-  font-family:'Fraunces',Georgia,serif; font-size:2rem; font-weight:700;
-  color:var(--tint-ink); line-height:1.1;
-}
-.tier .per{ font-size:.86rem; color:var(--navy-soft); margin-bottom:12px; }
-.tier .who{ font-size:.93rem; color:var(--navy-mid); margin-bottom:14px; }
-.tier ul{ margin:0 0 18px; padding-left:1.1em; font-size:.94rem; }
-.tier li{ margin-bottom:6px; }
-.tier .btn{ margin-top:auto; text-align:center; }
+.draft p{ margin:0; max-width:none; font-size:.95rem; }
 
-.note{
-  border-left:4px solid var(--sun); background:var(--sun-wash);
-  padding:14px 18px; border-radius:0 var(--radius) var(--radius) 0;
-  font-size:.94rem; color:var(--sun-ink); margin:0 0 24px;
+.level{
+  border:1px solid var(--rule); border-left:6px solid var(--tint);
+  border-radius:var(--radius); margin-bottom:18px; overflow:hidden;
+  background:var(--paper);
 }
-.note p{ margin:0; max-width:none; }
+.level.pick{ border-color:var(--tint); }
+
+.level-head{
+  display:flex; gap:24px; align-items:flex-start; justify-content:space-between;
+  padding:22px 26px; background:var(--tint-wash);
+  border-bottom:1px solid var(--rule);
+}
+.level-head h3{ margin:0 0 6px; font-size:1.42rem; }
+.level-head .who{ margin:0; font-size:.95rem; color:var(--navy-mid); max-width:62ch; }
+
+.flag{
+  display:inline-block; margin-bottom:9px;
+  font-size:.72rem; font-weight:700; letter-spacing:.05em; text-transform:uppercase;
+  background:var(--navy); color:#fff; padding:4px 11px; border-radius:999px;
+}
+
+.level-price{ text-align:right; flex:0 0 auto; }
+.level-price .price{
+  display:block; font-family:'Fraunces',Georgia,serif;
+  font-size:1.85rem; font-weight:700; color:var(--tint-ink); line-height:1.1;
+  white-space:nowrap;
+}
+.level-price .per{ display:block; font-size:.84rem; color:var(--navy-soft); margin-top:3px; }
+
+.level-body{ padding:22px 26px; }
+.level-body .builds{
+  font-weight:600; color:var(--tint-ink); font-size:.95rem; margin:0 0 12px;
+}
+
+.scale{
+  border-collapse:collapse; margin:0 0 20px; font-size:.94rem; width:100%; max-width:440px;
+}
+.scale caption{
+  text-align:left; font-size:.8rem; color:var(--navy-soft);
+  letter-spacing:.03em; padding-bottom:7px;
+}
+.scale th{ text-align:left; font-weight:400; padding:8px 0; border-bottom:1px solid var(--rule-soft); }
+.scale td{ text-align:right; font-weight:700; padding:8px 0; border-bottom:1px solid var(--rule-soft); }
+
+.perks{
+  columns:2; column-gap:34px; margin:0 0 20px; padding-left:1.1em; font-size:.95rem;
+}
+.perks li{ margin-bottom:7px; break-inside:avoid; }
+@media (max-width:640px){
+  .perks{ columns:1; }
+  .level-head{ flex-direction:column; gap:12px; }
+  .level-price{ text-align:left; }
+}
 
 /* ---------- Reasons and resource groups ---------------------------------- */
 
@@ -486,3 +545,91 @@ details.faq .ans p{ margin:0; }
   font-size:.85rem; color:#8FA8B1;
 }
 .foot-legal p{ margin:0; max-width:none; }
+
+/* ---------- Forms -------------------------------------------------------- */
+
+.form{ max-width:34rem; }
+.field{ margin-bottom:20px; }
+.field label{ display:block; font-weight:600; font-size:.95rem; margin-bottom:5px; }
+.field .req{
+  font-weight:500; font-size:.76rem; color:var(--navy-soft);
+  letter-spacing:.03em; margin-left:5px;
+}
+.field .help{
+  display:block; font-size:.88rem; color:var(--navy-soft);
+  margin:0 0 7px; max-width:52ch;
+}
+.field input, .field select, .field textarea{
+  width:100%; font:inherit; font-size:1rem; color:var(--navy);
+  padding:11px 13px; border:1px solid var(--rule); border-radius:9px;
+  background:var(--paper-warm);
+}
+.field input:focus, .field select:focus, .field textarea:focus{ background:#fff; }
+.field textarea{ resize:vertical; min-height:110px; }
+.field.check label{ font-weight:400; display:flex; gap:9px; align-items:center; }
+.field.check input{ width:auto; }
+
+/* Honeypot. Off screen rather than display:none, which bots detect. */
+.gotcha{ position:absolute; left:-9999px; width:1px; height:1px; opacity:0; }
+
+button.btn{ cursor:pointer; font:inherit; font-weight:600; font-size:.97rem; }
+button.btn:disabled{ opacity:.6; cursor:default; }
+
+.done{
+  border:1px solid var(--tint); border-left:6px solid var(--tint);
+  background:var(--tint-wash); border-radius:var(--radius); padding:26px;
+}
+.done h3{ margin-bottom:8px; }
+.done p{ margin:0; }
+
+/* ---------- Events calendar ---------------------------------------------- */
+
+.viewswitch{
+  display:flex; gap:7px; margin:0 0 22px;
+}
+.viewswitch button{
+  font:inherit; font-size:.9rem; cursor:pointer;
+  background:var(--paper-warm); color:var(--navy-mid);
+  border:1px solid var(--rule); border-radius:999px; padding:8px 17px;
+}
+.viewswitch button[aria-pressed="true"]{
+  background:var(--navy); border-color:var(--navy); color:#fff; font-weight:600;
+}
+
+.cal-head{
+  display:flex; align-items:center; gap:14px; margin-bottom:14px;
+}
+.cal-head h3{ margin:0; font-size:1.2rem; }
+.cal-head button{
+  font:inherit; cursor:pointer; background:var(--paper-warm);
+  border:1px solid var(--rule); border-radius:8px; padding:6px 13px; color:var(--navy);
+}
+.cal-head button:hover{ border-color:var(--navy-soft); }
+.cal-head .spacer{ margin-left:auto; }
+
+table.cal{ width:100%; border-collapse:collapse; table-layout:fixed; }
+table.cal th{
+  font-size:.76rem; letter-spacing:.04em; text-transform:uppercase;
+  color:var(--navy-soft); font-weight:600; padding:0 0 8px; text-align:center;
+}
+table.cal td{
+  border:1px solid var(--rule-soft); vertical-align:top;
+  height:92px; padding:5px 6px; width:14.28%;
+}
+table.cal td.out{ background:var(--paper-warm); }
+table.cal td.today{ outline:2px solid var(--sun); outline-offset:-2px; }
+table.cal .num{ font-size:.8rem; color:var(--navy-soft); display:block; margin-bottom:3px; }
+table.cal td.today .num{ color:var(--sun-ink); font-weight:700; }
+table.cal a.ev{
+  display:block; font-size:.76rem; line-height:1.25; text-decoration:none;
+  background:var(--tint-wash); color:var(--tint-ink);
+  border-left:3px solid var(--tint); border-radius:0 4px 4px 0;
+  padding:4px 5px; margin-bottom:3px;
+}
+table.cal a.ev:hover{ background:var(--tint); color:#fff; }
+
+@media (max-width:640px){
+  table.cal td{ height:64px; padding:3px; }
+  table.cal a.ev{ font-size:0; padding:0; height:7px; margin-bottom:2px; border-radius:2px; border-left-width:0; background:var(--tint); }
+  table.cal .num{ font-size:.72rem; }
+}

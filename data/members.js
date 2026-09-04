@@ -14,6 +14,10 @@
      contact   any of: person, phone, email, web, address
      serves    optional list of what they do, shown as tags
      joined    year they joined the chamber
+     logo      optional. Path to their logo, e.g. '/assets/members/slug.svg'
+               Square-ish works best. SVG or PNG with a transparent
+               background. Leave it out and the plate shows their initial,
+               which looks deliberate rather than broken.
    ========================================================================== */
 
 export const CATEGORIES = [

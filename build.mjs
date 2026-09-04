@@ -18,12 +18,13 @@ import path from 'node:path';
 import { SITE, DOORS } from './data/site.js';
 import { CATEGORIES, TIERS, MEMBERS } from './data/members.js';
 import { RECURRING, CALENDAR } from './data/events.js';
-import { TIER_LIST, WHY, JOIN_FAQ } from './data/membership.js';
+import { MEMBERSHIP, TIER_LIST, WHY, JOIN_FAQ } from './data/membership.js';
 import { ABOUT, FAQ, RESOURCE_GROUPS } from './data/pages.js';
 import { INVOLVED, PRIVACY } from './data/involved.js';
 import { POSTS } from './data/news.js';
 import { JOBS } from './data/jobs.js';
 import { REFERRALS } from './data/referrals.js';
+import { JOIN_FORM, EVENT_FORM } from './data/forms.js';
 
 const OUT = 'dist';
 
@@ -66,6 +67,13 @@ const REFERRAL_BY_MEMBER = (() => {
   return map;
 })();
 
+/* Members can supply a logo. Until they do, the plate shows their initial
+   in their category's season colour, which looks deliberate rather than
+   like a missing image. */
+const logoPlate = (m, cls = 'logo') => m.logo
+  ? `<span class="${cls}"><img src="${esc(m.logo)}" alt="${esc(m.name)} logo" loading="lazy"></span>`
+  : `<span class="${cls}"><span class="initial" aria-hidden="true">${esc(m.name.trim()[0] || '?')}</span></span>`;
+
 const catLabel = id => (CATEGORIES.find(c => c.id === id) || {}).label || 'Member';
 
 /* Categories cycle through the four season colors so the directory reads
@@ -91,7 +99,7 @@ const MARK = (cls = '') =>
 const WORDMARK = (colour = 'white') =>
   `<img class="wordmark" src="/assets/wordmark-${colour}.svg" alt="Polk City Area Chamber of Commerce" width="180" height="32">`;
 
-function head({ title, description, canonical, season = 'navy' }) {
+function head({ title, description, canonical, season = 'navy', noindex = false }) {
   const full = `${title} | ${SITE.shortName}`;
   return `<!doctype html>
 <html lang="en" data-season="${season}">
@@ -101,6 +109,7 @@ function head({ title, description, canonical, season = 'navy' }) {
 <title>${esc(full)}</title>
 <meta name="description" content="${esc(description)}">
 <link rel="canonical" href="${SITE.url}${canonical}">
+${noindex ? '<meta name="robots" content="noindex, nofollow">' : ''}
 <meta name="theme-color" content="#002734">
 <meta property="og:type" content="website">
 <meta property="og:title" content="${esc(full)}">
@@ -137,15 +146,12 @@ function header(current) {
   <div class="wrap">
     <a class="brand" href="/">
       ${MARK()}
-      <span class="brand-text">
-        ${WORDMARK('white')}
-        <span>Polk City, Alleman, Elkhart, Sheldahl</span>
-      </span>
+      <span class="brand-text">${WORDMARK('white')}</span>
     </a>
     <button class="burger" id="burger" aria-expanded="false" aria-controls="menu">Menu</button>
     <nav class="menu" id="menu" aria-label="Main">
       ${items}
-      <a class="join" href="/membership/#join">Join</a>
+      <a class="join" href="/join/">Join</a>
     </nav>
   </div>
 </header>`;
@@ -167,7 +173,7 @@ function footer() {
           ${SITE.nav.filter(n => n.href !== '/').map(n => `<li><a href="${n.href}">${esc(n.label)}</a></li>`).join('')}
           <li><a href="/jobs/">Jobs</a></li>
           <li><a href="/news/">News and spotlights</a></li>
-          <li><a href="${SITE.policyCenterUrl}">Business Policy Center</a></li>
+          <li><a href="/policy-center/">Business Policy Center<span class="memberonly"> (members)</span></a></li>
           <li><a href="/privacy/">Privacy</a></li>
         </ul>
       </div>
@@ -244,8 +250,8 @@ function homePage() {
   const body = `
 <section class="hero">
   <div class="wrap">
-    <h1>Good business here depends on knowing the people and the rules.</h1>
-    <p>${esc(SITE.tagline)} We run the room where local owners meet, and we keep track of what the state, the county, and the city are doing to them.</p>
+    <h1>The business network for Polk City, Alleman, Elkhart and Sheldahl.</h1>
+    <p>We connect local businesses to customers, to each other, and to the information they need to run. Find a member, come to a luncheon, or join.</p>
   </div>
 </section>
 ${strip}
@@ -260,7 +266,7 @@ ${strip}
     <p class="lede">${esc(ABOUT.lede)}</p>
     <p>${esc(ABOUT.body[1])}</p>
     <div class="btnrow">
-      <a class="btn sun" href="/membership/#join">See what it costs to join</a>
+      <a class="btn sun" href="/membership/">See what it costs to join</a>
       <a class="btn ghost" href="/about/">More about the chamber</a>
     </div>
   </div></div>
@@ -313,6 +319,7 @@ function directoryIndex() {
     const hay = [m.name, m.summary, m.about, catLabel(m.category), ...(m.serves || [])]
       .join(' ').toLowerCase();
     return `<a class="listing" href="/directory/${m.slug}/" data-season="${season}" data-cat="${m.category}" data-find="${esc(hay)}">
+  ${logoPlate(m)}
   <span class="body">
     <h3>${esc(m.name)}</h3>
     <p>${esc(m.summary)}</p>
@@ -345,7 +352,7 @@ function directoryIndex() {
   <div class="band">
     <h2>Not on this list?</h2>
     <p>A directory page costs less than one newspaper ad and it works all year.</p>
-    <div class="btnrow"><a class="btn sun" href="/membership/#join">Join the chamber</a></div>
+    <div class="btnrow"><a class="btn sun" href="/join/">Join the chamber</a></div>
   </div>
 </div>`;
 
@@ -449,6 +456,7 @@ function memberPage(m) {
 <div class="memberhead" data-season="${season}">
   <div class="wrap">
     <p class="crumb"><a href="/directory/">Member directory</a> / ${esc(catLabel(m.category))}</p>
+    ${logoPlate(m, 'logo')}
     <h1>${esc(m.name)}</h1>
     <p>${esc(m.summary)}</p>
   </div>
@@ -509,6 +517,14 @@ function eventsPage() {
   ${e.rsvp ? `<div class="btnrow"><a class="btn" href="${esc(e.rsvp.href)}">${esc(e.rsvp.label)}</a></div>` : ''}
 </article>`;
 
+  /* The calendar is drawn by JavaScript from this, but the list below is
+     real HTML. Turn JavaScript off and you lose the grid, not the events. */
+  const calData = upcoming.map(e => ({
+    date: e.date, title: e.title, where: e.where,
+    season: e.season || 'sun',
+    href: e.rsvp ? e.rsvp.href : '/events/'
+  }));
+
   const body = `
 <div class="pagehead" data-season="sun">
   <div class="wrap">
@@ -517,8 +533,29 @@ function eventsPage() {
   </div>
 </div>
 <div class="wrap band">
+  <div class="viewswitch" id="viewswitch" hidden>
+    <button type="button" data-view="list" aria-pressed="true">List</button>
+    <button type="button" data-view="cal" aria-pressed="false">Calendar</button>
+  </div>
+  <div id="calview" hidden>
+    <div class="cal-head">
+      <h3 id="calmonth"></h3>
+      <span class="spacer"></span>
+      <button type="button" id="calprev">Previous</button>
+      <button type="button" id="calnext">Next</button>
+    </div>
+    <table class="cal" id="caltable"><thead><tr>
+      <th><abbr title="Sunday">Sun</abbr></th><th><abbr title="Monday">Mon</abbr></th>
+      <th><abbr title="Tuesday">Tue</abbr></th><th><abbr title="Wednesday">Wed</abbr></th>
+      <th><abbr title="Thursday">Thu</abbr></th><th><abbr title="Friday">Fri</abbr></th>
+      <th><abbr title="Saturday">Sat</abbr></th>
+    </tr></thead><tbody></tbody></table>
+    <p class="help" style="margin-top:12px;color:var(--navy-soft);font-size:.9rem">Tap a day to see what is on. Recurring items like the luncheon appear on their dated instances.</p>
+  </div>
+  <div id="listview">
   <h2>Coming up</h2>
   ${upcoming.length ? upcoming.map(one).join('') : `<div class="empty"><p>Nothing on the calendar right now. The luncheon still runs monthly, so check back or email <a href="mailto:${SITE.email}">${SITE.email}</a>.</p></div>`}
+  </div>
 </div>
 <div class="band warm">
   <div class="wrap">
@@ -530,9 +567,69 @@ function eventsPage() {
 <div class="wrap band">
   <h2>Have something to add?</h2>
   <p>The community calendar is open to anyone running something in the area, member or not. Send the date, place, and a sentence about what it is.</p>
-  <div class="btnrow"><a class="btn" href="mailto:${SITE.email}?subject=Community%20event">Email the details</a></div>
+  <div class="btnrow"><a class="btn" href="/events/add/">Add your event</a></div>
 </div>
-${eventLd.map(o => `<script type="application/ld+json">${JSON.stringify(o)}</script>`).join('')}`;
+${eventLd.map(o => `<script type="application/ld+json">${JSON.stringify(o)}</script>`).join('')}
+<script>
+(function(){
+  var EVENTS = ${JSON.stringify(calData)};
+  var sw=document.getElementById('viewswitch'),
+      list=document.getElementById('listview'),
+      cal=document.getElementById('calview'),
+      tbody=document.querySelector('#caltable tbody'),
+      label=document.getElementById('calmonth');
+  if(!sw) return;
+  sw.hidden=false;
+
+  var MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
+  var today=new Date(); today.setHours(0,0,0,0);
+  var cur=new Date(today.getFullYear(), today.getMonth(), 1);
+
+  function iso(d){
+    return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+  }
+
+  function draw(){
+    label.textContent = MONTHS[cur.getMonth()]+' '+cur.getFullYear();
+    var first=new Date(cur.getFullYear(), cur.getMonth(), 1);
+    var start=new Date(first); start.setDate(1-first.getDay());
+    var html='';
+    for(var w=0; w<6; w++){
+      html+='<tr>';
+      for(var d=0; d<7; d++){
+        var day=new Date(start); day.setDate(start.getDate()+w*7+d);
+        var key=iso(day);
+        var out = day.getMonth()!==cur.getMonth() ? ' out' : '';
+        var isToday = day.getTime()===today.getTime() ? ' today' : '';
+        var on=EVENTS.filter(function(e){ return e.date===key; });
+        html+='<td class="'+(out+isToday).trim()+'"><span class="num">'+day.getDate()+'</span>';
+        on.forEach(function(e){
+          html+='<a class="ev" data-season="'+e.season+'" href="'+e.href+'" title="'+e.title+', '+e.where+'">'+e.title+'</a>';
+        });
+        html+='</td>';
+      }
+      html+='</tr>';
+      var last=new Date(start); last.setDate(start.getDate()+w*7+6);
+      if(last.getMonth()!==cur.getMonth() && w>=3) break;
+    }
+    tbody.innerHTML=html;
+  }
+
+  function move(n){ cur=new Date(cur.getFullYear(), cur.getMonth()+n, 1); draw(); }
+  document.getElementById('calprev').addEventListener('click', function(){ move(-1); });
+  document.getElementById('calnext').addEventListener('click', function(){ move(1); });
+
+  sw.addEventListener('click', function(e){
+    var b=e.target.closest('button'); if(!b) return;
+    var wantCal = b.getAttribute('data-view')==='cal';
+    list.hidden=wantCal; cal.hidden=!wantCal;
+    [].forEach.call(sw.querySelectorAll('button'), function(x){
+      x.setAttribute('aria-pressed', x===b ? 'true':'false');
+    });
+    if(wantCal) draw();
+  });
+})();
+</script>`;
 
   return page({
     title: 'Events',
@@ -543,14 +640,34 @@ ${eventLd.map(o => `<script type="application/ld+json">${JSON.stringify(o)}</scr
 }
 
 function membershipPage() {
-  const tiers = TIER_LIST.map(t => `<div class="tier${t.highlight ? ' pick' : ''}" data-season="${t.season}">
-  <h3>${esc(t.name)}</h3>
-  <div class="price">${esc(t.price)}</div>
-  <div class="per">${esc(t.per)}</div>
-  <p class="who">${esc(t.who)}</p>
-  <ul>${t.includes.map(i => `<li>${esc(i)}</li>`).join('')}</ul>
-  <a class="btn" href="#join">Join at ${esc(t.name)}</a>
-</div>`).join('');
+  /* Six levels with long benefit lists. Stacked rows, like the printed
+     sheet, rather than columns nobody can read on a phone. */
+  const tiers = TIER_LIST.map(tr => {
+    const scale = tr.scale ? `<table class="scale">
+    <caption>Priced by size</caption>
+    <tbody>${tr.scale.map(s => `<tr><th scope="row">${esc(s.label)}</th><td>${esc(s.price)}</td></tr>`).join('')}</tbody>
+  </table>` : '';
+
+    return `<section class="level${tr.highlight ? ' pick' : ''}" data-season="${tr.season}">
+  <div class="level-head">
+    <div>
+      ${tr.flag ? `<span class="flag">${esc(tr.flag)}</span>` : ''}
+      <h3>${esc(tr.name)}</h3>
+      <p class="who">${esc(tr.who)}</p>
+    </div>
+    <div class="level-price">
+      <span class="price">${esc(tr.price)}</span>
+      <span class="per">${esc(tr.per)}</span>
+    </div>
+  </div>
+  <div class="level-body">
+    ${scale}
+    ${tr.builds ? `<p class="builds">Everything in ${esc(tr.builds)}, plus:</p>` : ''}
+    <ul class="perks">${tr.includes.map(i => `<li>${esc(i)}</li>`).join('')}</ul>
+    <div class="btnrow"><a class="btn" href="/join/?level=${tr.id}">Join at ${esc(tr.name)}</a></div>
+  </div>
+</section>`;
+  }).join('');
 
   const why = WHY.map(w => `<div class="reason" data-season="${w.season}">
   <h3>${esc(w.title)}</h3>
@@ -562,16 +679,20 @@ function membershipPage() {
   <div class="ans"><p>${esc(f.a)}</p></div>
 </details>`).join('');
 
+  const draft = MEMBERSHIP.draft ? `<div class="draft">
+  <p><strong>Draft, not yet approved.</strong> ${esc(MEMBERSHIP.draftNote)}</p>
+</div>` : '';
+
   const body = `
 <div class="pagehead" data-season="autumn">
   <div class="wrap">
-    <h1>Membership</h1>
-    <p>What it costs and what you get. On the page, where you can read it without asking anyone.</p>
+    <h1>Membership levels and benefits</h1>
+    <p>What each level of chamber membership costs and what comes with it.</p>
   </div>
 </div>
 <div class="wrap band">
-  <div class="note"><p>Placeholder pricing. Swap in the board-approved figures in <code>data/membership.js</code> before this goes public.</p></div>
-  <div class="tiers">${tiers}</div>
+  ${draft}
+  ${tiers}
 </div>
 <div class="band warm">
   <div class="wrap">
@@ -580,11 +701,10 @@ function membershipPage() {
   </div>
 </div>
 <div class="wrap band" id="join">
-  <h2>Join</h2>
-  <p class="lede">Two steps. Tell us about the business, then pay the invoice we send back.</p>
-  <p>In the demo build this is a mailto link. In the real thing it becomes a short form and a Stripe payment page, so a new member can join at nine at night without anybody writing a check.</p>
+  <h2>Not sure which level fits?</h2>
+  <p class="lede">Tell us about the business and we will say which level makes sense. No pressure and no salesperson.</p>
   <div class="btnrow">
-    <a class="btn sun" href="mailto:${SITE.email}?subject=I%20want%20to%20join%20the%20chamber">Start a membership</a>
+    <a class="btn sun" href="/join/">Start a membership</a>
     <a class="btn ghost" href="/events/">Come to a luncheon first</a>
   </div>
 </div>
@@ -596,8 +716,8 @@ function membershipPage() {
 </div>`;
 
   return page({
-    title: 'Membership',
-    description: 'Polk City Area Chamber membership tiers, prices, and what each one includes.',
+    title: 'Membership levels and benefits',
+    description: 'What each level of Polk City Area Chamber membership costs and what comes with it.',
     canonical: '/membership/',
     season: 'autumn'
   }, body);
@@ -648,8 +768,12 @@ function resourcesPage() {
 <div class="band">
   <div class="wrap"><div class="col">
     <h2>The Business Policy Center</h2>
-    <p>Most of these state pages are written for people who already know the jargon. The chamber keeps a separate site that says what changed, who it applies to, and whether you should care, in plain language, with every claim linked to its source.</p>
-    <div class="btnrow"><a class="btn sun" href="${SITE.policyCenterUrl}">Open the Policy Center</a></div>
+    <p>Most of these state pages are written for people who already know the jargon. The chamber keeps its own, saying what changed, who it applies to, and whether you should care, in plain language, with every claim linked to its source.</p>
+    <p>It is a member benefit, so it sits behind the member passcode. Every level of membership includes it.</p>
+    <div class="btnrow">
+      <a class="btn sun" href="/policy-center/">Open the Policy Center</a>
+      <a class="btn ghost" href="/join/">Join to get access</a>
+    </div>
   </div></div>
 </div>`;
 
@@ -954,6 +1078,224 @@ ${ld.map(o => `<script type="application/ld+json">${JSON.stringify(o)}</script>`
   }, body);
 }
 
+
+/* ---------- forms --------------------------------------------------------- */
+
+function field(f) {
+  const req = f.required ? ' required' : '';
+  const star = f.required ? ' <span class="req" aria-hidden="true">required</span>' : '';
+  const help = f.help ? `<span class="help" id="${f.id}-help">${esc(f.help)}</span>` : '';
+  const described = f.help ? ` aria-describedby="${f.id}-help"` : '';
+
+  let input;
+  if (f.type === 'textarea') {
+    input = `<textarea id="${f.id}" name="${f.id}" rows="4"${req}${described}></textarea>`;
+  } else if (f.type === 'select') {
+    input = `<select id="${f.id}" name="${f.id}"${req}${described}>
+      ${f.options.map(o => `<option>${esc(o)}</option>`).join('')}
+    </select>`;
+  } else if (f.type === 'checkbox') {
+    return `<div class="field check">
+      <label for="${f.id}"><input type="checkbox" id="${f.id}" name="${f.id}" value="yes"> ${esc(f.label)}</label>
+      ${help}
+    </div>`;
+  } else {
+    input = `<input type="${f.type}" id="${f.id}" name="${f.id}"${req}${described}>`;
+  }
+
+  return `<div class="field">
+    <label for="${f.id}">${esc(f.label)}${star}</label>
+    ${help}
+    ${input}
+  </div>`;
+}
+
+function formPage(form, { canonical, season, aside }) {
+  const live = Boolean(SITE.formEndpoint);
+
+  /* No endpoint configured yet, so the form would post into nothing.
+     Show the email route instead of a button that silently fails. */
+  const fallback = `<div class="note">
+    <p><strong>The form is not connected yet.</strong> Set <code>formEndpoint</code> in <code>data/site.js</code> and this becomes a real form. Until then, email works.</p>
+  </div>
+  <div class="btnrow"><a class="btn sun" href="mailto:${SITE.email}?subject=${encodeURIComponent(form.subject)}">Email the chamber instead</a></div>`;
+
+  const theForm = `<form class="form" id="theform" action="${esc(SITE.formEndpoint)}" method="POST">
+    <input type="hidden" name="_subject" value="${esc(form.subject)}">
+    <input type="text" name="_gotcha" tabindex="-1" autocomplete="off" aria-hidden="true" class="gotcha">
+    ${form.fields.map(field).join('')}
+    <div class="btnrow"><button type="submit" class="btn sun">${esc(form.submit)}</button></div>
+    <p class="help">We use what you send here to reply and nothing else. See the <a href="/privacy/">privacy page</a>.</p>
+  </form>
+  <div class="done" id="done" hidden>
+    <h3>${esc(form.after)}</h3>
+    <p><a href="/">Back to the home page</a></p>
+  </div>`;
+
+  const body = `
+<div class="pagehead" data-season="${season}">
+  <div class="wrap">
+    <h1>${esc(form.title)}</h1>
+    <p>${esc(form.lede)}</p>
+  </div>
+</div>
+<div class="wrap band" data-season="${season}">
+  <div class="cols">
+    <div>
+      ${form.note ? `<p class="lede">${esc(form.note)}</p>` : ''}
+      ${live ? theForm : fallback}
+    </div>
+    ${aside}
+  </div>
+</div>
+${live ? `<script>
+(function(){
+  var f=document.getElementById('theform'), done=document.getElementById('done');
+  if(!f) return;
+  f.addEventListener('submit', function(e){
+    e.preventDefault();
+    var btn=f.querySelector('button[type=submit]');
+    btn.disabled=true; btn.textContent='Sending';
+    fetch(f.action, { method:'POST', body:new FormData(f), headers:{Accept:'application/json'} })
+      .then(function(r){
+        if(!r.ok) throw new Error('bad response');
+        f.hidden=true; done.hidden=false; done.scrollIntoView({block:'center'});
+      })
+      .catch(function(){
+        btn.disabled=false; btn.textContent=${JSON.stringify(form.submit)};
+        alert('That did not send. Please email ' + ${JSON.stringify(SITE.email)} + ' instead.');
+      });
+  });
+})();
+</script>` : ''}`;
+
+  return page({
+    title: form.title,
+    description: form.lede,
+    canonical,
+    season
+  }, body);
+}
+
+function joinPage() {
+  const aside = `<aside class="card">
+  <h4>What happens next</h4>
+  <ol style="margin:0;padding-left:1.1em;font-size:.95rem">
+    <li style="margin-bottom:8px">We read it and reply within two working days.</li>
+    <li style="margin-bottom:8px">You get an invoice for the level that fits.</li>
+    <li style="margin-bottom:8px">A short follow-up asks how you want your listing written.</li>
+    <li>Your directory page goes live within a week.</li>
+  </ol>
+  <p style="font-size:.93rem;color:var(--navy-soft);margin:16px 0 0">Prefer to talk first? <a href="mailto:${SITE.email}">Email the chamber</a>.</p>
+</aside>`;
+  return formPage(JOIN_FORM, { canonical: '/join/', season: 'autumn', aside });
+}
+
+function eventFormPage() {
+  const aside = `<aside class="card">
+  <h4>What gets listed</h4>
+  <p style="font-size:.95rem;margin:0 0 12px">Anything happening in the Polk City area that a local business or resident would want to know about. Member or not.</p>
+  <p style="font-size:.95rem;margin:0">Events come off the site on their own the day after they happen, so nothing has to be tidied up later.</p>
+</aside>`;
+  return formPage(EVENT_FORM, { canonical: '/events/add/', season: 'sun', aside });
+}
+
+
+/* ---------- Policy Center shell ------------------------------------------- */
+
+function policyCenterPage() {
+  /* This page carries no member content. It is a lock and a form. The
+     entries arrive from /api/policy only after the passcode checks out,
+     which is why the content is not in the built site at all. */
+  const body = `
+<div class="pagehead" data-season="winter">
+  <div class="wrap">
+    <h1>Business Policy Center</h1>
+    <p>What the legislature, the county and the city are doing to businesses here, in plain language. A chamber member benefit.</p>
+  </div>
+</div>
+<div class="wrap band" data-season="winter">
+  <div class="cols">
+    <div>
+      <div id="gate">
+        <h2>Members only</h2>
+        <p>Enter the member passcode. It is in the monthly chamber email, and it changes once a year.</p>
+        <form class="form" id="gateform" style="max-width:22rem">
+          <div class="field">
+            <label for="passcode">Member passcode</label>
+            <input type="password" id="passcode" name="passcode" autocomplete="current-password" required>
+          </div>
+          <div class="btnrow"><button type="submit" class="btn sun">Open the Policy Center</button></div>
+          <p class="help" id="gatemsg" role="status" aria-live="polite"></p>
+        </form>
+        <p style="margin-top:24px">Not a member, or lost the passcode? <a href="/join/">Join the chamber</a> or <a href="mailto:${SITE.email}?subject=Policy%20Center%20passcode">email the chamber</a>.</p>
+      </div>
+      <div id="policyapp" hidden></div>
+    </div>
+    <aside class="card" id="gateaside">
+      <h4>What is in here</h4>
+      <ul style="margin:0;padding-left:1.1em;font-size:.95rem">
+        <li style="margin-bottom:7px">Grants you can actually apply for, with the eligibility rules the state pages bury</li>
+        <li style="margin-bottom:7px">What changed in Iowa law and whether it affects you</li>
+        <li style="margin-bottom:7px">Property tax, assessments and appeal deadlines</li>
+        <li style="margin-bottom:7px">What is on the ballot, with no endorsements</li>
+        <li>What the city and county are deciding</li>
+      </ul>
+      <p style="font-size:.93rem;color:var(--navy-soft);margin:16px 0 0">Reviewed monthly. Every claim carries its source.</p>
+    </aside>
+  </div>
+</div>
+<link rel="stylesheet" href="/policy-center/policy.css">
+<script>
+(function(){
+  var form=document.getElementById('gateform'),
+      gate=document.getElementById('gate'),
+      aside=document.getElementById('gateaside'),
+      app=document.getElementById('policyapp'),
+      msg=document.getElementById('gatemsg');
+
+  function boot(code){
+    /* The response is the content file. Run it, then start their app. */
+    var s=document.createElement('script'); s.text=code; document.head.appendChild(s);
+    var a=document.createElement('script'); a.src='/policy-center/app.js';
+    a.onload=function(){
+      gate.hidden=true; if(aside) aside.hidden=true; app.hidden=false;
+    };
+    document.head.appendChild(a);
+  }
+
+  /* Already unlocked on this device, so skip the form. */
+  fetch('/api/policy', { credentials:'same-origin' })
+    .then(function(r){ return r.ok ? r.text() : null; })
+    .then(function(code){ if(code) boot(code); })
+    .catch(function(){});
+
+  form.addEventListener('submit', function(e){
+    e.preventDefault();
+    var btn=form.querySelector('button');
+    btn.disabled=true; msg.textContent='Checking';
+    fetch('/api/policy', {
+      method:'POST', credentials:'same-origin',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({ passcode:document.getElementById('passcode').value })
+    }).then(function(r){
+      if(r.ok) return r.text();
+      return r.json().then(function(j){ throw new Error(j.message || (j.error==='wrong_passcode' ? 'That passcode is not right.' : 'Could not open the Policy Center.')); });
+    }).then(boot)
+      .catch(function(err){ btn.disabled=false; msg.textContent=err.message; });
+  });
+})();
+</script>`;
+
+  return page({
+    title: 'Business Policy Center',
+    description: 'A Polk City Area Chamber member benefit. What is changing in state and local policy for businesses here.',
+    canonical: '/policy-center/',
+    season: 'winter',
+    noindex: true
+  }, body);
+}
+
 /* ---------- write it out -------------------------------------------------- */
 
 async function put(rel, html) {
@@ -977,13 +1319,21 @@ async function main() {
   await put('news', newsIndex());
   for (const post of POSTS) await put(path.join('news', post.slug), postPage(post));
   await put('jobs', jobsPage());
+  await put('join', joinPage());
+  await put(path.join('events', 'add'), eventFormPage());
   await writeFile(path.join(OUT, '404.html'), notFoundPage());
 
   for (const m of MEMBERS) await put(path.join('directory', m.slug), memberPage(m));
 
+  await put('policy-center', policyCenterPage());
+  await mkdir(path.join(OUT, 'policy-center'), { recursive: true });
+  for (const f of ['app.js', 'policy.css']) {
+    await cp(path.join('policy', f), path.join(OUT, 'policy-center', f));
+  }
+
   await cp('assets', path.join(OUT, 'assets'), { recursive: true });
 
-  const urls = ['/', '/directory/', '/events/', '/membership/', '/resources/', '/about/', '/get-involved/', '/privacy/', '/news/', '/jobs/']
+  const urls = ['/', '/directory/', '/events/', '/membership/', '/resources/', '/about/', '/get-involved/', '/privacy/', '/news/', '/jobs/', '/join/', '/events/add/']
     .concat(MEMBERS.map(m => `/directory/${m.slug}/`))
     .concat(POSTS.map(p => `/news/${p.slug}/`));
 
@@ -996,6 +1346,9 @@ ${urls.map(u => `  <url><loc>${SITE.url}${u}</loc></url>`).join('\n')}
   await writeFile(path.join(OUT, 'robots.txt'),
 `User-agent: *
 Allow: /
+Disallow: /policy-center/
+Disallow: /api/
+
 Sitemap: ${SITE.url}/sitemap.xml
 `);
 

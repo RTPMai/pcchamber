@@ -47,7 +47,7 @@ export const RESOURCE_GROUPS = [
     title: 'Money you can go after',
     blurb: 'Grants, loans, and free help, with plain language about who actually qualifies.',
     links: [
-      { label: 'Business Policy Center, grants section', href: '{POLICY}#/money', note: 'The chamber keeps this current and says who is excluded, which the state pages often bury.' },
+      { label: 'Business Policy Center, grants section', href: '{POLICY}#/grants', note: 'Members only. The chamber keeps this current and says who is excluded, which the state pages often bury.' },
       { label: 'Iowa Economic Development Authority', href: 'https://www.iowaeda.com/', note: 'State programs for expansion, equipment, and workforce training.' },
       { label: 'Iowa SBDC', href: 'https://www.iowasbdc.org/', note: 'Free one-on-one business advising. Genuinely free, not a sales funnel.' },
       { label: 'SBA Iowa District Office', href: 'https://www.sba.gov/district/iowa', note: 'SBA loan programs and lender matching.' }
@@ -58,7 +58,7 @@ export const RESOURCE_GROUPS = [
     title: 'Rules and paperwork',
     blurb: 'What you have to file, who you file it with, and what changed this year.',
     links: [
-      { label: 'Business Policy Center, new laws section', href: '{POLICY}#/laws', note: 'What the legislature changed and whether it affects you.' },
+      { label: 'Business Policy Center, new laws section', href: '{POLICY}#/law', note: 'Members only. What the legislature changed and whether it affects you.' },
       { label: 'Iowa Secretary of State, business filings', href: 'https://sos.iowa.gov/business/', note: 'Register an entity, file a biennial report.' },
       { label: 'Iowa Department of Revenue', href: 'https://revenue.iowa.gov/', note: 'Sales tax permits and withholding.' },
       { label: 'City of Polk City', href: 'https://www.polkcityia.gov/', note: 'Permits, zoning, and signage rules.' }
