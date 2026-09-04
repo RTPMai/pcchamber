@@ -18,14 +18,24 @@
 
    WHAT TO USE
 
-   Upstash Redis, added through the Vercel marketplace. Free at this size:
-   the allowance is far more than 61 members will ever use. Adding it sets
-   the two variables below automatically.
+   Upstash Redis. The free tier is 256 MB and 500,000 commands a month,
+   which is far more than 61 members will ever use.
 
-     KV_REST_API_URL
+   TWO WAYS TO SET IT UP, AND ONLY ONE OF THEM IS FREE
+
+   Through the Vercel marketplace, billing runs through Vercel and the free
+   tier is not offered. Sign up at upstash.com directly and it is.
+
+   Either way this only needs two values, so create the database wherever
+   you like and put them in the Vercel settings. Both naming conventions
+   are accepted, so you can paste whichever pair you are shown without
+   renaming anything:
+
+     KV_REST_API_URL          what the Vercel integration sets
      KV_REST_API_TOKEN
 
-   Vercel KV works too. It is Upstash underneath and sets the same names.
+     UPSTASH_REDIS_REST_URL   what the Upstash console shows you
+     UPSTASH_REDIS_REST_TOKEN
 
    IF IT IS EVER LOST
 
@@ -35,9 +45,14 @@
    a real member database would.
    ========================================================================== */
 
+/* Either naming. The Vercel integration sets KV_*, the Upstash console
+   shows UPSTASH_*, and having to rename one to the other is a pointless
+   step that only exists to be got wrong. */
 const conf = () => ({
-  url: (process.env.KV_REST_API_URL || '').trim().replace(/\/$/, ''),
-  token: (process.env.KV_REST_API_TOKEN || '').trim()
+  url: (process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL || '')
+    .trim().replace(/\/$/, ''),
+  token: (process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN || '')
+    .trim()
 });
 
 export function storeReady() {
@@ -47,7 +62,10 @@ export function storeReady() {
 
 export function storeMissing() {
   const { url, token } = conf();
-  return [!url && 'KV_REST_API_URL', !token && 'KV_REST_API_TOKEN'].filter(Boolean);
+  return [
+    !url && 'KV_REST_API_URL (or UPSTASH_REDIS_REST_URL)',
+    !token && 'KV_REST_API_TOKEN (or UPSTASH_REDIS_REST_TOKEN)'
+  ].filter(Boolean);
 }
 
 async function command(...parts) {
