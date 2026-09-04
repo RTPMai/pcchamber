@@ -20,6 +20,10 @@ import { CATEGORIES, TIERS, MEMBERS } from './data/members.js';
 import { RECURRING, CALENDAR } from './data/events.js';
 import { TIER_LIST, WHY, JOIN_FAQ } from './data/membership.js';
 import { ABOUT, FAQ, RESOURCE_GROUPS } from './data/pages.js';
+import { INVOLVED, PRIVACY } from './data/involved.js';
+import { POSTS } from './data/news.js';
+import { JOBS } from './data/jobs.js';
+import { REFERRALS } from './data/referrals.js';
 
 const OUT = 'dist';
 
@@ -48,6 +52,19 @@ function longDate(iso) {
 }
 
 const todayISO = () => new Date().toISOString().slice(0, 10);
+
+/* Reverse index: member slug -> the needs they are the named referral for.
+   Built once so the directory does not scan the referral list per member. */
+const REFERRAL_BY_MEMBER = (() => {
+  const map = new Map();
+  for (const r of REFERRALS) {
+    for (const slug of r.members) {
+      if (!map.has(slug)) map.set(slug, []);
+      map.get(slug).push(r);
+    }
+  }
+  return map;
+})();
 
 const catLabel = id => (CATEGORIES.find(c => c.id === id) || {}).label || 'Member';
 
@@ -83,7 +100,16 @@ function head({ title, description, canonical, season = 'navy' }) {
 <meta property="og:description" content="${esc(description)}">
 <meta property="og:url" content="${SITE.url}${canonical}">
 <meta property="og:site_name" content="${esc(SITE.name)}">
+<meta property="og:image" content="${SITE.url}/assets/social-card.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="${SITE.url}/assets/social-card.png">
+<link rel="icon" href="/assets/favicon.ico" sizes="any">
+<link rel="icon" href="/assets/favicon-32.png" type="image/png">
+<link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
 <link rel="stylesheet" href="/assets/styles.css">
+<script defer src="/_vercel/insights/script.js"></script>
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>`;
@@ -129,7 +155,10 @@ function footer() {
         <h4>Around the site</h4>
         <ul>
           ${SITE.nav.filter(n => n.href !== '/').map(n => `<li><a href="${n.href}">${esc(n.label)}</a></li>`).join('')}
+          <li><a href="/jobs/">Jobs</a></li>
+          <li><a href="/news/">News and spotlights</a></li>
           <li><a href="${SITE.policyCenterUrl}">Business Policy Center</a></li>
+          <li><a href="/privacy/">Privacy</a></li>
         </ul>
       </div>
       <div>
@@ -183,6 +212,20 @@ function homePage() {
   </div>
 </div>` : '';
 
+  const org = {
+    '@context': 'https://schema.org',
+    '@type': 'Organization',
+    name: SITE.name,
+    url: SITE.url,
+    email: SITE.email,
+    telephone: SITE.phone,
+    address: { '@type': 'PostalAddress', streetAddress: 'PO Box 226', addressLocality: 'Polk City', addressRegion: 'IA', postalCode: '50226', addressCountry: 'US' },
+    sameAs: Object.values(SITE.social)
+  };
+
+  const latest = [...POSTS].sort((a, b) => b.date.localeCompare(a.date))[0];
+  const openJobs = liveJobs().length;
+
   const doors = DOORS.map(d => `<a class="door" href="${d.href}" data-season="${d.season}">
   <h3>${esc(d.title)}</h3>
   <p>${esc(d.blurb)}</p>
@@ -211,7 +254,24 @@ ${strip}
       <a class="btn ghost" href="/about/">More about the chamber</a>
     </div>
   </div></div>
-</section>`;
+</section>
+<section class="band">
+  <div class="wrap">
+    <div class="reasons">
+      <div class="reason" data-season="autumn">
+        <h3>Latest</h3>
+        ${latest ? `<p><a href="/news/${latest.slug}/">${esc(latest.title)}</a><br><span style="color:var(--navy-soft);font-size:.9rem">${esc(longDate(latest.date))}</span></p>
+        <p>${esc(latest.summary)}</p>` : '<p>Nothing posted yet.</p>'}
+      </div>
+      <div class="reason" data-season="spring">
+        <h3>Hiring right now</h3>
+        <p>${openJobs === 0 ? 'No openings posted at the moment.' : openJobs === 1 ? 'One member business has an opening.' : `${openJobs} member businesses have openings.`}</p>
+        <p><a href="/jobs/">See the job board</a></p>
+      </div>
+    </div>
+  </div>
+</section>
+<script type="application/ld+json">${JSON.stringify(org)}</script>`;
 
   return page({
     title: 'Home',
@@ -235,8 +295,11 @@ function directoryIndex() {
 
   const rows = sorted.map(m => {
     const season = catSeason(m.category);
-    const badge = m.tier !== 'basic'
-      ? `<span class="badge">${esc(TIERS[m.tier].label)}</span>` : '';
+    const isReferral = REFERRAL_BY_MEMBER.has(m.slug);
+    const badge = isReferral
+      ? '<span class="badge">Chamber referral</span>'
+      : m.tier !== 'basic'
+        ? `<span class="badge">${esc(TIERS[m.tier].label)}</span>` : '';
     const hay = [m.name, m.summary, m.about, catLabel(m.category), ...(m.serves || [])]
       .join(' ').toLowerCase();
     return `<a class="listing" href="/directory/${m.slug}/" data-season="${season}" data-cat="${m.category}" data-find="${esc(hay)}">
@@ -356,6 +419,11 @@ function memberPage(m) {
   const siblings = MEMBERS
     .filter(o => o.category === m.category && o.slug !== m.slug)
     .slice(0, 4);
+  const refs = REFERRAL_BY_MEMBER.get(m.slug) || [];
+  const referralNote = refs.length ? `<div class="note" style="margin:22px 0 0">
+  <p><strong>Chamber referral.</strong> When a member asks the chamber ${esc(refs.map(r => r.need.replace(/^I need /, 'who to call to ').replace(/^My staff need /, 'about ')).join(' or '))}, this is who they are pointed at.</p>
+</div>` : '';
+
   const related = siblings.length ? `<div class="related">
   <h4>Others in ${esc(catLabel(m.category).toLowerCase())}</h4>
   <ul>${siblings.map(o => `<li><a href="/directory/${o.slug}/">${esc(o.name)}</a> <span>${esc(o.summary)}</span></li>`).join('')}</ul>
@@ -380,6 +448,7 @@ function memberPage(m) {
     <div>
       <p>${esc(m.about || m.summary)}</p>
       ${tags}
+      ${referralNote}
       ${related}
       <a class="back" href="/directory/">Back to the directory</a>
     </div>
@@ -404,6 +473,21 @@ function memberPage(m) {
 function eventsPage() {
   const t = todayISO();
   const upcoming = CALENDAR.filter(e => e.date >= t).sort((a, b) => a.date.localeCompare(b.date));
+
+  /* Dated events get structured data so they can show up as events in search
+     results rather than as an ordinary page. */
+  const eventLd = upcoming.map(e => ({
+    '@context': 'https://schema.org',
+    '@type': 'Event',
+    name: e.title,
+    startDate: e.date,
+    eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
+    eventStatus: 'https://schema.org/EventScheduled',
+    location: { '@type': 'Place', name: e.where, address: { '@type': 'PostalAddress', addressLocality: 'Polk City', addressRegion: 'IA', addressCountry: 'US' } },
+    description: e.summary,
+    organizer: { '@type': 'Organization', name: SITE.name, url: SITE.url },
+    ...(e.rsvp ? { url: e.rsvp.href } : {})
+  }));
 
   const one = e => `<article class="event" data-season="${e.season || 'sun'}">
   ${e.date ? `<div class="date">${esc(longDate(e.date))}</div>` : `<div class="date">${esc(e.when)}</div>`}
@@ -437,7 +521,8 @@ function eventsPage() {
   <h2>Have something to add?</h2>
   <p>The community calendar is open to anyone running something in the area, member or not. Send the date, place, and a sentence about what it is.</p>
   <div class="btnrow"><a class="btn" href="mailto:${SITE.email}?subject=Community%20event">Email the details</a></div>
-</div>`;
+</div>
+${eventLd.map(o => `<script type="application/ld+json">${JSON.stringify(o)}</script>`).join('')}`;
 
   return page({
     title: 'Events',
@@ -531,6 +616,26 @@ function resourcesPage() {
   ${groups}
 </div>
 <div class="band warm">
+  <div class="wrap">
+    <h2>Who to call</h2>
+    <p class="lede">Knowing what changed is half of it. These are the members the chamber points people at, by situation.</p>
+    <div class="group" data-season="spring">
+      <ul>
+        ${REFERRALS.map(r => {
+          if (r.gap) return `<li><strong>${esc(r.need)}</strong><span>${esc(r.note)}</span></li>`;
+          const named = r.members
+            .map(s => MEMBERS.find(x => x.slug === s))
+            .filter(Boolean)
+            .map(x => `<a href="/directory/${x.slug}/">${esc(x.name)}</a>`)
+            .join(', ');
+          return `<li><strong>${esc(r.need)}</strong><span>${named || 'No member listed yet.'}${r.note ? ` &middot; ${esc(r.note)}` : ''}</span></li>`;
+        }).join('')}
+      </ul>
+    </div>
+    <p style="font-size:.94rem;color:var(--navy-soft)">A referral is not an endorsement of quality. It means the business is a chamber member who works in that area and has agreed to take the call.</p>
+  </div>
+</div>
+<div class="band">
   <div class="wrap"><div class="col">
     <h2>The Business Policy Center</h2>
     <p>Most of these state pages are written for people who already know the jargon. The chamber keeps a separate site that says what changed, who it applies to, and whether you should care, in plain language, with every claim linked to its source.</p>
@@ -582,6 +687,263 @@ function aboutPage() {
   }, body);
 }
 
+
+function involvedPage() {
+  const ways = INVOLVED.ways.map(w => `<article class="event" data-season="${w.season}">
+  <h3>${esc(w.title)}</h3>
+  <p>${esc(w.body)}</p>
+  <p class="cost">What it takes: ${esc(w.ask)}</p>
+  <div class="btnrow"><a class="btn" href="${esc(w.action.href.replace('{EMAIL}', SITE.email))}">${esc(w.action.label)}</a></div>
+</article>`).join('');
+
+  const board = INVOLVED.board.map(b => `<li><strong>${esc(b.role)}</strong> <span>${esc(b.name)}${b.business ? `, ${esc(b.business)}` : ''}</span></li>`).join('');
+
+  const body = `
+<div class="pagehead" data-season="sun">
+  <div class="wrap">
+    <h1>Get involved</h1>
+    <p>${esc(INVOLVED.lede)}</p>
+  </div>
+</div>
+<div class="wrap band"><div class="col">
+  <p class="lede">${esc(INVOLVED.intro)}</p>
+</div></div>
+<div class="wrap band">
+  ${ways}
+</div>
+<div class="band warm">
+  <div class="wrap"><div class="col">
+    <h2>Who is on the board</h2>
+    <div class="related" style="margin-top:0;border-top:none;padding-top:0">
+      <ul>${board}</ul>
+    </div>
+  </div></div>
+</div>`;
+
+  return page({
+    title: 'Get involved',
+    description: 'Committees, event volunteering, sponsorship, and board seats at the Polk City Area Chamber of Commerce.',
+    canonical: '/get-involved/',
+    season: 'sun'
+  }, body);
+}
+
+function privacyPage() {
+  const secs = PRIVACY.sections.map(s => `<h3>${esc(s.title)}</h3>
+<p>${esc(s.body)}</p>`).join('');
+
+  const body = `
+<div class="pagehead" data-season="navy">
+  <div class="wrap">
+    <h1>Privacy</h1>
+    <p>Last updated ${esc(PRIVACY.updated)}.</p>
+  </div>
+</div>
+<div class="wrap band"><div class="col">
+  <p class="lede">${esc(PRIVACY.intro)}</p>
+  ${secs}
+  <h3>Questions</h3>
+  <p>Email <a href="mailto:${SITE.email}">${SITE.email}</a>.</p>
+</div></div>`;
+
+  return page({
+    title: 'Privacy',
+    description: 'What the Polk City Area Chamber of Commerce collects, what it does not, and how to change it.',
+    canonical: '/privacy/',
+    season: 'navy'
+  }, body);
+}
+
+function notFoundPage() {
+  const body = `
+<div class="pagehead" data-season="winter">
+  <div class="wrap">
+    <h1>That page is not here</h1>
+    <p>The site was rebuilt in 2026 and a few addresses moved. Nothing is lost, it is just somewhere else.</p>
+  </div>
+</div>
+<div class="wrap band"><div class="col">
+  <p>The four most likely places you were headed:</p>
+  <div class="btnrow">
+    <a class="btn" href="/directory/">Member directory</a>
+    <a class="btn ghost" href="/events/">Events</a>
+    <a class="btn ghost" href="/membership/">Membership</a>
+    <a class="btn ghost" href="/resources/">Business resources</a>
+  </div>
+  <p style="margin-top:26px">Still stuck? Email <a href="mailto:${SITE.email}">${SITE.email}</a> and say what you were looking for.</p>
+</div></div>`;
+
+  return page({
+    title: 'Page not found',
+    description: 'That page has moved.',
+    canonical: '/404/',
+    season: 'winter'
+  }, body);
+}
+
+
+/* ---------- news and spotlights ------------------------------------------ */
+
+const KIND = { spotlight: { label: 'Member spotlight', season: 'autumn' },
+               news:      { label: 'Chamber news',     season: 'winter' } };
+
+function newsIndex() {
+  const sorted = [...POSTS].sort((a, b) => b.date.localeCompare(a.date));
+  const rows = sorted.map(p => {
+    const k = KIND[p.kind] || KIND.news;
+    return `<a class="listing" href="/news/${p.slug}/" data-season="${k.season}">
+  <span class="body">
+    <h3>${esc(p.title)}</h3>
+    <p>${esc(p.summary)}</p>
+    <span class="cat">${esc(longDate(p.date))}</span>
+  </span>
+  <span class="badge">${esc(k.label)}</span>
+</a>`;
+  }).join('');
+
+  const body = `
+<div class="pagehead" data-season="autumn">
+  <div class="wrap">
+    <h1>News and spotlights</h1>
+    <p>What the chamber is doing, and a closer look at the businesses in it.</p>
+  </div>
+</div>
+<div class="wrap band">
+  ${rows || '<div class="empty"><p>Nothing posted yet.</p></div>'}
+</div>
+<div class="band warm">
+  <div class="wrap"><div class="col">
+    <h2>Want a spotlight?</h2>
+    <p>Pro and Premier members get one a year, written by the chamber and posted across social and the member email. It is included, so ask for it.</p>
+    <div class="btnrow"><a class="btn sun" href="mailto:${SITE.email}?subject=Member%20spotlight">Ask for a spotlight</a></div>
+  </div></div>
+</div>`;
+
+  return page({
+    title: 'News and spotlights',
+    description: 'Chamber news and member spotlights from the Polk City Area Chamber of Commerce.',
+    canonical: '/news/',
+    season: 'autumn'
+  }, body);
+}
+
+function postPage(p) {
+  const k = KIND[p.kind] || KIND.news;
+  const m = p.member ? MEMBERS.find(x => x.slug === p.member) : null;
+
+  const aside = m ? `<aside class="card">
+  <h4>About ${esc(m.name)}</h4>
+  <p style="font-size:.95rem;margin:0 0 14px">${esc(m.summary)}</p>
+  <div class="btnrow"><a class="btn" href="/directory/${m.slug}/">See their listing</a></div>
+</aside>` : `<aside class="card">
+  <h4>Get this in your inbox</h4>
+  <p style="font-size:.95rem;margin:0 0 14px">The chamber sends one email a month. No more than that.</p>
+  <div class="btnrow"><a class="btn" href="mailto:${SITE.email}?subject=Add%20me%20to%20the%20chamber%20email">Ask to be added</a></div>
+</aside>`;
+
+  const ld = {
+    '@context': 'https://schema.org',
+    '@type': 'NewsArticle',
+    headline: p.title,
+    datePublished: p.date,
+    description: p.summary,
+    publisher: { '@type': 'Organization', name: SITE.name, url: SITE.url },
+    mainEntityOfPage: `${SITE.url}/news/${p.slug}/`
+  };
+
+  const body = `
+<div class="memberhead" data-season="${k.season}">
+  <div class="wrap">
+    <p class="crumb"><a href="/news/">News and spotlights</a> / ${esc(k.label)}</p>
+    <h1>${esc(p.title)}</h1>
+    <p>${esc(longDate(p.date))}</p>
+  </div>
+</div>
+<div class="wrap band" data-season="${k.season}">
+  <div class="cols">
+    <div>
+      ${p.body.map(x => `<p>${esc(x)}</p>`).join('')}
+      <a class="back" href="/news/">Back to news</a>
+    </div>
+    ${aside}
+  </div>
+</div>
+<script type="application/ld+json">${JSON.stringify(ld)}</script>`;
+
+  return page({
+    title: p.title,
+    description: p.summary,
+    canonical: `/news/${p.slug}/`,
+    season: k.season
+  }, body);
+}
+
+/* ---------- job board ----------------------------------------------------- */
+
+function liveJobs() {
+  const t = todayISO();
+  return JOBS.filter(j => !j.closes || j.closes >= t)
+             .sort((a, b) => (b.posted || '').localeCompare(a.posted || ''));
+}
+
+function jobsPage() {
+  const live = liveJobs();
+
+  const card = j => {
+    const m = MEMBERS.find(x => x.slug === j.member);
+    return `<article class="event" data-season="spring">
+  <div class="date">${esc(j.type)}${j.pay ? ` &middot; ${esc(j.pay)}` : ''}</div>
+  <h3>${esc(j.title)}</h3>
+  <div class="meta">${m ? `<a href="/directory/${m.slug}/">${esc(m.name)}</a>` : 'Chamber member'} &middot; Closes ${esc(longDate(j.closes))}</div>
+  <p>${esc(j.summary)}</p>
+  ${j.detail ? `<p>${esc(j.detail)}</p>` : ''}
+  ${j.apply ? `<div class="btnrow"><a class="btn" href="${esc(j.apply.href)}">${esc(j.apply.label)}</a></div>` : ''}
+</article>`;
+  };
+
+  const ld = live.map(j => {
+    const m = MEMBERS.find(x => x.slug === j.member);
+    return {
+      '@context': 'https://schema.org',
+      '@type': 'JobPosting',
+      title: j.title,
+      description: [j.summary, j.detail].filter(Boolean).join(' '),
+      datePosted: j.posted,
+      validThrough: j.closes,
+      employmentType: j.type.toUpperCase().replace(' ', '_'),
+      hiringOrganization: { '@type': 'Organization', name: m ? m.name : SITE.name },
+      jobLocation: { '@type': 'Place', address: { '@type': 'PostalAddress', addressLocality: 'Polk City', addressRegion: 'IA', addressCountry: 'US' } }
+    };
+  });
+
+  const body = `
+<div class="pagehead" data-season="spring">
+  <div class="wrap">
+    <h1>Jobs</h1>
+    <p>Openings at chamber member businesses. Free to post if you are a member.</p>
+  </div>
+</div>
+<div class="wrap band">
+  ${live.length ? live.map(card).join('') : `<div class="empty"><p>No openings right now. Members can post one at any time by emailing <a href="mailto:${SITE.email}">${SITE.email}</a>.</p></div>`}
+</div>
+<div class="band warm">
+  <div class="wrap"><div class="col">
+    <h2>Posting a job</h2>
+    <p>Send the title, whether it is full or part time, the pay, a sentence about the work, and how to apply. It goes up within a day and comes down on its own when it closes.</p>
+    <p>Put a real number in the pay field. Postings without one get a fraction of the applications, and everybody who reads it assumes the worst.</p>
+    <div class="btnrow"><a class="btn sun" href="mailto:${SITE.email}?subject=Job%20posting">Post a job</a></div>
+  </div></div>
+</div>
+${ld.map(o => `<script type="application/ld+json">${JSON.stringify(o)}</script>`).join('')}`;
+
+  return page({
+    title: 'Jobs',
+    description: 'Current job openings at Polk City area chamber member businesses.',
+    canonical: '/jobs/',
+    season: 'spring'
+  }, body);
+}
+
 /* ---------- write it out -------------------------------------------------- */
 
 async function put(rel, html) {
@@ -600,13 +962,20 @@ async function main() {
   await put('membership', membershipPage());
   await put('resources', resourcesPage());
   await put('about', aboutPage());
+  await put('get-involved', involvedPage());
+  await put('privacy', privacyPage());
+  await put('news', newsIndex());
+  for (const post of POSTS) await put(path.join('news', post.slug), postPage(post));
+  await put('jobs', jobsPage());
+  await writeFile(path.join(OUT, '404.html'), notFoundPage());
 
   for (const m of MEMBERS) await put(path.join('directory', m.slug), memberPage(m));
 
   await cp('assets', path.join(OUT, 'assets'), { recursive: true });
 
-  const urls = ['/', '/directory/', '/events/', '/membership/', '/resources/', '/about/']
-    .concat(MEMBERS.map(m => `/directory/${m.slug}/`));
+  const urls = ['/', '/directory/', '/events/', '/membership/', '/resources/', '/about/', '/get-involved/', '/privacy/', '/news/', '/jobs/']
+    .concat(MEMBERS.map(m => `/directory/${m.slug}/`))
+    .concat(POSTS.map(p => `/news/${p.slug}/`));
 
   await writeFile(path.join(OUT, 'sitemap.xml'),
 `<?xml version="1.0" encoding="UTF-8"?>

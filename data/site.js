@@ -41,6 +41,7 @@ export const SITE = {
     { href: '/events/',     label: 'Events',      season: 'sun'    },
     { href: '/membership/', label: 'Membership',  season: 'autumn' },
     { href: '/resources/',  label: 'Resources',   season: 'winter' },
+    { href: '/get-involved/', label: 'Get involved', season: 'sun' },
     { href: '/about/',      label: 'About',       season: 'navy'   }
   ]
 };

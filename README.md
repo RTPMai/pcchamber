@@ -12,7 +12,11 @@ This is the front half of the platform. Dues collection, member logins, and even
 
 **Prices are on the membership page.** Not behind an application form. Somebody deciding whether they can afford this should not have to email a stranger to find out.
 
+**Three things expire by themselves.** Past events, closed job postings, and the next-event line on the home page all update from the dates in the data. Nothing has to be remembered or cleaned up, which matters when nobody is being paid to remember.
+
 **The next event is on the home page automatically.** It reads the calendar and shows the soonest one. Past events drop off by themselves on the day after. Nothing to clean up.
+
+**It passes a WCAG 2.1 AA audit.** Thirteen page types, mobile and desktop, zero violations under axe-core. That is not a nice-to-have for an organisation that takes public money and speaks for the business community.
 
 **Search and filtering work without a page reload,** but every listing is already in the HTML before any JavaScript runs. Turn JavaScript off and the directory still works.
 
@@ -27,6 +31,10 @@ This is the front half of the platform. Dues collection, member logins, and even
 | `data/membership.js` | Tiers, prices, benefits. **Placeholder pricing.** |
 | `data/pages.js` | About text, FAQ, the resources links |
 | `data/site.js` | Chamber contact details, menu, the demo banner |
+| `data/involved.js` | Get Involved page and the privacy policy. **Board list is placeholder.** |
+| `data/news.js` | Chamber news and member spotlights |
+| `data/jobs.js` | The job board. Postings drop off on their own. |
+| `data/referrals.js` | Who the chamber points people at, by situation. Shared with the Policy Center. |
 
 Everything else builds itself from those five files.
 
@@ -34,7 +42,30 @@ Everything else builds itself from those five files.
 | --- | --- | --- |
 | `build.mjs` | Turns the data into HTML pages | No |
 | `assets/styles.css` | Colors, type, layout | Only to change the look |
-| `vercel.json` | Tells Vercel how to build | No |
+| `vercel.json` | Build settings and the redirects from the old site | Only to add a redirect |
+| `tools/import-directory.mjs` | Turns a pasted directory into member entries | No |
+| `tools/make-social-card.py` | Rebuilds the share card and favicons | Only if the wording changes |
+
+---
+
+## Loading the real directory
+
+Do not type sixty-seven members by hand.
+
+1. Paste the directory, in whatever shape it comes out, into `tools/paste.txt`
+2. Run `node tools/import-directory.mjs`
+3. It writes `data/members.generated.js` and prints a list of anything it could not work out
+4. Set `category` and `tier` on each entry, then rename the file over `data/members.js`
+
+It works out names, phones, emails, websites, addresses and slugs. It will not guess a category or a tier, because getting those wrong is worse than leaving them blank.
+
+---
+
+## The old site's addresses still work
+
+`vercel.json` redirects every page on the current GoDaddy site to its new home, including `/business-member-directory`, `/chamber-golf-tournament`, and `/business-resources`. Anyone with a bookmark, and every link Google already has, lands in the right place instead of on an error.
+
+If a page is added to the old site before the switch, add a redirect for it too.
 
 ---
 
@@ -67,11 +98,29 @@ Node 18 or newer. No dependencies to install.
 
 **Turn off the demo banner.** One line in `data/site.js`.
 
+**Replace the board list.** `data/involved.js` has placeholder names and roles on the Get Involved page.
+
+**Fill in the real referrals.** `data/referrals.js` drives the Who to call block and the referral badges. Two categories are honestly marked as gaps: no accountant or CPA, and no attorney. Leave them marked until somebody joins. A referral to nobody is worse than an admitted gap.
+
+**Empty the job board and the news list, or fill them.** The three jobs and three posts in there are examples. A job board with fake postings is worse than an empty one.
+
 **Drop in the real logos.** The roundel in `build.mjs` is a stand-in built from the brand colours. The clean SVGs from the Policy Center repo should replace it.
 
 **Point the Policy Center link at the live address.** `SITE.policyCenterUrl`.
 
 **Decide about slugs.** A member's address is `/directory/their-slug/`. Once it is public and indexed, changing a slug breaks every link to it. Get them right the first time, or plan redirects.
+
+---
+
+## Re-running the accessibility audit
+
+Worth doing after any change to colours or markup.
+
+```
+npm install --no-save axe-core playwright
+```
+
+Then point axe at each page in `dist/`. The one thing that has already failed once is colour contrast on muted grey text sitting on a seasonal wash. `--navy-soft` is set to a value that clears 4.5:1 on all five washes. If you lighten it, re-check.
 
 ---
 
