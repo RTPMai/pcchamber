@@ -117,7 +117,7 @@ Node 18 or newer. No dependencies to install.
 
 **Set MEMBER_PASSCODE in Vercel** or the Policy Center will refuse everyone.
 
-**Set formEndpoint** or the join and event forms stay in email fallback.
+**Set formEndpoint** to have the forms submit directly rather than opening an email.
 
 **Vote on the membership structure.** `data/membership.js` has `draft: true`, which puts a red banner on the page. Turn it off after the board votes, not before.
 
@@ -175,9 +175,11 @@ Files are only generated for events still to come, so the feed does not grow for
 
 ## Forms
 
-`data/site.js` has a `formEndpoint`. Any service that accepts a plain POST works: Formspree, Basin, Getform, Tally. Formspree's free tier covers fifty submissions a month, which is more than this chamber will use.
+The join form and the event submission form always render. What changes is where they go.
 
-Leave it empty and both forms fall back to an email link rather than a button that silently does nothing.
+With `formEndpoint` set in `data/site.js`, they POST straight to the chamber. Any service accepting a plain POST works: Formspree, Basin, Getform, Tally. Formspree's free tier covers fifty submissions a month, more than this chamber will use.
+
+With it empty, submitting opens the person's email client with every answer already filled in and labelled. Nothing is lost and no setup is needed. If a live endpoint fails mid-submission, it falls back to the same email rather than dropping what they typed.
 
 Both forms carry a honeypot field positioned off screen rather than hidden with `display:none`, which bots detect.
 
@@ -200,6 +202,14 @@ Both forms carry a honeypot field positioned off screen rather than hidden with 
 **They are `<img>` references, not inline SVG.** The artwork is about 38KB of path data. Inlining it into all 31 pages would add well over a megabyte of duplicated markup and stop it being cached.
 
 The originals from Illustrator carried around 8KB each of C2PA provenance metadata, which has been stripped. If you re-export, strip it again or the files roughly double.
+
+---
+
+## If you add another serverless function
+
+Write it as an ES module. `package.json` sets `"type": "module"`, so every `.js` file in the project is ESM. A function written with `require`, `module.exports` and `__dirname` throws on every invocation, the platform returns its own plain-text error page, and the browser reports a JSON parse error that has nothing to do with the real fault. `api/policy.js` is the working pattern: `import` at the top, `export default async function handler(req, res)`.
+
+Anything calling one of these endpoints should read the response as text before trying to parse it, for the same reason.
 
 ---
 

@@ -1179,23 +1179,13 @@ function field(f) {
 function formPage(form, { canonical, season, aside }) {
   const live = Boolean(SITE.formEndpoint);
 
-  /* No endpoint configured yet, so the form would post into nothing.
-     Show the email route instead of a button that silently fails. */
-  const fallback = `<div class="note">
-    <p><strong>The form is not connected yet.</strong> Set <code>formEndpoint</code> in <code>data/site.js</code> and this becomes a real form. Until then, email works.</p>
-  </div>
-  <div class="btnrow"><a class="btn sun" href="mailto:${SITE.email}?subject=${encodeURIComponent(form.subject)}">Email the chamber instead</a></div>`;
-
-  const theForm = `<form class="form" id="theform" action="${esc(SITE.formEndpoint)}" method="POST">
-    <input type="hidden" name="_subject" value="${esc(form.subject)}">
-    <input type="text" name="_gotcha" tabindex="-1" autocomplete="off" aria-hidden="true" class="gotcha">
-    ${form.fields.map(field).join('')}
-    <div class="btnrow"><button type="submit" class="btn sun">${esc(form.submit)}</button></div>
-    <p class="help">We use what you send here to reply and nothing else. See the <a href="/privacy/">privacy page</a>.</p>
-  </form>
-  <div class="done" id="done" hidden>
-    <h3>${esc(form.after)}</h3>
-    <p><a href="/">Back to the home page</a></p>
+  /* The form always renders. An earlier version showed an email link
+     instead whenever no endpoint was configured, which meant that out of
+     the box the join page had no join form on it. If there is no endpoint,
+     submitting composes an email with the answers already filled in, so
+     the page works before anything is set up and works better after. */
+  const notice = live ? '' : `<div class="note">
+    <p><strong>This form opens an email rather than sending directly.</strong> Set <code>formEndpoint</code> in <code>data/site.js</code> and it will submit straight to the chamber instead. Either way, what you fill in gets through.</p>
   </div>`;
 
   const body = `
@@ -1209,17 +1199,65 @@ function formPage(form, { canonical, season, aside }) {
   <div class="cols">
     <div>
       ${form.note ? `<p class="lede">${esc(form.note)}</p>` : ''}
-      ${live ? theForm : fallback}
+      ${notice}
+      <form class="form" id="theform"${live ? ` action="${esc(SITE.formEndpoint)}" method="POST"` : ''}>
+        <input type="hidden" name="_subject" value="${esc(form.subject)}">
+        <input type="text" name="_gotcha" tabindex="-1" autocomplete="off" aria-hidden="true" class="gotcha">
+        ${form.fields.map(field).join('')}
+        <div class="btnrow"><button type="submit" class="btn sun">${esc(form.submit)}</button></div>
+        <p class="help">We use what you send here to reply and nothing else. See the <a href="/privacy/">privacy page</a>.</p>
+      </form>
+      <div class="done" id="done" hidden>
+        <h3>${esc(form.after)}</h3>
+        <p><a href="/">Back to the home page</a></p>
+      </div>
     </div>
     ${aside}
   </div>
 </div>
-${live ? `<script>
+<script>
 (function(){
   var f=document.getElementById('theform'), done=document.getElementById('done');
   if(!f) return;
+  var LIVE=${live ? 'true' : 'false'};
+  var EMAIL=${JSON.stringify(SITE.email)};
+  var SUBJECT=${JSON.stringify(form.subject)};
+  var LABELS=${JSON.stringify(Object.fromEntries(form.fields.map(x => [x.id, x.label])))};
+  var SUBMIT=${JSON.stringify(form.submit)};
+
+  function answers(){
+    var out=[];
+    for (var id in LABELS){
+      var el=f.elements[id];
+      if(!el) continue;
+      var v = el.type==='checkbox' ? (el.checked?'Yes':'No') : (el.value||'').trim();
+      if(v) out.push(LABELS[id] + ': ' + v);
+    }
+    return out.join('\n');
+  }
+
+  function missing(){
+    /* Let the browser do the validating, then say so plainly. */
+    if(f.checkValidity()) return false;
+    f.reportValidity();
+    return true;
+  }
+
   f.addEventListener('submit', function(e){
     e.preventDefault();
+    if(f.elements['_gotcha'] && f.elements['_gotcha'].value) return;
+    if(missing()) return;
+
+    if(!LIVE){
+      /* No endpoint configured. Hand the answers to their email client
+         rather than pretending to send and losing them. */
+      window.location.href = 'mailto:' + EMAIL
+        + '?subject=' + encodeURIComponent(SUBJECT)
+        + '&body=' + encodeURIComponent(answers());
+      f.hidden=true; done.hidden=false;
+      return;
+    }
+
     var btn=f.querySelector('button[type=submit]');
     btn.disabled=true; btn.textContent='Sending';
     fetch(f.action, { method:'POST', body:new FormData(f), headers:{Accept:'application/json'} })
@@ -1228,12 +1266,14 @@ ${live ? `<script>
         f.hidden=true; done.hidden=false; done.scrollIntoView({block:'center'});
       })
       .catch(function(){
-        btn.disabled=false; btn.textContent=${JSON.stringify(form.submit)};
-        alert('That did not send. Please email ' + ${JSON.stringify(SITE.email)} + ' instead.');
+        btn.disabled=false; btn.textContent=SUBMIT;
+        window.location.href = 'mailto:' + EMAIL
+          + '?subject=' + encodeURIComponent(SUBJECT)
+          + '&body=' + encodeURIComponent(answers());
       });
   });
 })();
-</script>` : ''}`;
+</script>`;
 
   return page({
     title: form.title,
@@ -1377,7 +1417,19 @@ function policyCenterPage() {
       body:JSON.stringify({ passcode:document.getElementById('passcode').value })
     }).then(function(r){
       if(r.ok) return r.text();
-      return r.json().then(function(j){ throw new Error(j.message || (j.error==='wrong_passcode' ? 'That passcode is not right.' : 'Could not open the Policy Center.')); });
+      /* Read as text first. A crashed function returns the platform's own
+         error page, which is not JSON, and parsing it blindly reports a
+         syntax error instead of the actual fault. */
+      return r.text().then(function(body){
+        var message;
+        try { message = JSON.parse(body).message; } catch (e) { message = null; }
+        if(!message){
+          message = r.status >= 500
+            ? 'Something went wrong at our end (error ' + r.status + '). Please email the chamber.'
+            : 'That passcode is not right.';
+        }
+        throw new Error(message);
+      });
     }).then(boot)
       .catch(function(err){ btn.disabled=false; msg.textContent=err.message; });
   });
