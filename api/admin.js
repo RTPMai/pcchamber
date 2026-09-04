@@ -102,13 +102,72 @@ async function github(path, options = {}) {
 
 /* ---------- the four things this endpoint does ---------------------------- */
 
+/* GitHub answers 404 for four completely different problems, and one of
+   them is deliberate: a fine-grained token that has not been granted this
+   repository gets 404 rather than 403, so a token cannot be used to probe
+   which private repositories exist. That is good security and terrible
+   debugging, so when a read fails we work out which it actually is. */
+async function diagnose(name) {
+  const { repo, branch } = api();
+
+  const repoRes = await fetch(`https://api.github.com/repos/${repo}`, {
+    headers: {
+      Authorization: `Bearer ${process.env.GITHUB_TOKEN}`,
+      Accept: 'application/vnd.github+json',
+      'User-Agent': 'polk-city-chamber-admin'
+    }
+  });
+
+  if (repoRes.status === 401) {
+    return `The GitHub token is not valid. It may have expired. Create a new one and update GITHUB_TOKEN in the Vercel settings.`;
+  }
+
+  if (repoRes.status === 404) {
+    return `Cannot see the repository "${repo}". Either GITHUB_REPO is wrong, or the token has not been given access to it. `
+      + `A fine-grained token has to name this repository under Repository access, with Contents set to Read and write. `
+      + `If you created it as a fine-grained token on an organisation, an owner may still need to approve it.`;
+  }
+
+  if (!repoRes.ok) {
+    return `GitHub returned ${repoRes.status} for the repository "${repo}".`;
+  }
+
+  const info = await repoRes.json();
+
+  const branchRes = await fetch(`https://api.github.com/repos/${repo}/branches/${encodeURIComponent(branch)}`, {
+    headers: {
+      Authorization: `Bearer ${process.env.GITHUB_TOKEN}`,
+      Accept: 'application/vnd.github+json',
+      'User-Agent': 'polk-city-chamber-admin'
+    }
+  });
+
+  if (branchRes.status === 404) {
+    return `The repository is there, but it has no branch called "${branch}". Its default branch is "${info.default_branch}". `
+      + `Set GITHUB_BRANCH to that in the Vercel settings, or leave it unset if the default is main.`;
+  }
+
+  /* Repo and branch are fine, so the file genuinely is not there. */
+  return `The repository and branch are fine, but content/${name} is not in them. `
+    + `That folder holds the site's content and is created by the build. `
+    + `Check that the content/ folder was committed and pushed, not left out by a .gitignore.`;
+}
+
 async function loadFile(name) {
   const { branch } = api();
-  const res = await github(`content/${name}?ref=${branch}`);
+  const res = await github(`content/${name}?ref=${encodeURIComponent(branch)}`);
+
+  if (res.status === 404) {
+    throw Object.assign(new Error(await diagnose(name)), { status: 502 });
+  }
   if (!res.ok) {
     const detail = await res.text();
-    throw Object.assign(new Error(`Could not read ${name}: ${res.status}`), { status: 502, detail });
+    throw Object.assign(
+      new Error(`GitHub returned ${res.status} reading content/${name}.`),
+      { status: 502, detail }
+    );
   }
+
   const meta = await res.json();
   return {
     name,
@@ -129,7 +188,9 @@ async function saveFile(name, data, sha, who, note) {
     body: JSON.stringify({
       message: `${note || 'Update ' + name.replace('.json', '')} (via admin, by ${who})`,
       content: Buffer.from(body, 'utf8').toString('base64'),
-      sha,
+      /* Omitted entirely when the file does not exist yet. Sending an
+         undefined sha to GitHub is an error rather than a create. */
+      ...(sha ? { sha } : {}),
       branch,
       committer: { name: `${who} via chamber admin`, email: 'admin@polkcitychamber.com' }
     })
