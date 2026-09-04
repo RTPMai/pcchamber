@@ -958,8 +958,15 @@ function involvedPage() {
     const who = b.member && MEMBERS.some(m => m.slug === b.member)
       ? `<a href="/directory/${b.member}/">${esc(b.business)}</a>`
       : esc(b.business);
+    /* alt is empty on purpose. The person's name is right beside the
+       photo, so describing it again just makes a screen reader say the
+       name twice. */
+    const face = b.photo
+      ? `<img class="face" src="/assets/board/${esc(b.photo)}.webp" alt="" width="64" height="64" loading="lazy">`
+      : `<span class="face" aria-hidden="true">${esc(b.vacant ? '?' : b.name.trim()[0])}</span>`;
+
     return `<div class="person${b.vacant ? ' vacant' : ''}">
-  <span class="face" aria-hidden="true">${esc(b.vacant ? '?' : b.name.trim()[0])}</span>
+  ${face}
   <span class="who">
     <strong>${esc(b.name)}</strong>
     <span class="role">${esc(b.role)}</span>

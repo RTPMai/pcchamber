@@ -734,12 +734,14 @@ a:hover .ext::after{ opacity:1; }
 /* Portraits drop in later. Until then an initial reads as intentional
    rather than as a broken image. */
 .person .face{
-  flex:0 0 auto; width:48px; height:48px; border-radius:50%;
+  flex:0 0 auto; width:64px; height:64px; border-radius:50%;
   background:var(--tint-wash); border:1px solid var(--tint);
   display:flex; align-items:center; justify-content:center;
-  font-family:'Fraunces',Georgia,serif; font-size:1.25rem; font-weight:600;
+  font-family:'Fraunces',Georgia,serif; font-size:1.5rem; font-weight:600;
   color:var(--tint-ink);
+  object-fit:cover;
 }
+img.face{ display:block; }
 .person .who{ display:block; min-width:0; }
 .person strong{ display:block; font-size:1rem; }
 .person .role{ display:block; font-size:.87rem; color:var(--tint-ink); font-weight:600; }

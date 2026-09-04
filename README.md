@@ -50,6 +50,7 @@ Everything else builds itself from those five files.
 | `tools/calendar-files.mjs` | Builds the .ics files and add-to-calendar links | No |
 | `tools/needs-a-sentence.mjs` | Lists what the directory is still missing | No |
 | `tools/external-links.mjs` | Sends off-site links to a new tab | No |
+| `tools/board-photos.py` | Crops and resizes board headshots | Only when the board changes |
 
 ---
 
@@ -113,8 +114,6 @@ Node 18 or newer. No dependencies to install.
 **Put in the approved dues.** `data/membership.js` has invented numbers in it.
 
 **Turn off the demo banner.** One line in `data/site.js`.
-
-**Add board portraits.** The board is real; the photos are not in yet. Save them as `/assets/board/firstname-lastname.jpg`, square, and add a `photo` field. Until then each person shows their initial, which reads as intentional rather than broken.
 
 **Set MEMBER_PASSCODE in Vercel** or the Policy Center will refuse everyone.
 
@@ -223,6 +222,21 @@ Both forms carry a honeypot field positioned off screen rather than hidden with 
 **They are `<img>` references, not inline SVG.** The artwork is about 38KB of path data. Inlining it into all 31 pages would add well over a megabyte of duplicated markup and stop it being cached.
 
 The originals from Illustrator carried around 8KB each of C2PA provenance metadata, which has been stripped. If you re-export, strip it again or the files roughly double.
+
+---
+
+## Board photos
+
+Eight are in. When the board changes, drop the new headshots into a folder and run:
+
+    pip install pillow
+    python3 tools/board-photos.py path/to/photos
+
+It crops each one to a true square, resizes to 256, and writes a WebP into `assets/board/`. Then set `photo` in `data/involved.js` to the filename without its extension. Anyone without a photo shows their initial instead, which reads as intentional rather than broken.
+
+**It crops rather than squashing,** because several headshots come in taller than they are wide and stretching one distorts the face. **It does not crop from the centre,** because in a portrait the face sits above the middle and a centred crop clips foreheads. A quarter comes off the top and the rest off the bottom, so the head keeps its room and the trim comes out of the chest.
+
+The photos carry an empty `alt`. The person's name sits right beside the picture, so describing it again only makes a screen reader say the name twice.
 
 ---
 
