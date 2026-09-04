@@ -45,10 +45,10 @@ let cached = null;
 function payload() {
   if (cached) return cached;
   const dir = path.join(__dirname, '_policy');
-  cached = [
-    fs.readFileSync(path.join(dir, 'membership.js'), 'utf8'),
-    fs.readFileSync(path.join(dir, 'content.js'), 'utf8')
-  ].join('\n;\n');
+  /* Entries only. Membership lives on the public site at /membership/,
+     not in here, so there is one place to edit it and no chance of the
+     two drifting apart. */
+  cached = fs.readFileSync(path.join(dir, 'content.js'), 'utf8');
   return cached;
 }
 

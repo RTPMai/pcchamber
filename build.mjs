@@ -25,6 +25,7 @@ import { POSTS } from './data/news.js';
 import { JOBS } from './data/jobs.js';
 import { REFERRALS } from './data/referrals.js';
 import { JOIN_FORM, EVENT_FORM } from './data/forms.js';
+import { scopeCss } from './tools/scope-policy-css.mjs';
 
 const OUT = 'dist';
 
@@ -1215,7 +1216,7 @@ function policyCenterPage() {
   </div>
 </div>
 <div class="wrap band" data-season="winter">
-  <div class="cols">
+  <div class="cols" id="gatecols">
     <div>
       <div id="gate">
         <h2>Members only</h2>
@@ -1230,7 +1231,28 @@ function policyCenterPage() {
         </form>
         <p style="margin-top:24px">Not a member, or lost the passcode? <a href="/join/">Join the chamber</a> or <a href="mailto:${SITE.email}?subject=Policy%20Center%20passcode">email the chamber</a>.</p>
       </div>
-      <div id="policyapp" hidden></div>
+      <!-- The Policy Center app writes into these. It was built as a
+           standalone page, so it expects this scaffolding to exist. -->
+      <div id="policyapp" hidden>
+        <nav id="sections" aria-label="Policy Center sections"><ul id="section-nav"></ul></nav>
+        <div class="searchbar" hidden>
+          <div class="wrap">
+            <div class="search-field">
+              <label class="skip" for="search">Search the Policy Center</label>
+              <input type="search" id="search" placeholder="Search the Policy Center. Try &ldquo;grant&rdquo; or &ldquo;property tax&rdquo;">
+              <button type="button" id="clear-search" class="clear" hidden>Clear</button>
+            </div>
+          </div>
+        </div>
+        <div class="wrap" id="view"></div>
+        <div class="policy-stamp">
+          <p id="foot-review"></p>
+          <p id="foot-contact"></p>
+          <p id="foot-home"></p>
+        </div>
+        <span id="brand-sub" hidden></span>
+        <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+      </div>
     </div>
     <aside class="card" id="gateaside">
       <h4>What is in here</h4>
@@ -1259,7 +1281,17 @@ function policyCenterPage() {
     var s=document.createElement('script'); s.text=code; document.head.appendChild(s);
     var a=document.createElement('script'); a.src='/policy-center/app.js';
     a.onload=function(){
-      gate.hidden=true; if(aside) aside.hidden=true; app.hidden=false;
+      gate.hidden=true;
+      if(aside) aside.hidden=true;
+      /* Full width once it is open. The two-column gate layout was only
+         ever there to sit beside the passcode form. */
+      var cols=document.getElementById('gatecols');
+      if(cols) cols.classList.add('open');
+      /* The app renders its own heading and review stamp, so ours would be
+         the same words twice. */
+      var head=document.querySelector('.pagehead');
+      if(head) head.hidden=true;
+      app.hidden=false;
     };
     document.head.appendChild(a);
   }
@@ -1327,9 +1359,11 @@ async function main() {
 
   await put('policy-center', policyCenterPage());
   await mkdir(path.join(OUT, 'policy-center'), { recursive: true });
-  for (const f of ['app.js', 'policy.css']) {
-    await cp(path.join('policy', f), path.join(OUT, 'policy-center', f));
-  }
+  await cp(path.join('policy', 'app.js'), path.join(OUT, 'policy-center', 'app.js'));
+  await writeFile(
+    path.join(OUT, 'policy-center', 'policy.css'),
+    scopeCss(await readFile(path.join('policy', 'policy.css'), 'utf8'))
+  );
 
   await cp('assets', path.join(OUT, 'assets'), { recursive: true });
 

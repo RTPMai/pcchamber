@@ -150,7 +150,10 @@ button.clear{
 }
 
 .hero .intro{ max-width:var(--measure); font-size:1.06rem; margin:0 0 14px; }
-.hero .howto{ max-width:var(--measure); font-size:0.94rem; color:var(--navy-soft); margin:0 0 18px; }
+/* --navy-soft is a muted grey meant for pale backgrounds. The hero is
+   navy, so it fell to 3.4:1 here. This is the same colour the footer uses
+   on navy and it clears AA. */
+.hero .howto{ max-width:var(--measure); font-size:0.94rem; color:#A8BEC6; margin:0 0 18px; }
 
 .stamp{
   display:inline-block; font-size:0.84rem; color:var(--navy-mid);

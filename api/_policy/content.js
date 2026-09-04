@@ -47,7 +47,7 @@ const SITE = {
 
   cadence: 'Reviewed monthly',
   contactEmail: 'admin@polkcitychamber.com',
-  chamberUrl: 'https://polkcitychamber.com',
+  chamberUrl: '/',
 };
 
 /* Topic filters. Keep this list short. Four or five is the limit before

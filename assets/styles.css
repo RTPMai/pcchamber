@@ -633,3 +633,30 @@ table.cal a.ev:hover{ background:var(--tint); color:#fff; }
   table.cal a.ev{ font-size:0; padding:0; height:7px; margin-bottom:2px; border-radius:2px; border-left-width:0; background:var(--tint); }
   table.cal .num{ font-size:.72rem; }
 }
+
+/* ---------- Policy Center container -------------------------------------- */
+
+/* Once unlocked the Policy Center uses the full width. Its own stylesheet
+   is scoped to #policyapp and cannot reach the chamber header or footer. */
+.cols.open{ grid-template-columns:1fr; }
+
+#policyapp .wrap{ padding:0; max-width:none; }
+#policyapp .searchbar{ position:static; padding:0 0 18px; background:none; border:none; }
+
+.policy-stamp{
+  margin-top:40px; padding-top:20px; border-top:1px solid var(--rule);
+  font-size:.88rem; color:var(--navy-soft);
+}
+.policy-stamp p{ margin:0 0 7px; max-width:70ch; }
+.policy-stamp p:last-child{ margin-bottom:0; }
+
+.memberonly{ color:#8FA8B1; }
+
+/* The app sets this as a page label. Useful to a screen reader, noise on
+   screen, since the heading right below it says the same thing. */
+#brand-sub{
+  position:absolute; width:1px; height:1px; overflow:hidden;
+  clip:rect(0 0 0 0); white-space:nowrap;
+}
+.pagehead[hidden]{ display:none; }
+#policyapp .hero{ border-radius:var(--radius); }

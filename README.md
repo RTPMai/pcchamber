@@ -37,7 +37,6 @@ This is the front half of the platform. Dues collection, member logins, and even
 | `data/referrals.js` | Who the chamber points people at, by situation |
 | `data/forms.js` | The join form and the event submission form |
 | `api/_policy/content.js` | **Policy Center entries.** Members only, so it lives here, not in the site. |
-| `api/_policy/membership.js` | The Policy Center's own membership content |
 
 Everything else builds itself from those five files.
 
@@ -135,7 +134,9 @@ Without it the endpoint refuses everyone, which is the safe way for it to fail.
 
 The page also carries `noindex` and is excluded from the sitemap and disallowed in `robots.txt`.
 
-**One thing to resolve.** Membership content now exists twice: `data/membership.js` drives the public membership page, and `api/_policy/membership.js` drives the Policy Center's own membership section. They will drift. Either point the Policy Center's membership link at `/membership/` and delete its copy, or accept that two files need editing together.
+**Membership is not in here.** It lives on the public site at `/membership/` and nowhere else, so there is one file to edit and nothing to drift. The Policy Center's own membership section, its two-door landing page, and its top navigation rail were removed, and `#/membership` now redirects to `/membership/` so old links and bookmarks still land somewhere sensible. The Policy Center opens straight onto its section cards.
+
+**Its stylesheet is scoped, automatically.** `policy.css` was written for a standalone site: it styles `body`, `html`, and eleven class names the chamber site also uses, including `wrap`, `foot`, `hero` and `brand`. Dropped on the page as-is it would restyle the chamber header and footer. `tools/scope-policy-css.mjs` rewrites every rule under `#policyapp` at build time, including pinning its `:root` variables to that container. Edit `policy/policy.css` normally and the scoping happens on build.
 
 ---
 
