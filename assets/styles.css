@@ -660,3 +660,31 @@ table.cal a.ev:hover{ background:var(--tint); color:#fff; }
 }
 .pagehead[hidden]{ display:none; }
 #policyapp .hero{ border-radius:var(--radius); }
+
+/* ---------- Add to calendar ---------------------------------------------- */
+
+.event .where{ font-size:.9rem; color:var(--navy-soft); margin:-6px 0 10px; }
+
+.addcal{
+  display:flex; flex-wrap:wrap; align-items:center; gap:6px 14px;
+  margin-top:16px; padding-top:14px; border-top:1px solid var(--rule-soft);
+  font-size:.9rem;
+}
+.addcal-label{ color:var(--navy-soft); }
+.addcal a{ color:var(--tint-ink); font-weight:600; }
+
+.subscribe{
+  display:flex; flex-wrap:wrap; gap:18px 26px; align-items:center;
+  justify-content:space-between;
+  border:1px solid var(--tint); border-left:6px solid var(--tint);
+  background:var(--tint-wash); border-radius:var(--radius);
+  padding:22px 26px; margin:0 0 26px;
+}
+.subscribe h3{ margin:0 0 5px; }
+.subscribe p{ margin:0; font-size:.95rem; color:var(--navy-mid); max-width:56ch; }
+.subscribe .btnrow{ margin:0; flex:0 0 auto; }
+
+code{
+  font-size:.9em; background:var(--paper-warm);
+  border:1px solid var(--rule); border-radius:5px; padding:1px 5px;
+}

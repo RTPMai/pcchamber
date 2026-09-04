@@ -18,6 +18,7 @@ import path from 'node:path';
 import { SITE, DOORS } from './data/site.js';
 import { CATEGORIES, TIERS, MEMBERS } from './data/members.js';
 import { RECURRING, CALENDAR } from './data/events.js';
+import { eventIcs, feedIcs, googleUrl, outlookUrl } from './tools/calendar-files.mjs';
 import { MEMBERSHIP, TIER_LIST, WHY, JOIN_FAQ } from './data/membership.js';
 import { ABOUT, FAQ, RESOURCE_GROUPS } from './data/pages.js';
 import { INVOLVED, PRIVACY } from './data/involved.js';
@@ -74,6 +75,16 @@ const REFERRAL_BY_MEMBER = (() => {
 const logoPlate = (m, cls = 'logo') => m.logo
   ? `<span class="${cls}"><img src="${esc(m.logo)}" alt="${esc(m.name)} logo" loading="lazy"></span>`
   : `<span class="${cls}"><span class="initial" aria-hidden="true">${esc(m.name.trim()[0] || '?')}</span></span>`;
+
+/* 11:30 and 13:00 become "11:30 am to 1:00 pm". One source of truth for
+   the time, so the display and the calendar file cannot disagree. */
+function clock(hhmm) {
+  const [h, m] = hhmm.split(':').map(Number);
+  const suffix = h < 12 ? 'am' : 'pm';
+  const hour = h % 12 === 0 ? 12 : h % 12;
+  return `${hour}:${String(m).padStart(2, '0')} ${suffix}`;
+}
+const timeRange = e => (e.start && e.end) ? `${clock(e.start)} to ${clock(e.end)}` : (e.time || '');
 
 const catLabel = id => (CATEGORIES.find(c => c.id === id) || {}).label || 'Member';
 
@@ -515,19 +526,37 @@ function eventsPage() {
     ...(e.rsvp ? { url: e.rsvp.href } : {})
   }));
 
-  const one = e => `<article class="event" data-season="${e.season || 'sun'}">
-  ${e.date ? `<div class="date">${esc(longDate(e.date))}</div>` : `<div class="date">${esc(e.when)}</div>`}
+  const one = e => {
+    const venue = e.venue && MEMBERS.some(m => m.slug === e.venue)
+      ? `<a href="/directory/${e.venue}/">${esc(e.where)}</a>`
+      : esc(e.where);
+
+    /* Three, because people use different calendars and none of them takes
+       the same format. The .ics covers Outlook desktop and Apple. */
+    const add = e.id ? `<div class="addcal">
+      <span class="addcal-label">Add to your calendar</span>
+      <a href="${esc(googleUrl(e, SITE))}" rel="noopener">Google</a>
+      <a href="${esc(outlookUrl(e, SITE))}" rel="noopener">Outlook</a>
+      <a href="/events/ics/${e.id}.ics" download>Download (.ics)</a>
+    </div>` : '';
+
+    const when = timeRange(e);
+    return `<article class="event" data-season="${e.season || 'sun'}">
+  <div class="date">${e.date ? esc(longDate(e.date)) : esc(e.when)}</div>
   <h3>${esc(e.title)}</h3>
-  <div class="meta">${esc(e.where)}${e.time ? ` &middot; ${esc(e.time)}` : ''}${e.audience === 'members' ? ' &middot; Members only' : ''}</div>
+  <div class="meta">${venue}${when ? ` &middot; ${esc(when)}` : ''}${e.audience === 'members' ? ' &middot; Members only' : ''}</div>
+  ${e.address ? `<p class="where">${esc(e.address)}</p>` : ''}
   <p>${esc(e.summary)}</p>
   ${e.detail ? `<p>${esc(e.detail)}</p>` : ''}
   ${e.cost ? `<p class="cost">${esc(e.cost)}</p>` : ''}
   ${e.rsvp ? `<div class="btnrow"><a class="btn" href="${esc(e.rsvp.href)}">${esc(e.rsvp.label)}</a></div>` : ''}
+  ${add}
 </article>`;
+  };
 
-  /* The calendar is drawn by JavaScript from this, but the list below is
-     real HTML. Turn JavaScript off and you lose the grid, not the events. */
-  const calData = upcoming.map(e => ({
+  /* The calendar grid is drawn by JavaScript from this. The list below it
+     is real HTML, so no-JS visitors and search engines still get it all. */
+  const calData = upcoming.filter(e => e.date).map(e => ({
     date: e.date, title: e.title, where: e.where,
     season: e.season || 'sun',
     href: e.rsvp ? e.rsvp.href : '/events/'
@@ -560,6 +589,16 @@ function eventsPage() {
     </tr></thead><tbody></tbody></table>
     <p class="help" style="margin-top:12px;color:var(--navy-soft);font-size:.9rem">Tap a day to see what is on. Recurring items like the luncheon appear on their dated instances.</p>
   </div>
+  <div class="subscribe" data-season="winter">
+    <div>
+      <h3>Put the whole calendar in yours</h3>
+      <p>Subscribe once and every chamber event appears automatically, including ones added later. Better than adding them one at a time.</p>
+    </div>
+    <div class="btnrow">
+      <a class="btn" href="/events/chamber.ics">Subscribe</a>
+      <a class="btn ghost" href="#howsubscribe">How</a>
+    </div>
+  </div>
   <div id="listview">
   <h2>Coming up</h2>
   ${upcoming.length ? upcoming.map(one).join('') : `<div class="empty"><p>Nothing on the calendar right now. The luncheon still runs monthly, so check back or email <a href="mailto:${SITE.email}">${SITE.email}</a>.</p></div>`}
@@ -571,6 +610,25 @@ function eventsPage() {
     <p class="lede">These do not need announcing every time.</p>
     ${RECURRING.map(one).join('')}
   </div>
+</div>
+<div class="band warm">
+  <div class="wrap"><div class="col" id="howsubscribe">
+    <h2>Subscribing, per calendar</h2>
+    <p>The subscribe link gives you a live feed rather than a one-off copy. Add it once and it keeps itself current.</p>
+    <details class="faq">
+      <summary>Google Calendar</summary>
+      <div class="ans"><p>On a computer, open Google Calendar, click the plus next to Other calendars, choose From URL, and paste the subscribe address. Phones cannot add a subscription, so do this bit on a computer and it appears on your phone afterwards.</p></div>
+    </details>
+    <details class="faq">
+      <summary>Outlook</summary>
+      <div class="ans"><p>In Outlook on the web, go to Calendar, then Add calendar, then Subscribe from web, and paste the address. In desktop Outlook it is Add Calendar, then From Internet.</p></div>
+    </details>
+    <details class="faq">
+      <summary>Apple Calendar, iPhone and Mac</summary>
+      <div class="ans"><p>On a Mac, File, then New Calendar Subscription, and paste the address. On an iPhone, Settings, Calendar, Accounts, Add Account, Other, Add Subscribed Calendar.</p></div>
+    </details>
+    <p style="margin-top:18px;font-size:.94rem;color:var(--navy-soft)">The address is <code>${SITE.url}/events/chamber.ics</code>. Or use the Google, Outlook and download links on any single event to add just that one.</p>
+  </div></div>
 </div>
 <div class="wrap band">
   <h2>Have something to add?</h2>
@@ -1363,6 +1421,14 @@ async function main() {
   await writeFile(path.join(OUT, '404.html'), notFoundPage());
 
   for (const m of MEMBERS) await put(path.join('directory', m.slug), memberPage(m));
+
+  /* One .ics per upcoming event, plus a subscription feed of all of them. */
+  const dated = CALENDAR.filter(e => e.id && e.date >= todayISO());
+  await mkdir(path.join(OUT, 'events', 'ics'), { recursive: true });
+  for (const e of dated) {
+    await writeFile(path.join(OUT, 'events', 'ics', `${e.id}.ics`), eventIcs(e, SITE));
+  }
+  await writeFile(path.join(OUT, 'events', 'chamber.ics'), feedIcs(dated, SITE));
 
   await put('policy-center', policyCenterPage());
   await mkdir(path.join(OUT, 'policy-center'), { recursive: true });

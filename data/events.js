@@ -1,24 +1,37 @@
 /* ==========================================================================
    EVENTS
 
-   Two lists. RECURRING is the stuff that happens on a rhythm and does not
-   need re-entering. CALENDAR is dated items, newest first.
+   Two lists. RECURRING is what happens on a rhythm and does not need
+   re-entering. CALENDAR is dated items.
 
-   An event drops off the site automatically the day after its date.
-   Nothing to remember, nothing to clean up.
+   An event disappears from the site the day after it happens. Nothing to
+   remember, nothing to tidy up.
+
+   TIMES ARE LOCAL WALL-CLOCK, ALWAYS
+   Write the time you would say out loud. 11:30 means half past eleven in
+   Polk City, whatever the clocks are doing. The build converts to UTC for
+   the calendar files using a proper America/Chicago timezone block, so
+   an event in November lands correctly even though the clocks change on
+   the first of that month. Never write a UTC time here.
 
    Fields:
-     date      YYYY-MM-DD. Required on CALENDAR items.
-     time      free text, e.g. '11:30 am to 1:00 pm'
+     id        stable, used for the .ics filename. Do not reuse one.
+     date      YYYY-MM-DD
+     start     'HH:MM' 24-hour, local
+     end       'HH:MM' 24-hour, local
      title     what it is called
      where     venue name
+     address   full postal address, used by the calendar files and maps
+     venue     optional slug from members.js, if the venue is a member
      summary   one plain sentence
      detail    optional paragraph
-     cost      free text, e.g. '$20 for members, $30 for guests'
+     cost      free text
      rsvp      { label, href } or leave out
      audience  'members' | 'public'
-     season    color: sun | autumn | spring | winter
+     season    sun | autumn | spring | winter
    ========================================================================== */
+
+export const TIMEZONE = 'America/Chicago';
 
 export const RECURRING = [
   {
@@ -33,72 +46,99 @@ export const RECURRING = [
     season: 'sun'
   },
   {
+    title: 'Coffee and Connections',
+    when: 'Fourth Thursday of the month, 7:45 am',
+    where: 'Rising Sun Cafe',
+    summary: 'An hour of networking before the working day starts. No program, no speaker.',
+    cost: 'Free, buy your own coffee',
+    audience: 'public',
+    season: 'winter'
+  },
+  {
     title: 'Ribbon cuttings',
     when: 'Scheduled as needed',
     where: 'Your place of business',
     summary: 'A photo, a crowd, and a post that reaches several thousand people locally.',
     detail: 'Open to any chamber member opening, moving, expanding, or hitting a milestone. The chamber brings the oversized scissors and handles the promotion.',
-    cost: 'Free to members',
+    cost: 'Included with membership',
     rsvp: { label: 'Ask for a ribbon cutting', href: 'mailto:admin@polkcitychamber.com?subject=Ribbon%20cutting%20request' },
     audience: 'members',
     season: 'spring'
-  },
-  {
-    title: 'Meaningful Connections',
-    when: 'Quarterly',
-    where: 'Rotating member locations',
-    summary: 'Small-group networking built so you actually talk to people instead of collecting cards.',
-    detail: 'Hosted at a different member business each time, which doubles as an introduction to that business.',
-    cost: 'Free to members',
-    audience: 'members',
-    season: 'winter'
   }
 ];
 
 export const CALENDAR = [
   {
-    date: '2026-09-09',
-    time: '11:30 am to 1:00 pm',
-    title: 'September luncheon',
+    id: 'luncheon-2026-09-09',
+    date: '2026-09-09', start: '11:30', end: '13:00',
+    title: 'Polk City Area Chamber Luncheon',
     where: 'Tournament Club of Iowa',
-    summary: 'Program to be announced. Register through the club by the Friday before.',
+    address: '1000 Tradition Dr, Polk City, IA 50226',
+    venue: 'tournament-club-of-iowa',
+    summary: 'The monthly luncheon. Register through the club ahead of the date and pick your meal.',
     cost: '$20',
     rsvp: { label: 'Register', href: 'https://tcofiowa.com/product/2026-chamber-of-commerce-meetings/' },
     audience: 'public',
     season: 'sun'
   },
   {
-    date: '2026-09-24',
-    time: '8:00 am shotgun start',
-    title: 'Annual chamber golf tournament',
-    where: 'Tournament Club of Iowa',
-    summary: 'Four-person best shot, the chamber\'s largest fundraiser of the year.',
-    detail: 'Hole sponsorships and team spots both sell out. Sponsorship is the cheapest broad exposure the chamber sells all year.',
-    cost: 'Team and sponsor rates vary',
-    rsvp: { label: 'Ask about a team or sponsorship', href: 'mailto:admin@polkcitychamber.com?subject=Golf%20tournament' },
+    id: 'coffee-2026-09-24',
+    date: '2026-09-24', start: '07:45', end: '09:00',
+    title: 'Coffee and Connections',
+    where: 'Rising Sun Cafe',
+    address: '107 N 2nd St, Polk City, IA 50226',
+    summary: 'Early networking before the day starts. Turn up, buy a coffee, talk to people.',
+    cost: 'Free',
     audience: 'public',
-    season: 'spring'
+    season: 'winter'
   },
   {
-    date: '2026-10-14',
-    time: '11:30 am to 1:00 pm',
-    title: 'October luncheon',
+    id: 'luncheon-2026-10-14',
+    date: '2026-10-14', start: '11:30', end: '13:00',
+    title: 'Polk City Area Chamber Luncheon',
     where: 'Tournament Club of Iowa',
-    summary: 'Program to be announced.',
+    address: '1000 Tradition Dr, Polk City, IA 50226',
+    venue: 'tournament-club-of-iowa',
+    summary: 'The monthly luncheon. Register through the club ahead of the date and pick your meal.',
     cost: '$20',
     rsvp: { label: 'Register', href: 'https://tcofiowa.com/product/2026-chamber-of-commerce-meetings/' },
     audience: 'public',
     season: 'sun'
   },
   {
-    date: '2026-11-11',
-    time: '11:30 am to 1:00 pm',
-    title: 'November luncheon',
-    where: 'Tournament Club of Iowa',
-    summary: 'First luncheon after the election. Program to be announced.',
-    cost: '$20',
-    rsvp: { label: 'Register', href: 'https://tcofiowa.com/product/2026-chamber-of-commerce-meetings/' },
+    id: 'trunk-or-treat-2026-10-25',
+    date: '2026-10-25', start: '16:00', end: '18:00',
+    title: 'Chamber Trunk or Treat',
+    where: 'Polk City Town Square',
+    address: '107 S 3rd St, Polk City, IA 50226',
+    summary: 'A community event for Polk City area residents, with local businesses handing out candy.',
+    detail: 'Attendees can vote for their favourite decorated trunk at the chamber table. A sign-up link for businesses will go out by email.',
+    cost: 'Free',
     audience: 'public',
-    season: 'sun'
+    season: 'autumn'
+  },
+  {
+    id: 'coffee-2026-10-29',
+    date: '2026-10-29', start: '07:45', end: '09:00',
+    title: 'Coffee and Connections',
+    where: 'Rising Sun Cafe',
+    address: '107 N 2nd St, Polk City, IA 50226',
+    summary: 'Early networking before the day starts. Turn up, buy a coffee, talk to people.',
+    cost: 'Free',
+    audience: 'public',
+    season: 'winter'
+  },
+  {
+    id: 'mixer-2026-10-29',
+    date: '2026-10-29', start: '17:30', end: '19:30',
+    title: 'Chamber Connections: Networking and Membership Mixer',
+    where: 'Arcadia',
+    address: '1010 Tyler St #4, Polk City, IA 50226',
+    venue: 'arcadia',
+    summary: 'An evening for current members, past members, and any business thinking about joining.',
+    detail: 'Hors d\u2019oeuvres, networking, and a chance to hear how the chamber can help your business. Come whether or not you are a member.',
+    cost: 'Free',
+    audience: 'public',
+    season: 'autumn'
   }
 ];

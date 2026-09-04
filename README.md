@@ -27,7 +27,7 @@ This is the front half of the platform. Dues collection, member logins, and even
 | File | What is in it |
 | --- | --- |
 | `data/members.js` | The member directory. 61 real members, imported 4 September. |
-| `data/events.js` | The luncheon, the golf tournament, the calendar |
+| `data/events.js` | The event calendar. Times are local wall-clock, always. |
 | `data/membership.js` | Tiers, prices, benefits. **Placeholder pricing.** |
 | `data/pages.js` | About text, FAQ, the resources links |
 | `data/site.js` | Chamber contact details, menu, the demo banner |
@@ -47,6 +47,8 @@ Everything else builds itself from those five files.
 | `vercel.json` | Build settings and the redirects from the old site | Only to add a redirect |
 | `tools/import-directory.mjs` | Turns a pasted directory into member entries | No |
 | `tools/make-social-card.py` | Rebuilds the share card and favicons | Only if the wording changes |
+| `tools/calendar-files.mjs` | Builds the .ics files and add-to-calendar links | No |
+| `tools/needs-a-sentence.mjs` | Lists what the directory is still missing | No |
 
 ---
 
@@ -121,6 +123,8 @@ Node 18 or newer. No dependencies to install.
 
 **Fill in the real referrals.** `data/referrals.js` drives the Who to call block and the referral badges. Two categories are honestly marked as gaps: no accountant or CPA, and no attorney. Leave them marked until somebody joins. A referral to nobody is worse than an admitted gap.
 
+**Confirm the Trunk or Treat sign-up link** when it goes out to business emails, and add it as the event's `rsvp`.
+
 **The job board is empty on purpose.** The demo postings were removed when the real directory went in: a made-up vacancy attached to a real named employer is not a placeholder, it is a false statement about somebody else's business. Same reason the sample member spotlight was deleted. Add real ones as they come.
 
 **Point the Policy Center link at the live address.** `SITE.policyCenterUrl`.
@@ -148,6 +152,24 @@ The page also carries `noindex` and is excluded from the sitemap and disallowed 
 **Membership is not in here.** It lives on the public site at `/membership/` and nowhere else, so there is one file to edit and nothing to drift. The Policy Center's own membership section, its two-door landing page, and its top navigation rail were removed, and `#/membership` now redirects to `/membership/` so old links and bookmarks still land somewhere sensible. The Policy Center opens straight onto its section cards.
 
 **Its stylesheet is scoped, automatically.** `policy.css` was written for a standalone site: it styles `body`, `html`, and eleven class names the chamber site also uses, including `wrap`, `foot`, `hero` and `brand`. Dropped on the page as-is it would restyle the chamber header and footer. `tools/scope-policy-css.mjs` rewrites every rule under `#policyapp` at build time, including pinning its `:root` variables to that container. Edit `policy/policy.css` normally and the scoping happens on build.
+
+---
+
+## Getting events into people's calendars
+
+Every event carries four routes into a personal calendar:
+
+- **Google** and **Outlook** links open a pre-filled event in the web calendar
+- **Download (.ics)** covers Outlook desktop, Apple Calendar, and everything else
+- **Subscribe** at `/events/chamber.ics` is a live feed of the whole calendar
+
+The subscription is the one worth pushing. Add it once and future events appear on their own, including ones added months later. Adding events one at a time means coming back to the site every month, which nobody does. The events page has per-calendar instructions under "Subscribing, per calendar".
+
+**Write times as local wall-clock and nothing else.** `start: '11:30'` means half past eleven in Polk City. Never write a UTC time in `data/events.js`.
+
+The reason matters: Iowa is UTC-5 in October and UTC-6 in November. Converting with a fixed offset silently puts every event after the first Sunday in November an hour out. The build emits a real `America/Chicago` VTIMEZONE block and uses `TZID`, so the calendar application does the conversion and gets it right across the change. The Google and Outlook links convert to UTC using the timezone name rather than an offset, for the same reason.
+
+Files are only generated for events still to come, so the feed does not grow forever.
 
 ---
 
