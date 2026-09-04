@@ -230,6 +230,28 @@ export default async function handler(req, res) {
       return;
     }
 
+    /* Checked before anything is sent to GitHub. Without this, a value
+       pasted into the wrong box comes back as a permissions error, which
+       sends you looking at the token instead of the typo. */
+    if (!/^[\w.-]+\/[\w.-]+$/.test(repo)) {
+      res.status(503).json({
+        error: 'bad_repo',
+        message: `GITHUB_REPO is set to "${repo}", which is not a repository name. `
+          + `It needs the form owner/repository, for example polkcitychamber/website. `
+          + `That is the two parts after github.com in the address of your repository. `
+          + `If what you pasted was meant to be a token or a passcode, change it, because it is now sitting in a settings field it does not belong in.`
+      });
+      return;
+    }
+
+    if (/^gh[pousr]_|^github_pat_/.test(repo)) {
+      res.status(503).json({
+        error: 'bad_repo',
+        message: `GITHUB_REPO contains what looks like a GitHub token. Move it to GITHUB_TOKEN, put owner/repository in GITHUB_REPO, and revoke that token on GitHub since it has been in the wrong place.`
+      });
+      return;
+    }
+
     const good = tokenFor(pass);
     const body = req.method === 'POST' ? await readBody(req) : {};
     const action = body.action || (req.method === 'GET' ? 'load' : null);
