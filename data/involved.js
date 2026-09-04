@@ -43,14 +43,27 @@ export const INVOLVED = {
     }
   ],
 
-  /* Placeholder. Replace with the real board before launch. */
+  /* The board, as shown on the chamber website.
+
+     Where a director's business is a chamber member, "member" is their
+     slug from members.js and their name links to their directory page.
+     Two are listed as community members rather than representing a
+     business, which is how the chamber describes them.
+
+     The Administrative Director seat is open. Leaving it visible rather
+     than hiding it is deliberate: it is a real vacancy, it explains why
+     things move at the pace they do, and somebody reading this page is
+     exactly who might fill it. */
   board: [
-    { name: 'Board president', role: 'President', business: 'Placeholder' },
-    { name: 'Board vice president', role: 'Vice president', business: 'Placeholder' },
-    { name: 'Board treasurer', role: 'Treasurer', business: 'Placeholder' },
-    { name: 'Board secretary', role: 'Secretary', business: 'Placeholder' },
-    { name: 'Director', role: 'Director', business: 'Placeholder' },
-    { name: 'Administrative Director', role: 'Staff', business: 'Position open' }
+    { name: 'Shawn Comer',      role: 'President',        business: "Papa's Pizzeria", member: 'papas-pizzeria' },
+    { name: 'Susie Sheldahl',   role: 'Vice President',   business: 'Realty One Group Impact', member: 'susie-sheldahl-realty-one-group-impact' },
+    { name: 'Jake Lundgren',    role: 'Treasurer',        business: 'Knapp Properties', member: 'knapp-properties' },
+    { name: 'Brandon Converse', role: 'Secretary',        business: 'Luana Savings Bank', member: 'luana-savings-bank' },
+    { name: 'Laramie Sandquist', role: 'Director',        business: 'Community member' },
+    { name: 'Brian Nelson',     role: 'Director',         business: "Nelson's Automotive" },
+    { name: 'Ryan Toney',       role: 'Director',         business: 'P&M Apparel', member: 'p-and-m-apparel' },
+    { name: 'Mary Treanor',     role: 'Fiscal Agent',     business: 'Community member' },
+    { name: 'Administrative Director', role: 'Staff',     business: 'Position open', vacant: true }
   ]
 };
 

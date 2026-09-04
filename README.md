@@ -31,7 +31,7 @@ This is the front half of the platform. Dues collection, member logins, and even
 | `data/membership.js` | Tiers, prices, benefits. **Placeholder pricing.** |
 | `data/pages.js` | About text, FAQ, and the resources sections |
 | `data/site.js` | Chamber contact details, menu, the demo banner |
-| `data/involved.js` | Get Involved page and the privacy policy. **Board list is placeholder.** |
+| `data/involved.js` | Get Involved page, the board, and the privacy policy |
 | `data/news.js` | Chamber news and member spotlights |
 | `data/jobs.js` | The job board. Postings drop off on their own. |
 | `data/referrals.js` | Who the chamber points people at, by situation |
@@ -114,7 +114,7 @@ Node 18 or newer. No dependencies to install.
 
 **Turn off the demo banner.** One line in `data/site.js`.
 
-**Replace the board list.** `data/involved.js` has placeholder names and roles on the Get Involved page.
+**Add board portraits.** The board is real; the photos are not in yet. Save them as `/assets/board/firstname-lastname.jpg`, square, and add a `photo` field. Until then each person shows their initial, which reads as intentional rather than broken.
 
 **Set MEMBER_PASSCODE in Vercel** or the Policy Center will refuse everyone.
 
@@ -122,7 +122,11 @@ Node 18 or newer. No dependencies to install.
 
 **Vote on the membership structure.** `data/membership.js` has `draft: true`, which puts a red banner on the page. Turn it off after the board votes, not before.
 
-**Fill in the real referrals.** `data/referrals.js` drives the Who to call block and the referral badges. Two categories are honestly marked as gaps: no accountant or CPA, and no attorney. Leave them marked until somebody joins. A referral to nobody is worse than an admitted gap.
+**Get the board to agree the referral list.** `data/referrals.js` drives `/resources/who-to-call/`. The fourteen members named in it were picked off their category during the import, not chosen by anyone at the chamber, and referral exclusivity is a paid benefit. Treat the current list as a first draft.
+
+There is deliberately no referral badge in the directory. It made a claim on a member's behalf that nobody had agreed to, and it outranked the tier badge, so a paying Premier member could show nothing while a Basic member showed a badge. The referral list lives only on the Who to call page, where the surrounding text explains what being named means.
+
+Two categories are marked as gaps: no accountant or CPA, and no attorney. Leave them marked until somebody joins. A referral to nobody is worse than an admitted gap.
 
 **Confirm the Trunk or Treat sign-up link** when it goes out to business emails, and add it as the event's `rsvp`.
 

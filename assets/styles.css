@@ -719,3 +719,30 @@ a:hover .ext::after{ opacity:1; }
   position:absolute; width:1px; height:1px; overflow:hidden;
   clip:rect(0 0 0 0); white-space:nowrap;
 }
+
+/* ---------- Board -------------------------------------------------------- */
+
+.people{
+  display:grid; grid-template-columns:repeat(auto-fill,minmax(268px,1fr));
+  gap:14px; margin-top:22px;
+}
+.person{
+  display:flex; gap:14px; align-items:center;
+  border:1px solid var(--rule); border-radius:var(--radius);
+  padding:16px 18px; background:var(--paper);
+}
+/* Portraits drop in later. Until then an initial reads as intentional
+   rather than as a broken image. */
+.person .face{
+  flex:0 0 auto; width:48px; height:48px; border-radius:50%;
+  background:var(--tint-wash); border:1px solid var(--tint);
+  display:flex; align-items:center; justify-content:center;
+  font-family:'Fraunces',Georgia,serif; font-size:1.25rem; font-weight:600;
+  color:var(--tint-ink);
+}
+.person .who{ display:block; min-width:0; }
+.person strong{ display:block; font-size:1rem; }
+.person .role{ display:block; font-size:.87rem; color:var(--tint-ink); font-weight:600; }
+.person .biz{ display:block; font-size:.9rem; color:var(--navy-mid); }
+.person.vacant{ border-style:dashed; background:var(--paper-warm); }
+.person.vacant .face{ background:var(--paper); color:var(--navy-soft); border-color:var(--rule); }

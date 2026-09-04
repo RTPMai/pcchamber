@@ -57,26 +57,6 @@ function longDate(iso) {
 
 const todayISO = () => new Date().toISOString().slice(0, 10);
 
-/* Reverse index: member slug -> the needs they are the named referral for.
-   Built once so the directory does not scan the referral list per member. */
-const REFERRAL_BY_MEMBER = (() => {
-  const map = new Map();
-  for (const r of REFERRALS) {
-    for (const slug of r.members) {
-      if (!map.has(slug)) map.set(slug, []);
-      map.get(slug).push(r);
-    }
-  }
-  return map;
-})();
-
-/* Members can supply a logo. Until they do, the plate shows their initial
-   in their category's season colour, which looks deliberate rather than
-   like a missing image. */
-const logoPlate = (m, cls = 'logo') => m.logo
-  ? `<span class="${cls}"><img src="${esc(m.logo)}" alt="${esc(m.name)} logo" loading="lazy"></span>`
-  : `<span class="${cls}"><span class="initial" aria-hidden="true">${esc(m.name.trim()[0] || '?')}</span></span>`;
-
 /* 11:30 and 13:00 become "11:30 am to 1:00 pm". One source of truth for
    the time, so the display and the calendar file cannot disagree. */
 function clock(hhmm) {
@@ -86,6 +66,13 @@ function clock(hhmm) {
   return `${hour}:${String(m).padStart(2, '0')} ${suffix}`;
 }
 const timeRange = e => (e.start && e.end) ? `${clock(e.start)} to ${clock(e.end)}` : (e.time || '');
+
+/* Members can supply a logo. Until they do, the plate shows their initial
+   in their category's season colour, which looks deliberate rather than
+   like a missing image. */
+const logoPlate = (m, cls = 'logo') => m.logo
+  ? `<span class="${cls}"><img src="${esc(m.logo)}" alt="${esc(m.name)} logo" loading="lazy"></span>`
+  : `<span class="${cls}"><span class="initial" aria-hidden="true">${esc(m.name.trim()[0] || '?')}</span></span>`;
 
 const catLabel = id => (CATEGORIES.find(c => c.id === id) || {}).label || 'Member';
 
@@ -326,11 +313,14 @@ function directoryIndex() {
 
   const rows = sorted.map(m => {
     const season = catSeason(m.category);
-    const isReferral = REFERRAL_BY_MEMBER.has(m.slug);
-    const badge = isReferral
-      ? '<span class="badge">Chamber referral</span>'
-      : m.tier !== 'basic'
-        ? `<span class="badge">${esc(TIERS[m.tier].label)}</span>` : '';
+    /* Tier only. The referral list lives on /resources/who-to-call/, where
+       the surrounding page explains what being named actually means. A
+       badge in the directory made a claim on the member's behalf that the
+       board has not agreed to, and it outranked the tier badge, so a
+       paying Premier member could show nothing while a Basic member
+       showed a badge. */
+    const badge = m.tier !== 'basic'
+      ? `<span class="badge">${esc(TIERS[m.tier].label)}</span>` : '';
     const hay = [m.name, m.summary, m.about, catLabel(m.category), ...(m.serves || [])]
       .join(' ').toLowerCase();
     return `<a class="listing" href="/directory/${m.slug}/" data-season="${season}" data-cat="${m.category}" data-find="${esc(hay)}">
@@ -451,11 +441,6 @@ function memberPage(m) {
   const siblings = MEMBERS
     .filter(o => o.category === m.category && o.slug !== m.slug)
     .slice(0, 4);
-  const refs = REFERRAL_BY_MEMBER.get(m.slug) || [];
-  const referralNote = refs.length ? `<div class="note" style="margin:22px 0 0">
-  <p><strong>Chamber referral.</strong> When a member asks the chamber ${esc(refs.map(r => r.need.replace(/^I need /, 'who to call to ').replace(/^My staff need /, 'about ')).join(' or '))}, this is who they are pointed at.</p>
-</div>` : '';
-
   const related = siblings.length ? `<div class="related">
   <h4>Others in ${esc(catLabel(m.category).toLowerCase())}</h4>
   <ul>${siblings.map(o => `<li><a href="/directory/${o.slug}/">${esc(o.name)}</a> <span>${esc(o.summary)}</span></li>`).join('')}</ul>
@@ -484,7 +469,6 @@ function memberPage(m) {
         : `<p class="lede">A ${esc(catLabel(m.category).toLowerCase().replace(/ and .*$/, ''))} business and a member of the Polk City Area Chamber of Commerce. Contact details are on the right.</p>
            <p style="font-size:.93rem;color:var(--navy-soft)">Are you this member? Send the chamber a sentence about what you do and it goes here. <a href="mailto:${SITE.email}?subject=${encodeURIComponent('Listing for ' + m.name)}">Email your listing</a>.</p>`}
       ${tags}
-      ${referralNote}
       ${related}
       <a class="back" href="/directory/">Back to the directory</a>
     </div>
@@ -970,7 +954,19 @@ function involvedPage() {
   <div class="btnrow"><a class="btn" href="${esc(w.action.href.replace('{EMAIL}', SITE.email))}">${esc(w.action.label)}</a></div>
 </article>`).join('');
 
-  const board = INVOLVED.board.map(b => `<li><strong>${esc(b.role)}</strong> <span>${esc(b.name)}${b.business ? `, ${esc(b.business)}` : ''}</span></li>`).join('');
+  const board = INVOLVED.board.map(b => {
+    const who = b.member && MEMBERS.some(m => m.slug === b.member)
+      ? `<a href="/directory/${b.member}/">${esc(b.business)}</a>`
+      : esc(b.business);
+    return `<div class="person${b.vacant ? ' vacant' : ''}">
+  <span class="face" aria-hidden="true">${esc(b.vacant ? '?' : b.name.trim()[0])}</span>
+  <span class="who">
+    <strong>${esc(b.name)}</strong>
+    <span class="role">${esc(b.role)}</span>
+    <span class="biz">${who}</span>
+  </span>
+</div>`;
+  }).join('');
 
   const body = `
 <div class="pagehead" data-season="sun">
@@ -988,9 +984,11 @@ function involvedPage() {
 <div class="band warm">
   <div class="wrap"><div class="col">
     <h2>Who is on the board</h2>
-    <div class="related" style="margin-top:0;border-top:none;padding-top:0">
-      <ul>${board}</ul>
-    </div>
+    <p>Directors are elected by the membership and serve as volunteers. They set the budget, approve programmes, and decide what the chamber says on behalf of local business.</p>
+  </div>
+  <div class="people">${board}</div>
+  <div class="col">
+    <p style="font-size:.94rem;color:var(--navy-soft);margin-top:22px">Seats come open at the annual meeting. If you want one, say so before then rather than after.</p>
   </div></div>
 </div>`;
 
