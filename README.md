@@ -26,7 +26,7 @@ This is the front half of the platform. Dues collection, member logins, and even
 
 | File | What is in it |
 | --- | --- |
-| `data/members.js` | The member directory. **All sample data. Replace it.** |
+| `data/members.js` | The member directory. 61 real members, imported 4 September. |
 | `data/events.js` | The luncheon, the golf tournament, the calendar |
 | `data/membership.js` | Tiers, prices, benefits. **Placeholder pricing.** |
 | `data/pages.js` | About text, FAQ, the resources links |
@@ -50,16 +50,23 @@ Everything else builds itself from those five files.
 
 ---
 
-## Loading the real directory
+## Reloading the directory
 
-Do not type sixty-seven members by hand.
+The 61 members are already in. To reload from a fresh export:
 
-1. Paste the directory, in whatever shape it comes out, into `tools/paste.txt`
-2. Run `node tools/import-directory.mjs`
-3. It writes `data/members.generated.js` and prints a list of anything it could not work out
-4. Set `category` and `tier` on each entry, then rename the file over `data/members.js`
+1. Save the CSV as `tools/members.csv`
+2. Run `node tools/import-csv.mjs`
+3. Rename `data/members.generated.js` over `data/members.js`
 
-It works out names, phones, emails, websites, addresses and slugs. It will not guess a category or a tier, because getting those wrong is worse than leaving them blank.
+The importer maps the 29 source categories onto the 13 the directory uses, builds slugs, tidies phone numbers and websites, and prints everything it changed.
+
+It applies a ZIP correction only where the `data_issues` column names both the wrong value and the right one. Six were corrected on import. Knapp Properties kept its 50266 because it is genuinely in West Des Moines, which is the point of only fixing what the data itself flags.
+
+For a paste rather than a CSV, `tools/import-directory.mjs` handles loose text.
+
+**It does not write descriptions, and neither should anything else.** These are real businesses with real names on real pages. A plausible sentence that turns out to be wrong is worse than no sentence. All 61 summaries are empty and the listing falls back to the category and town until somebody collects the real ones.
+
+Run `node tools/needs-a-sentence.mjs` for a working list, worst first.
 
 ---
 
@@ -94,7 +101,11 @@ Node 18 or newer. No dependencies to install.
 
 ## Before this stops being a demo
 
-**Replace the members.** Every listing is a placeholder. The real 67 need to be pasted into `data/members.js`. Category and tier drive sorting, colour, and the badge, so those two fields matter more than the prose.
+**Collect 61 sentences.** Every summary is empty. This is a phone round, not a writing job: ask each member for one line about what they do.
+
+**Assign tiers.** Every member is on the default, so tier sorting and the referral badge are doing nothing.
+
+**Check the slugs before launch.** Once a page is public and indexed, changing its slug breaks every link to it.
 
 **Put in the approved dues.** `data/membership.js` has invented numbers in it.
 
@@ -110,7 +121,7 @@ Node 18 or newer. No dependencies to install.
 
 **Fill in the real referrals.** `data/referrals.js` drives the Who to call block and the referral badges. Two categories are honestly marked as gaps: no accountant or CPA, and no attorney. Leave them marked until somebody joins. A referral to nobody is worse than an admitted gap.
 
-**Empty the job board and the news list, or fill them.** The three jobs and three posts in there are examples. A job board with fake postings is worse than an empty one.
+**The job board is empty on purpose.** The demo postings were removed when the real directory went in: a made-up vacancy attached to a real named employer is not a placeholder, it is a false statement about somebody else's business. Same reason the sample member spotlight was deleted. Add real ones as they come.
 
 **Point the Policy Center link at the live address.** `SITE.policyCenterUrl`.
 

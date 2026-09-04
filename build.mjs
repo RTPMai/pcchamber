@@ -299,6 +299,8 @@ ${strip}
 }
 
 function directoryIndex() {
+  /* Tier first, then alphabetical. Every member is currently 'basic', so
+     in practice this is alphabetical until tiers are assigned. */
   const sorted = [...MEMBERS].sort((a, b) => {
     const r = (TIERS[a.tier]?.rank ?? 9) - (TIERS[b.tier]?.rank ?? 9);
     return r !== 0 ? r : a.name.localeCompare(b.name);
@@ -323,8 +325,8 @@ function directoryIndex() {
   ${logoPlate(m)}
   <span class="body">
     <h3>${esc(m.name)}</h3>
-    <p>${esc(m.summary)}</p>
-    <span class="cat">${esc(catLabel(m.category))}</span>
+    ${m.summary ? `<p>${esc(m.summary)}</p><span class="cat">${esc(catLabel(m.category))}</span>`
+                : `<p>${esc(catLabel(m.category))}${m.city ? ', ' + esc(m.city) : ''}</p>`}
   </span>
   ${badge}
 </a>`;
@@ -459,13 +461,16 @@ function memberPage(m) {
     <p class="crumb"><a href="/directory/">Member directory</a> / ${esc(catLabel(m.category))}</p>
     ${logoPlate(m, 'logo')}
     <h1>${esc(m.name)}</h1>
-    <p>${esc(m.summary)}</p>
+    <p>${esc(m.summary || catLabel(m.category))}</p>
   </div>
 </div>
 <div class="wrap band" data-season="${season}">
   <div class="cols">
     <div>
-      <p>${esc(m.about || m.summary)}</p>
+      ${m.about || m.summary
+        ? `<p>${esc(m.about || m.summary)}</p>`
+        : `<p class="lede">A ${esc(catLabel(m.category).toLowerCase().replace(/ and .*$/, ''))} business and a member of the Polk City Area Chamber of Commerce. Contact details are on the right.</p>
+           <p style="font-size:.93rem;color:var(--navy-soft)">Are you this member? Send the chamber a sentence about what you do and it goes here. <a href="mailto:${SITE.email}?subject=${encodeURIComponent('Listing for ' + m.name)}">Email your listing</a>.</p>`}
       ${tags}
       ${referralNote}
       ${related}
@@ -483,7 +488,9 @@ function memberPage(m) {
 
   return page({
     title: m.name,
-    description: `${m.name}, a Polk City Area Chamber member. ${m.summary}`,
+    description: m.summary
+      ? `${m.name}, a Polk City Area Chamber member. ${m.summary}`
+      : `${m.name}. ${catLabel(m.category)} and a member of the Polk City Area Chamber of Commerce.`,
     canonical: `/directory/${m.slug}/`,
     season
   }, body);

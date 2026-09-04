@@ -33,19 +33,6 @@ export const POSTS = [
     ]
   },
   {
-    slug: 'member-spotlight-sample-hr-partners',
-    date: '2026-08-19',
-    kind: 'spotlight',
-    title: 'Member spotlight: Sample HR Partners',
-    summary: 'A one-person firm doing the employment paperwork that small employers put off until something goes wrong.',
-    member: 'sample-hr-partners',
-    body: [
-      'Most businesses in the chamber are too small to employ an HR person and big enough that not having one is a problem. That gap is the whole business.',
-      'The work is unglamorous. Handbooks that match what a business actually does rather than what a template says. Hiring that does not create a discrimination claim. Keeping up with Iowa wage and leave rules, which change more often than employers expect.',
-      'The advice for a business with fewer than ten employees: the handbook matters less than writing down how you handle time off before somebody asks. Most disputes come from a rule that was never written down and then got applied unevenly.'
-    ]
-  },
-  {
     slug: 'luncheon-registration-moves-online',
     date: '2026-08-05',
     kind: 'news',

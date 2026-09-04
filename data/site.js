@@ -28,7 +28,7 @@ export const SITE = {
   // Turn this off the day real member data replaces the samples.
   demoBanner: true,
   demoBannerText:
-    'Demo site. Layout and features are real. Member listings and a few dates are placeholders until the live data is loaded in.',
+    'Demo site. The 61 member listings are real. Descriptions, membership tiers and some event dates are still being collected.',
 
   /* FORMS
      The join form and the event form post here. Any form service that
