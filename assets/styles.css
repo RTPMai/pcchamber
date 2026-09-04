@@ -406,7 +406,7 @@ a:hover{ color:var(--tint-ink); }
 .related h4{ margin-bottom:14px; }
 .related ul{ list-style:none; margin:0; padding:0; }
 .related li{ padding:9px 0; border-bottom:1px solid var(--rule-soft); font-size:.96rem; }
-.related li span{ color:var(--navy-soft); }
+.related li > span{ color:var(--navy-soft); }
 
 .crumb{ font-size:.9rem; color:var(--navy-soft); margin:0 0 10px; }
 .crumb a{ color:var(--navy-mid); }
@@ -503,7 +503,7 @@ a:hover{ color:var(--tint-ink); }
 .group ul{ list-style:none; margin:16px 0 0; padding:0; }
 .group li{ padding:13px 0; border-bottom:1px solid var(--rule-soft); }
 .group li a{ font-weight:600; }
-.group li span{ display:block; font-size:.93rem; color:var(--navy-mid); margin-top:2px; }
+.group li > span{ display:block; font-size:.93rem; color:var(--navy-mid); margin-top:2px; }
 
 /* ---------- FAQ ---------------------------------------------------------- */
 
@@ -694,4 +694,28 @@ code{
 .door-count{
   display:block; margin-top:8px; font-size:.85rem;
   color:var(--tint-ink); font-weight:600;
+}
+
+/* ---------- Off-site links ------------------------------------------------ */
+
+/* Inline, always. Several list styles set spans to display:block, which
+   would drop the arrow onto its own line. */
+.ext{ display:inline !important; }
+
+/* Small arrow so it is clear before clicking, not after. */
+.ext::after{
+  content:'\2197';
+  font-size:.8em; margin-left:.22em; opacity:.6;
+  display:inline-block; vertical-align:baseline;
+}
+a:hover .ext::after{ opacity:1; }
+
+/* Nav, buttons and footer already read as leaving the page. An arrow on
+   every one of those would be noise. */
+.top .ext::after, .btn .ext::after, .foot .ext::after, .addcal .ext::after{ content:none; }
+
+/* Warns a screen reader without putting the words on screen. */
+.skip-text{
+  position:absolute; width:1px; height:1px; overflow:hidden;
+  clip:rect(0 0 0 0); white-space:nowrap;
 }

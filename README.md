@@ -49,6 +49,7 @@ Everything else builds itself from those five files.
 | `tools/make-social-card.py` | Rebuilds the share card and favicons | Only if the wording changes |
 | `tools/calendar-files.mjs` | Builds the .ics files and add-to-calendar links | No |
 | `tools/needs-a-sentence.mjs` | Lists what the directory is still missing | No |
+| `tools/external-links.mjs` | Sends off-site links to a new tab | No |
 
 ---
 
@@ -218,6 +219,22 @@ Both forms carry a honeypot field positioned off screen rather than hidden with 
 **They are `<img>` references, not inline SVG.** The artwork is about 38KB of path data. Inlining it into all 31 pages would add well over a megabyte of duplicated markup and stop it being cached.
 
 The originals from Illustrator carried around 8KB each of C2PA provenance metadata, which has been stripped. If you re-export, strip it again or the files roughly double.
+
+---
+
+## Off-site links
+
+Every link to another website opens in a new tab. This is applied to the built HTML by `tools/external-links.mjs`, not remembered link by link, because a hand-applied rule gets forgotten the first time somebody adds a link in a hurry and there are over five hundred of them.
+
+What is left alone, deliberately:
+
+- Anything relative or on this site. Those stay in the same tab.
+- `mailto:` and `tel:` links. Opening a new tab to launch someone's email client leaves them a blank tab to close.
+- Off-site downloads, so they download rather than navigate.
+
+Each off-site link gets a small arrow and a hidden phrase reading "opens in a new tab", because a tab opening without warning is disorienting for anyone using a screen reader or relying on the back button. The arrow is suppressed in the header, footer, buttons and the add-to-calendar row, where it would be noise.
+
+The Policy Center already did this for its own source links, so it was left as it was.
 
 ---
 

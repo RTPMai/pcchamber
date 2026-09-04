@@ -27,6 +27,7 @@ import { JOBS } from './data/jobs.js';
 import { REFERRALS } from './data/referrals.js';
 import { JOIN_FORM, EVENT_FORM } from './data/forms.js';
 import { scopeCss } from './tools/scope-policy-css.mjs';
+import { externalLinks } from './tools/external-links.mjs';
 
 const OUT = 'dist';
 
@@ -1523,7 +1524,9 @@ function policyCenterPage() {
 async function put(rel, html) {
   const file = path.join(OUT, rel, 'index.html');
   await mkdir(path.dirname(file), { recursive: true });
-  await writeFile(file, html);
+  /* Every page goes through this, so no off-site link can be missed by
+     somebody forgetting the rule. */
+  await writeFile(file, externalLinks(html, SITE.url));
 }
 
 async function main() {
@@ -1545,7 +1548,7 @@ async function main() {
   await put('jobs', jobsPage());
   await put('join', joinPage());
   await put(path.join('events', 'add'), eventFormPage());
-  await writeFile(path.join(OUT, '404.html'), notFoundPage());
+  await writeFile(path.join(OUT, '404.html'), externalLinks(notFoundPage(), SITE.url));
 
   for (const m of MEMBERS) await put(path.join('directory', m.slug), memberPage(m));
 
