@@ -174,6 +174,7 @@ function footer() {
           <li><a href="/jobs/">Jobs</a></li>
           <li><a href="/news/">News and spotlights</a></li>
           <li><a href="/policy-center/">Business Policy Center<span class="memberonly"> (members)</span></a></li>
+          <li><a href="/members/">Member sign in</a></li>
           <li><a href="/privacy/">Privacy</a></li>
         </ul>
       </div>
@@ -494,6 +495,7 @@ function memberPage(m) {
     season
   }, body);
 }
+
 
 function eventsPage() {
   const t = todayISO();
@@ -1407,7 +1409,9 @@ function policyCenterPage() {
     <div>
       <div id="gate">
         <h2>Members only</h2>
-        <p>Enter the member passcode. It is in the monthly chamber email, and it changes once a year.</p>
+        <p>Signing in with your email is the easiest way, and it lasts thirty days.</p>
+        <div class="btnrow"><a class="btn sun" href="/members/?next=%2Fpolicy-center%2F">Sign in as a member</a></div>
+        <p style="margin-top:26px">Or use the shared member passcode, which is in the monthly chamber email.</p>
         <form class="form" id="gateform" style="max-width:22rem">
           <div class="field">
             <label for="passcode">Member passcode</label>
@@ -1559,6 +1563,222 @@ function adminPage() {
 </html>`;
 }
 
+
+/* ---------- member sign in ------------------------------------------------ */
+
+function membersPage() {
+  const body = `
+<div class="pagehead" data-season="spring">
+  <div class="wrap">
+    <h1>Member sign in</h1>
+    <p>For chamber members. Signing in gets you the Business Policy Center and anything else reserved for members.</p>
+  </div>
+</div>
+<div class="wrap band" data-season="spring">
+  <div class="cols">
+    <div>
+      <div id="signedout">
+        <form class="form" id="signinform" style="max-width:24rem">
+          <h2 style="margin-bottom:18px">Sign in</h2>
+          <div class="field">
+            <label for="email">Email</label>
+            <input type="email" id="email" name="email" autocomplete="username" required>
+          </div>
+          <div class="field">
+            <label for="password">Password</label>
+            <input type="password" id="password" name="password" autocomplete="current-password" required>
+          </div>
+          <div class="btnrow"><button type="submit" class="btn sun">Sign in</button></div>
+          <p class="help" id="signinmsg" role="status" aria-live="polite"></p>
+        </form>
+
+        <div class="note" style="margin-top:28px">
+          <p><strong>First time, or forgotten it?</strong> Put your email in below and we send a link to set a password. The chamber never sees it.</p>
+        </div>
+        <form class="form" id="setupform" style="max-width:24rem">
+          <div class="field">
+            <label for="setupemail">Send the link to</label>
+            <span class="help">The address the chamber has for your business.</span>
+            <input type="email" id="setupemail" name="setupemail" autocomplete="email" required>
+          </div>
+          <div class="btnrow"><button type="submit" class="btn">Email me a link</button></div>
+          <p class="help" id="setupmsg" role="status" aria-live="polite"></p>
+        </form>
+
+        <p style="margin-top:26px">Not sure which address the chamber has, or it has changed? <a href="mailto:${SITE.email}?subject=Member%20sign%20in">Email the chamber</a>.</p>
+        <p>Not a member? <a href="/join/">What membership costs</a>.</p>
+      </div>
+
+      <div id="signedin" hidden>
+        <h2>You are signed in</h2>
+        <p id="wholine"></p>
+        <div class="btnrow">
+          <a class="btn sun" href="/policy-center/">Open the Business Policy Center</a>
+          <a class="btn ghost" href="/directory/" id="mylisting">Your directory listing</a>
+        </div>
+        <p style="margin-top:26px"><button class="linkish" id="signoutbtn">Sign out</button></p>
+      </div>
+    </div>
+    <aside class="card">
+      <h4>About your password</h4>
+      <p style="font-size:.95rem;margin:0 0 12px">You choose it, and nobody at the chamber can see it. If you forget it, the chamber cannot tell you what it was, only send you a link to set a new one.</p>
+      <p style="font-size:.95rem;margin:0">Twelve characters minimum. Three or four unrelated words is the easiest way to get there and the easiest to remember.</p>
+    </aside>
+  </div>
+</div>
+<script>
+(function(){
+  var params=new URLSearchParams(location.search);
+  var signinForm=document.getElementById('signinform'),
+      setupForm=document.getElementById('setupform'),
+      signinMsg=document.getElementById('signinmsg'),
+      setupMsg=document.getElementById('setupmsg'),
+      out=document.getElementById('signedout'),
+      inn=document.getElementById('signedin'),
+      who=document.getElementById('wholine');
+
+  if(params.get('problem')==='expired'){
+    setupMsg.textContent='That link has expired. Ask for a new one.';
+  }
+
+  function post(payload){
+    return fetch('/api/member',{method:'POST',credentials:'same-origin',
+      headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)})
+      .then(function(r){ return r.text().then(function(txt){
+        var b=null; try{ b=JSON.parse(txt); }catch(e){}
+        if(!r.ok) throw new Error((b&&b.message) || 'Something went wrong.');
+        return b;
+      });});
+  }
+
+  function showSignedIn(d){
+    out.hidden=true; inn.hidden=false;
+    who.textContent='Signed in as ' + d.name + '.';
+    var mine=document.getElementById('mylisting');
+    if(mine) mine.setAttribute('href','/directory/'+d.slug+'/');
+  }
+
+  post({action:'whoami'}).then(function(d){ if(d&&d.signedIn) showSignedIn(d); }).catch(function(){});
+
+  signinForm.addEventListener('submit', function(e){
+    e.preventDefault();
+    var btn=signinForm.querySelector('button');
+    btn.disabled=true; signinMsg.textContent='Checking';
+    post({action:'signin',
+          email:document.getElementById('email').value,
+          password:document.getElementById('password').value})
+      .then(function(d){
+        var next=params.get('next');
+        if(next && next.charAt(0)==='/') location.href=next; else showSignedIn(d);
+      })
+      .catch(function(err){ btn.disabled=false; signinMsg.textContent=err.message; });
+  });
+
+  setupForm.addEventListener('submit', function(e){
+    e.preventDefault();
+    var btn=setupForm.querySelector('button');
+    btn.disabled=true; setupMsg.textContent='Sending';
+    post({action:'setup', email:document.getElementById('setupemail').value})
+      .then(function(d){ setupForm.hidden=true; setupMsg.textContent=d.message; })
+      .catch(function(err){ btn.disabled=false; setupMsg.textContent=err.message; });
+  });
+
+  var so=document.getElementById('signoutbtn');
+  if(so) so.addEventListener('click', function(){
+    post({action:'signout'}).then(function(){ location.href='/members/'; });
+  });
+})();
+</script>`;
+
+  return page({
+    title: 'Member sign in',
+    description: 'Sign in as a Polk City Area Chamber member.',
+    canonical: '/members/',
+    season: 'spring',
+    noindex: true
+  }, body);
+}
+
+function passwordPage() {
+  const body = `
+<div class="pagehead" data-season="spring">
+  <div class="wrap">
+    <h1>Choose your password</h1>
+    <p>This sets the password for your chamber sign in. Nobody at the chamber can see it.</p>
+  </div>
+</div>
+<div class="wrap band" data-season="spring">
+  <div class="cols">
+    <div>
+      <form class="form" id="pwform" style="max-width:24rem">
+        <div class="field">
+          <label for="pw">New password</label>
+          <span class="help">At least 12 characters. Three or four unrelated words is easiest to remember and hardest to guess.</span>
+          <input type="password" id="pw" autocomplete="new-password" required>
+        </div>
+        <div class="field">
+          <label for="pw2">Type it again</label>
+          <input type="password" id="pw2" autocomplete="new-password" required>
+        </div>
+        <div class="btnrow"><button type="submit" class="btn sun">Save my password</button></div>
+        <p class="help" id="pwmsg" role="status" aria-live="polite"></p>
+      </form>
+      <div id="pwdone" hidden>
+        <h2>Done, and you are signed in</h2>
+        <div class="btnrow">
+          <a class="btn sun" href="/policy-center/">Open the Business Policy Center</a>
+          <a class="btn ghost" href="/members/">Your account</a>
+        </div>
+      </div>
+    </div>
+    <aside class="card">
+      <h4>If this page says the link expired</h4>
+      <p style="font-size:.95rem;margin:0">Links last 30 minutes, so an old email will not work. Go back to <a href="/members/">member sign in</a> and ask for another.</p>
+    </aside>
+  </div>
+</div>
+<script>
+(function(){
+  var token=new URLSearchParams(location.search).get('token');
+  var form=document.getElementById('pwform'),
+      msg=document.getElementById('pwmsg'),
+      done=document.getElementById('pwdone');
+
+  if(!token){
+    form.hidden=true;
+    msg.textContent='This page needs the link from your email. Go back to member sign in and ask for one.';
+    return;
+  }
+
+  form.addEventListener('submit', function(e){
+    e.preventDefault();
+    var a=document.getElementById('pw').value, b=document.getElementById('pw2').value;
+    if(a!==b){ msg.textContent='The two do not match.'; return; }
+    var btn=form.querySelector('button');
+    btn.disabled=true; msg.textContent='Saving';
+    fetch('/api/member',{method:'POST',credentials:'same-origin',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({action:'setpassword', token:token, password:a})})
+      .then(function(r){ return r.text().then(function(txt){
+        var j=null; try{ j=JSON.parse(txt); }catch(e){}
+        if(!r.ok) throw new Error((j&&j.message)||'Something went wrong.');
+        return j;
+      });})
+      .then(function(){ form.hidden=true; done.hidden=false; msg.textContent=''; })
+      .catch(function(err){ btn.disabled=false; msg.textContent=err.message; });
+  });
+})();
+</script>`;
+
+  return page({
+    title: 'Choose your password',
+    description: 'Set a password for your chamber sign in.',
+    canonical: '/members/password/',
+    season: 'spring',
+    noindex: true
+  }, body);
+}
+
 /* ---------- write it out -------------------------------------------------- */
 
 async function put(rel, html) {
@@ -1608,6 +1828,8 @@ async function main() {
     await cp(path.join('admin', f), path.join(OUT, 'admin', f));
   }
 
+  await put('members', membersPage());
+  await put(path.join('members', 'password'), passwordPage());
   await put('policy-center', policyCenterPage());
   await mkdir(path.join(OUT, 'policy-center'), { recursive: true });
   await cp(path.join('policy', 'app.js'), path.join(OUT, 'policy-center', 'app.js'));
@@ -1633,6 +1855,7 @@ ${urls.map(u => `  <url><loc>${SITE.url}${u}</loc></url>`).join('\n')}
 `User-agent: *
 Allow: /
 Disallow: /policy-center/
+Disallow: /members/
 Disallow: /admin/
 Disallow: /api/
 

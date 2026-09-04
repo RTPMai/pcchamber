@@ -138,6 +138,62 @@ Two categories are marked as gaps: no accountant or CPA, and no attorney. Leave 
 
 ---
 
+## Member sign in
+
+At `/members/`. A member signs in with their email address and a password they chose themselves.
+
+**The chamber never sets and never sees a password.** A new member, or one who has forgotten theirs, asks for a link by email and chooses it on the page. That is the only way a password system can work without somebody at the chamber handling other people's credentials.
+
+### Where passwords are kept, and why not in git
+
+Hashed with scrypt, in a key-value store. Not in the repository, for two reasons and the second is the one people miss.
+
+Git history is permanent. A hash committed today is in the history for ever, including after the member leaves. You cannot take it back out without rewriting history.
+
+And every password change would be a commit, and every commit rebuilds the site. A member changing their own password should not deploy the chamber website.
+
+**If the store is ever lost, nothing irreplaceable goes with it.** Members set a new password by email, the same way they set the first one. So it does not need backing up and does not carry the obligations a real member database would.
+
+### Set these in Vercel
+
+    MEMBER_SECRET      32 or more characters of random text. Signs sessions
+                       and setup links. Changing it signs everybody out,
+                       which is how you revoke everything at once.
+    KV_REST_API_URL    both set for you when you add Upstash Redis from
+    KV_REST_API_TOKEN  the Vercel marketplace. Free at this size.
+    RESEND_API_KEY     from resend.com, for setup and reset emails
+    MEMBER_EMAIL_FROM  the address those come from
+
+Until they are set, the endpoint names the ones missing.
+
+### The password rules, and why they are what they are
+
+Twelve characters. That is the only rule.
+
+No "must contain a number and a symbol". Composition rules push people towards `Passw0rd!` and towards writing it on a note by the till. Length is what actually makes a password hard to guess, and three or four unrelated words is both easy to remember and hard to attack.
+
+Obvious passwords are refused outright, including with numbers stuck on the end, because `password1234` is the first thing anybody tries and no length rule catches it. So is the member's own business name.
+
+### What protects it
+
+Five wrong attempts for one address stops it for fifteen minutes, and the count expires on its own so nobody has to unlock anything. This is only possible because there is somewhere to keep a count.
+
+An address not on the roster takes the same time and gives the same answer as a wrong password, so sign in cannot be used to work out who is a chamber member. Measured gap: about a millisecond.
+
+Passwords are per address, not per business, so two people at the same member cannot lock each other out.
+
+### Who can sign in
+
+Each member can carry an `access` list of email addresses, editable in the admin. Anybody on it can hold a password for that business. Left empty, the public contact address is accepted so this works before anything is filled in.
+
+### The thing standing in the way
+
+**Sixteen of the 61 members have no email address at all**, including Grinnell State Bank, Home State Bank, Luana Savings Bank, Knapp Properties, P&M Apparel and Yellow Brick Road. Your treasurer's business, a board member's business, and every bank in the referral list. Until those are collected, a quarter of the membership cannot sign in.
+
+That is why the Policy Center still accepts the shared passcode as a fallback. Once every member has an address, delete the passcode branch in `api/policy.js` and unset `MEMBER_PASSCODE`.
+
+---
+
 ## The Policy Center
 
 It now lives at `/policy-center/` inside this site rather than at its own address, and it is gated because access is a paid benefit at every membership level.
@@ -180,6 +236,21 @@ The admin says the minute out loud. Somebody who reloads the site five seconds a
     GITHUB_BRANCH    optional, defaults to main
 
 Until all three are set, the admin says exactly which one is missing rather than failing silently.
+
+### If the admin says it cannot read a file
+
+GitHub answers 404 for four completely different problems, and one of them is deliberate: a fine-grained token that has not been granted a repository gets 404 rather than 403, so that a token cannot be used to probe which private repositories exist. Good security, terrible debugging.
+
+So the admin works out which one it actually is and tells you:
+
+| What you see | What to do |
+| --- | --- |
+| Cannot see the repository | `GITHUB_REPO` is wrong, or the token does not list this repository under Repository access with Contents set to Read and write. On an organisation, an owner may still need to approve the token. |
+| The token is not valid | It expired. Create a new one and update `GITHUB_TOKEN`. |
+| No branch called X | Set `GITHUB_BRANCH` to the default branch it names. |
+| content/... is not in them | The `content/` folder was not committed. Check `.gitignore`. |
+
+**One useful deduction:** if `/admin/` loads at all, the build succeeded, and the build cannot succeed without `content/`. So a 404 on a deployed site almost always means the token or the repository name, not a missing file.
 
 ### The risk, plainly
 

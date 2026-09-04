@@ -39,6 +39,7 @@
 
 import { readFileSync } from 'node:fs';
 import { createHash } from 'node:crypto';
+import { currentMember } from './member.js';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -126,6 +127,13 @@ export default async function handler(req, res) {
     const good = tokenFor(secret);
 
     if (req.method === 'GET') {
+      /* A member signed in at /members/ never sees the passcode screen.
+         Wrapped, because a failure to read the roster should fall back to
+         the passcode rather than lock everybody out. */
+      let signedIn = null;
+      try { signedIn = currentMember(req); } catch { signedIn = null; }
+      if (signedIn) { sendJs(res, payload()); return; }
+
       if (same(readCookie(req, COOKIE) || '', good)) sendJs(res, payload());
       else res.status(401).json({ error: 'locked' });
       return;

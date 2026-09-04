@@ -27,6 +27,11 @@
      city      the town they are based in. Shown in the list while summaries
                are still being collected.
      joined    year they joined the chamber
+     access    optional list of email addresses allowed to sign in as this
+               member. A business has several people in it, and the public
+               contact address is often a shared inbox nobody reads. Left
+               empty, the contact email is accepted so sign in works before
+               anything is filled in.
      logo      optional. Path to their logo, e.g. '/assets/members/slug.svg'
                Square-ish works best. SVG or PNG with a transparent
                background. Leave it out and the plate shows their initial,
