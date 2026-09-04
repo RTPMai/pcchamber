@@ -688,3 +688,10 @@ code{
   font-size:.9em; background:var(--paper-warm);
   border:1px solid var(--rule); border-radius:5px; padding:1px 5px;
 }
+
+/* ---------- Resource hub -------------------------------------------------- */
+
+.door-count{
+  display:block; margin-top:8px; font-size:.85rem;
+  color:var(--tint-ink); font-weight:600;
+}

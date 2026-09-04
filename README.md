@@ -29,7 +29,7 @@ This is the front half of the platform. Dues collection, member logins, and even
 | `data/members.js` | The member directory. 61 real members, imported 4 September. |
 | `data/events.js` | The event calendar. Times are local wall-clock, always. |
 | `data/membership.js` | Tiers, prices, benefits. **Placeholder pricing.** |
-| `data/pages.js` | About text, FAQ, the resources links |
+| `data/pages.js` | About text, FAQ, and the resources sections |
 | `data/site.js` | Chamber contact details, menu, the demo banner |
 | `data/involved.js` | Get Involved page and the privacy policy. **Board list is placeholder.** |
 | `data/news.js` | Chamber news and member spotlights |
@@ -152,6 +152,22 @@ The page also carries `noindex` and is excluded from the sitemap and disallowed 
 **Membership is not in here.** It lives on the public site at `/membership/` and nowhere else, so there is one file to edit and nothing to drift. The Policy Center's own membership section, its two-door landing page, and its top navigation rail were removed, and `#/membership` now redirects to `/membership/` so old links and bookmarks still land somewhere sensible. The Policy Center opens straight onto its section cards.
 
 **Its stylesheet is scoped, automatically.** `policy.css` was written for a standalone site: it styles `body`, `html`, and eleven class names the chamber site also uses, including `wrap`, `foot`, `hero` and `brand`. Dropped on the page as-is it would restyle the chamber header and footer. `tools/scope-policy-css.mjs` rewrites every rule under `#policyapp` at build time, including pinning its `:root` variables to that container. Edit `policy/policy.css` normally and the scoping happens on build.
+
+---
+
+## Business resources
+
+A hub at `/resources/` with a card per section and a real page behind each one, rather than every link on a single page. Sections live in `RESOURCE_GROUPS` in `data/pages.js`; adding a group adds its page and its card automatically.
+
+Two rules worth keeping:
+
+**Sort by the problem, not by who runs the programme.** A grant administered by the county still belongs under money. People arrive knowing what they need, not which agency provides it.
+
+**The Policy Center appears once.** It is a single button on the hub, not an entry inside each section. Repeating it in every group made one thing look like four.
+
+`/resources/who-to-call/` is generated from `data/referrals.js` and ends with the categories the chamber cannot fill, which doubles as the recruiting pitch for the businesses missing from membership.
+
+**Still needed:** the link list from the current site's Business Resources page. Its content could not be read from outside, so the sections above are a curated set rather than a port. Paste the current page and anything missing goes in.
 
 ---
 

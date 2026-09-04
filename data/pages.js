@@ -41,47 +41,88 @@ export const FAQ = [
   }
 ];
 
+/* ==========================================================================
+   BUSINESS RESOURCES
+
+   One hub page with a card per section, and a real page behind each card.
+   The old version put every link on one page and it was a wall.
+
+   The Business Policy Center is deliberately NOT listed inside these
+   sections. It sits as a single button on the hub. Repeating it in every
+   group made it look like four different things.
+
+   Each group needs:
+     slug     its web address under /resources/
+     season   sun | autumn | spring | winter
+     title    what the section is called
+     blurb    one sentence, shown on the card before anyone clicks
+     intro    a short paragraph, shown at the top of its own page
+     links    { label, href, note }
+
+   TO ADD A LINK
+     Put it in the group where somebody would look for it, not the group
+     that matches who runs it. A grant administered by the county still
+     belongs under money.
+   ========================================================================== */
+
 export const RESOURCE_GROUPS = [
   {
+    slug: 'money',
     season: 'sun',
     title: 'Money you can go after',
-    blurb: 'Grants, loans, and free help, with plain language about who actually qualifies.',
+    blurb: 'Grants, loans, and free advice, with straight talk about who actually qualifies.',
+    intro: 'Most of these programmes are open to businesses here and most local owners never apply. The eligibility rules are the part that catches people out, so read those before the dollar figures.',
     links: [
-      { label: 'Business Policy Center, grants section', href: '{POLICY}#/grants', note: 'Members only. The chamber keeps this current and says who is excluded, which the state pages often bury.' },
-      { label: 'Iowa Economic Development Authority', href: 'https://www.iowaeda.com/', note: 'State programs for expansion, equipment, and workforce training.' },
-      { label: 'Iowa SBDC', href: 'https://www.iowasbdc.org/', note: 'Free one-on-one business advising. Genuinely free, not a sales funnel.' },
-      { label: 'SBA Iowa District Office', href: 'https://www.sba.gov/district/iowa', note: 'SBA loan programs and lender matching.' }
+      { label: 'Iowa Economic Development Authority', href: 'https://www.iowaeda.com/', note: 'State programmes for expansion, equipment, and workforce training.' },
+      { label: 'IowaGrants.gov', href: 'https://www.iowagrants.gov/', note: 'Where state grant applications are actually filed. Register before a deadline, not on the day.' },
+      { label: 'Iowa SBDC', href: 'https://www.iowasbdc.org/', note: 'Free one-to-one business advising. Genuinely free, not a sales funnel.' },
+      { label: 'SBA Iowa District Office', href: 'https://www.sba.gov/district/iowa', note: 'SBA loan programmes and lender matching.' },
+      { label: 'Choose Iowa grants', href: 'https://www.chooseiowa.com/grants', note: 'Food and farm programmes. Check the exclusions: meat and dairy processing are handled separately.' },
+      { label: 'Grants.gov', href: 'https://www.grants.gov/', note: 'Federal grants. Large, slow, and worth it for a few.' },
+      { label: 'Polk County news and announcements', href: 'https://www.polkcountyiowa.gov/news-and-announcements/', note: 'Where county grant rounds get announced, including CDBG.' }
     ]
   },
   {
+    slug: 'rules',
     season: 'winter',
     title: 'Rules and paperwork',
     blurb: 'What you have to file, who you file it with, and what changed this year.',
+    intro: 'Nothing here is interesting and all of it is compulsory. The city page is the one most often needed and least often found.',
     links: [
-      { label: 'Business Policy Center, new laws section', href: '{POLICY}#/law', note: 'Members only. What the legislature changed and whether it affects you.' },
+      { label: 'City of Polk City', href: 'https://www.polkcityia.gov/', note: 'Permits, zoning, signage, and council agendas. The chamber is not the city.' },
+      { label: 'Polk City municipal code', href: 'https://www.polkcityia.gov/businesses/pages/municipal-code', note: 'The actual rules, including what you can put on your building.' },
       { label: 'Iowa Secretary of State, business filings', href: 'https://sos.iowa.gov/business/', note: 'Register an entity, file a biennial report.' },
-      { label: 'Iowa Department of Revenue', href: 'https://revenue.iowa.gov/', note: 'Sales tax permits and withholding.' },
-      { label: 'City of Polk City', href: 'https://www.polkcityia.gov/', note: 'Permits, zoning, and signage rules.' }
+      { label: 'Iowa Department of Revenue', href: 'https://revenue.iowa.gov/taxes/file-my-taxes/business-taxes', note: 'Sales tax permits and withholding.' },
+      { label: 'IRS Small Business Center', href: 'https://www.irs.gov/businesses/small-businesses-self-employed', note: 'Federal taxes. When the IRS and a firm blog disagree, the IRS is right.' },
+      { label: 'Polk County Assessor, appealing an assessment', href: 'https://www.polkcountyiowa.gov/county-assessor/appealing-your-assessment/', note: 'Protest deadlines live here and they are not generous.' }
     ]
   },
   {
+    slug: 'hiring',
     season: 'spring',
     title: 'Hiring and people',
     blurb: 'Finding staff, training them, and staying on the right side of employment rules.',
+    intro: 'Two of these cost nothing and are underused. Posting a job on IowaWORKS is free, and DMACC will sometimes cover part of the cost of training you were going to pay for anyway.',
     links: [
       { label: 'IowaWORKS', href: 'https://www.iowaworks.gov/', note: 'Post jobs at no cost and connect to hiring events.' },
-      { label: 'Iowa Workforce Development', href: 'https://www.iowaworkforcedevelopment.gov/', note: 'Unemployment insurance, wage rules, and workplace posters.' },
-      { label: 'DMACC business and industry training', href: 'https://www.dmacc.edu/business-and-industry/', note: 'Customized training, sometimes with the cost partly reimbursed.' }
+      { label: 'Iowa Workforce Development', href: 'https://www.iowaworkforcedevelopment.gov/', note: 'Unemployment insurance, wage rules, and the posters you are required to display.' },
+      { label: 'Workforce and training grants', href: 'https://workforce.iowa.gov/opportunities/grants', note: 'Money towards training existing staff.' },
+      { label: 'DMACC business and industry training', href: 'https://www.dmacc.edu/business-and-industry/', note: 'Customised training, sometimes with the cost partly reimbursed.' },
+      { label: 'The chamber job board', href: '/jobs/', note: 'Free for members. Openings at member businesses, seen by people who already live here.' }
     ]
   },
   {
+    slug: 'growing',
     season: 'autumn',
     title: 'Growing and getting known',
-    blurb: 'Ways to reach customers that do not require a marketing budget.',
+    blurb: 'Ways to reach customers that do not need a marketing budget.',
+    intro: 'The chamber runs most of these and members have already paid for them. A ribbon cutting reaches more people locally than anything you could buy for the same money, which is nothing.',
     links: [
-      { label: 'Ask for a ribbon cutting', href: 'mailto:admin@polkcitychamber.com?subject=Ribbon%20cutting%20request', note: 'Free to members and reaches several thousand people locally.' },
-      { label: 'Add your event to the community calendar', href: 'mailto:admin@polkcitychamber.com?subject=Community%20event', note: 'Open to anyone, member or not.' },
-      { label: 'Catch Des Moines', href: 'https://www.catchdesmoines.com/', note: 'Regional tourism listings, useful if you get visitor traffic from Saylorville and Big Creek.' }
+      { label: 'Ask for a ribbon cutting', href: 'mailto:admin@polkcitychamber.com?subject=Ribbon%20cutting%20request', note: 'Included with membership. Opening, moving, expanding, or a milestone all count.' },
+      { label: 'Add your event to the community calendar', href: '/events/add/', note: 'Open to anyone running something locally, member or not.' },
+      { label: 'The member directory', href: '/directory/', note: 'Your listing is a real page that turns up in search. Keep your details current.' },
+      { label: 'Catch Des Moines', href: 'https://www.catchdesmoines.com/', note: 'Regional tourism listings. Worth it if you get visitor traffic from Saylorville and Big Creek.' },
+      { label: 'Greater Des Moines Partnership', href: 'https://www.dsmpartnership.com/', note: 'Metro-wide business network. Basic Business membership includes reciprocal membership.' }
     ]
   }
 ];

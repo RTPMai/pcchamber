@@ -790,52 +790,37 @@ function membershipPage() {
 }
 
 function resourcesPage() {
-  const groups = RESOURCE_GROUPS.map(g => `<section class="group" data-season="${g.season}">
-  <h2>${esc(g.title)}</h2>
+  /* A hub, not a wall. One card per section, one sentence each, and the
+     links live on the section's own page. Same rule as the Policy Center:
+     say what it is before anyone has to click. */
+  const cards = RESOURCE_GROUPS.map(g => `<a class="door" href="/resources/${g.slug}/" data-season="${g.season}">
+  <h3>${esc(g.title)}</h3>
   <p>${esc(g.blurb)}</p>
-  <ul>
-    ${g.links.map(l => `<li>
-      <a href="${esc(swapPolicy(l.href))}">${esc(l.label)}</a>
-      <span>${esc(l.note)}</span>
-    </li>`).join('')}
-  </ul>
-</section>`).join('');
+  <span class="door-count">${g.links.length} links</span>
+</a>`).join('');
+
+  const gaps = REFERRALS.filter(r => r.gap).length;
 
   const body = `
 <div class="pagehead" data-season="winter">
   <div class="wrap">
     <h1>Business resources</h1>
-    <p>The useful links, sorted by the problem you are trying to solve rather than by who runs the program.</p>
+    <p>Sorted by the problem you are trying to solve rather than by who runs the programme.</p>
   </div>
 </div>
 <div class="wrap band">
-  ${groups}
+  ${cards}
+  <a class="door" href="/resources/who-to-call/" data-season="spring">
+    <h3>Who to call</h3>
+    <p>The members the chamber points people at, by situation. Financing, insurance, hiring, property and more.</p>
+    <span class="door-count">${REFERRALS.length - gaps} categories covered</span>
+  </a>
 </div>
 <div class="band warm">
-  <div class="wrap">
-    <h2>Who to call</h2>
-    <p class="lede">Knowing what changed is half of it. These are the members the chamber points people at, by situation.</p>
-    <div class="group" data-season="spring">
-      <ul>
-        ${REFERRALS.map(r => {
-          if (r.gap) return `<li><strong>${esc(r.need)}</strong><span>${esc(r.note)}</span></li>`;
-          const named = r.members
-            .map(s => MEMBERS.find(x => x.slug === s))
-            .filter(Boolean)
-            .map(x => `<a href="/directory/${x.slug}/">${esc(x.name)}</a>`)
-            .join(', ');
-          return `<li><strong>${esc(r.need)}</strong><span>${named || 'No member listed yet.'}${r.note ? ` &middot; ${esc(r.note)}` : ''}</span></li>`;
-        }).join('')}
-      </ul>
-    </div>
-    <p style="font-size:.94rem;color:var(--navy-soft)">A referral is not an endorsement of quality. It means the business is a chamber member who works in that area and has agreed to take the call.</p>
-  </div>
-</div>
-<div class="band">
   <div class="wrap"><div class="col">
     <h2>The Business Policy Center</h2>
-    <p>Most of these state pages are written for people who already know the jargon. The chamber keeps its own, saying what changed, who it applies to, and whether you should care, in plain language, with every claim linked to its source.</p>
-    <p>It is a member benefit, so it sits behind the member passcode. Every level of membership includes it.</p>
+    <p>The pages above are the official ones, written for people who already know the jargon. The chamber keeps its own separate resource that says what changed, who it applies to, and whether you should care, in plain language, with every claim linked to its source.</p>
+    <p>It is a member benefit and sits behind the member passcode. Every level of membership includes it.</p>
     <div class="btnrow">
       <a class="btn sun" href="/policy-center/">Open the Policy Center</a>
       <a class="btn ghost" href="/join/">Join to get access</a>
@@ -845,9 +830,97 @@ function resourcesPage() {
 
   return page({
     title: 'Business resources',
-    description: 'Grants, permits, hiring help, and policy tracking for Polk City area businesses.',
+    description: 'Grants, permits, hiring help and local contacts for Polk City area businesses.',
     canonical: '/resources/',
     season: 'winter'
+  }, body);
+}
+
+function resourceSectionPage(g) {
+  const others = RESOURCE_GROUPS.filter(o => o.slug !== g.slug);
+
+  const links = g.links.map(l => `<li>
+  <a href="${esc(l.href)}">${esc(l.label)}</a>
+  <span>${esc(l.note)}</span>
+</li>`).join('');
+
+  const body = `
+<div class="pagehead" data-season="${g.season}">
+  <div class="wrap">
+    <p class="crumb"><a href="/resources/">Business resources</a></p>
+    <h1>${esc(g.title)}</h1>
+    <p>${esc(g.blurb)}</p>
+  </div>
+</div>
+<div class="wrap band" data-season="${g.season}">
+  <div class="col">
+    <p class="lede">${esc(g.intro)}</p>
+  </div>
+  <section class="group">
+    <ul>${links}</ul>
+  </section>
+</div>
+<div class="band warm">
+  <div class="wrap">
+    <h2>The other sections</h2>
+    ${others.map(o => `<a class="door" href="/resources/${o.slug}/" data-season="${o.season}">
+      <h3>${esc(o.title)}</h3>
+      <p>${esc(o.blurb)}</p>
+    </a>`).join('')}
+  </div>
+</div>`;
+
+  return page({
+    title: g.title,
+    description: g.blurb,
+    canonical: `/resources/${g.slug}/`,
+    season: g.season
+  }, body);
+}
+
+function whoToCallPage() {
+  const rows = REFERRALS.map(r => {
+    if (r.gap) return `<li><strong>${esc(r.need)}</strong><span>${esc(r.note)}</span></li>`;
+    const named = r.members
+      .map(s => MEMBERS.find(x => x.slug === s))
+      .filter(Boolean)
+      .map(x => `<a href="/directory/${x.slug}/">${esc(x.name)}</a>`)
+      .join(', ');
+    return `<li><strong>${esc(r.need)}</strong><span>${named || 'No member listed yet.'}${r.note ? ` &middot; ${esc(r.note)}` : ''}</span></li>`;
+  }).join('');
+
+  const gaps = REFERRALS.filter(r => r.gap);
+
+  const body = `
+<div class="pagehead" data-season="spring">
+  <div class="wrap">
+    <p class="crumb"><a href="/resources/">Business resources</a></p>
+    <h1>Who to call</h1>
+    <p>Knowing what changed is half of it. These are the members the chamber points people at, by situation.</p>
+  </div>
+</div>
+<div class="wrap band" data-season="spring">
+  <section class="group">
+    <ul>${rows}</ul>
+  </section>
+  <div class="col">
+    <p style="font-size:.94rem;color:var(--navy-soft);margin-top:24px">A referral is not an endorsement of quality. It means the business is a chamber member who works in that area and has agreed to take the call.</p>
+  </div>
+</div>
+${gaps.length ? `<div class="band warm">
+  <div class="wrap"><div class="col">
+    <h2>${gaps.length === 1 ? 'One category the chamber cannot fill' : `${gaps.length} categories the chamber cannot fill`}</h2>
+    <p>These are the calls that come in and go unanswered because no member does this work. If that is you, being the named referral for a category is what Basic Business membership buys.</p>
+    <ul style="font-size:.97rem">${gaps.map(g => `<li style="margin-bottom:8px"><strong>${esc(g.need)}</strong></li>`).join('')}</ul>
+    <div class="btnrow"><a class="btn sun" href="/join/">Join the chamber</a></div>
+  </div></div>
+</div>` : ''}`;
+
+  return page({
+    title: 'Who to call',
+    description: 'The Polk City Area Chamber members to call, sorted by what you need.',
+    canonical: '/resources/who-to-call/',
+    season: 'spring'
   }, body);
 }
 
@@ -1462,6 +1535,8 @@ async function main() {
   await put('events', eventsPage());
   await put('membership', membershipPage());
   await put('resources', resourcesPage());
+  for (const g of RESOURCE_GROUPS) await put(path.join('resources', g.slug), resourceSectionPage(g));
+  await put(path.join('resources', 'who-to-call'), whoToCallPage());
   await put('about', aboutPage());
   await put('get-involved', involvedPage());
   await put('privacy', privacyPage());
@@ -1492,7 +1567,8 @@ async function main() {
 
   await cp('assets', path.join(OUT, 'assets'), { recursive: true });
 
-  const urls = ['/', '/directory/', '/events/', '/membership/', '/resources/', '/about/', '/get-involved/', '/privacy/', '/news/', '/jobs/', '/join/', '/events/add/']
+  const urls = ['/', '/directory/', '/events/', '/membership/', '/resources/', '/about/', '/get-involved/', '/privacy/', '/news/', '/jobs/', '/join/', '/events/add/', '/resources/who-to-call/']
+    .concat(RESOURCE_GROUPS.map(g => `/resources/${g.slug}/`))
     .concat(MEMBERS.map(m => `/directory/${m.slug}/`))
     .concat(POSTS.map(p => `/news/${p.slug}/`));
 
