@@ -162,7 +162,9 @@ The page also carries `noindex` and is excluded from the sitemap and disallowed 
 
 ## The admin
 
-At `/admin/`. Built so somebody with no technical background can change the site without seeing GitHub, a terminal, or a line of code.
+At `/admin/`, reachable from an "Admin sign in" link at the very bottom of every page. Built so somebody with no technical background can change the site without seeing GitHub, a terminal, or a line of code.
+
+The link is deliberately visible rather than a secret address. Hiding the door does not lock it, the passcode is the actual security, and a tool nobody can find is a tool nobody uses. The page itself is still `noindex` and disallowed in `robots.txt`, so it will not turn up in a search.
 
 **How it works.** The admin reads and writes the JSON files in `content/` through the GitHub API. Saving makes a real commit, Vercel notices, and the site rebuilds. About a minute end to end. So there is no database, nothing new to back up, and every change has an author, a timestamp and an undo, because it is all git history.
 

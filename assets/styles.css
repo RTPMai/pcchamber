@@ -748,3 +748,9 @@ img.face{ display:block; }
 .person .biz{ display:block; font-size:.9rem; color:var(--navy-mid); }
 .person.vacant{ border-style:dashed; background:var(--paper-warm); }
 .person.vacant .face{ background:var(--paper); color:var(--navy-soft); border-color:var(--rule); }
+
+/* One word, set back from the legal line. Present for the person who needs
+   it monthly, not competing with anything a visitor came for. */
+.foot-admin{ margin-top:10px; font-size:.82rem; }
+.foot-admin a{ color:#7C949D; text-decoration-thickness:1px; }
+.foot-admin a:hover{ color:#E4EDF0; }

@@ -189,6 +189,9 @@ function footer() {
     </div>
     <div class="foot-legal">
       <p>The chamber is an independent nonprofit and is not part of city government. For city services go to <a href="https://www.polkcityia.gov">polkcityia.gov</a>. &copy; ${new Date().getFullYear()} ${esc(SITE.name)}.</p>
+      <!-- Deliberately visible. Hiding the door does not lock it, and a tool
+           nobody can find is a tool nobody uses. The passcode is the security. -->
+      <p class="foot-admin"><a href="/admin/">Admin sign in</a></p>
     </div>
   </div>
 </footer>`;
