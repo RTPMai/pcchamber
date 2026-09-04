@@ -52,9 +52,12 @@ const ALLOWED = new Set([
 ]);
 
 const api = () => ({
-  repo: process.env.GITHUB_REPO,
-  branch: process.env.GITHUB_BRANCH || 'main',
-  token: process.env.GITHUB_TOKEN
+  /* Trimmed. Copying a token out of GitHub very often brings a trailing
+     newline or space with it. You cannot see it in the settings box, and
+     it produces a 401 that looks exactly like an expired token. */
+  repo: (process.env.GITHUB_REPO || '').trim(),
+  branch: (process.env.GITHUB_BRANCH || 'main').trim(),
+  token: (process.env.GITHUB_TOKEN || '').trim()
 });
 
 function same(a, b) {
@@ -86,11 +89,11 @@ async function readBody(req) {
 }
 
 async function github(path, options = {}) {
-  const { repo, token } = api();
+  const { repo } = api();
   const res = await fetch(`https://api.github.com/repos/${repo}/contents/${path}`, {
     ...options,
     headers: {
-      Authorization: `Bearer ${token}`,
+      Authorization: `Bearer ${api().token}`,
       Accept: 'application/vnd.github+json',
       'X-GitHub-Api-Version': '2022-11-28',
       'User-Agent': 'polk-city-chamber-admin',
@@ -112,7 +115,7 @@ async function diagnose(name) {
 
   const repoRes = await fetch(`https://api.github.com/repos/${repo}`, {
     headers: {
-      Authorization: `Bearer ${process.env.GITHUB_TOKEN}`,
+      Authorization: `Bearer ${api().token}`,
       Accept: 'application/vnd.github+json',
       'User-Agent': 'polk-city-chamber-admin'
     }
@@ -136,7 +139,7 @@ async function diagnose(name) {
 
   const branchRes = await fetch(`https://api.github.com/repos/${repo}/branches/${encodeURIComponent(branch)}`, {
     headers: {
-      Authorization: `Bearer ${process.env.GITHUB_TOKEN}`,
+      Authorization: `Bearer ${api().token}`,
       Accept: 'application/vnd.github+json',
       'User-Agent': 'polk-city-chamber-admin'
     }
@@ -160,6 +163,25 @@ async function loadFile(name) {
   if (res.status === 404) {
     throw Object.assign(new Error(await diagnose(name)), { status: 502 });
   }
+
+  if (res.status === 401) {
+    const { token } = api();
+    const shaped = /^(gh[pousr]_|github_pat_)/.test(token);
+    throw Object.assign(new Error(
+      'GitHub rejected the token. ' +
+      (shaped
+        ? 'It is the right shape, so it has most likely expired or been revoked. Create a new one and update GITHUB_TOKEN.'
+        : `The value in GITHUB_TOKEN does not look like a GitHub token. A real one starts with github_pat_ for a fine-grained token, or ghp_ for a classic one. Yours starts with "${token.slice(0, 4)}".`) +
+      ' Remember to redeploy afterwards, because changing a setting in Vercel does not affect the deployment already running.'
+    ), { status: 502 });
+  }
+
+  if (res.status === 403) {
+    throw Object.assign(new Error(
+      'The token is valid but not allowed to do this. Check it has Contents set to Read and write for this repository, not just Read.'
+    ), { status: 502 });
+  }
+
   if (!res.ok) {
     const detail = await res.text();
     throw Object.assign(
