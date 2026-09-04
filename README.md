@@ -104,11 +104,29 @@ Node 18 or newer. No dependencies to install.
 
 **Empty the job board and the news list, or fill them.** The three jobs and three posts in there are examples. A job board with fake postings is worse than an empty one.
 
-**Drop in the real logos.** The roundel in `build.mjs` is a stand-in built from the brand colours. The clean SVGs from the Policy Center repo should replace it.
-
 **Point the Policy Center link at the live address.** `SITE.policyCenterUrl`.
 
 **Decide about slugs.** A member's address is `/directory/their-slug/`. Once it is public and indexed, changing a slug breaks every link to it. Get them right the first time, or plan redirects.
+
+---
+
+## The logo files
+
+`assets/` holds five, and which one to use is not arbitrary.
+
+| File | Use it for |
+| --- | --- |
+| `mark.svg` | The roundel alone, full colour. Header, footer, icons. |
+| `wordmark-navy.svg` | The type alone, for light backgrounds |
+| `wordmark-white.svg` | The type alone, for navy |
+| `logo-horizontal.svg` | The full lockup. Print, letterhead, anything sent out. |
+| `logo-stacked.svg` | The full lockup, taller. Square spaces, social avatars. |
+
+**Why the mark and the type are separate files.** The roundel cannot be recoloured for a dark background. Its outer ring is navy and its gazebo is white, so inverting one destroys the other. On navy the roundel sits on a white plate at full colour, which is what the `.mark` class does. The wordmark is plain type and inverts cleanly, hence two colour versions of it and only one of the mark.
+
+**They are `<img>` references, not inline SVG.** The artwork is about 38KB of path data. Inlining it into all 31 pages would add well over a megabyte of duplicated markup and stop it being cached.
+
+The originals from Illustrator carried around 8KB each of C2PA provenance metadata, which has been stripped. If you re-export, strip it again or the files roughly double.
 
 ---
 

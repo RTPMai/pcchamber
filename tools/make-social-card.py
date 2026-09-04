@@ -8,11 +8,17 @@ Run it only if the wording, the colours, or the logo change.
     pip install pillow
     python3 tools/make-social-card.py
 
-It needs the two brand fonts in tools/fonts/. Both are free from Google Fonts:
-    Fraunces      https://fonts.google.com/specimen/Fraunces
-    Public Sans   https://fonts.google.com/specimen/Public+Sans
-Download the variable .ttf of each and save them as fraunces.ttf and
-publicsans.ttf.
+It needs two things alongside it:
+
+  tools/mark-1024.png   the chamber roundel on a transparent background.
+                        Committed. Re-export from assets/mark.svg if the
+                        logo ever changes.
+
+  tools/fonts/          the two brand fonts, free from Google Fonts:
+                        Fraunces     https://fonts.google.com/specimen/Fraunces
+                        Public Sans  https://fonts.google.com/specimen/Public+Sans
+                        Save the variable .ttf of each as fraunces.ttf and
+                        publicsans.ttf.
 """
 
 import os
@@ -47,21 +53,25 @@ def public_sans(size, weight=500):
     return f
 
 
-def roundel(size):
-    """The four seasons mark. Drawn at 4x and shrunk so the edges are clean."""
+def roundel(size, plate=False):
+    """The real chamber mark. On navy it needs a white plate behind it,
+    because the roundel's own outer ring is navy and would disappear."""
+    mark = Image.open(os.path.join(HERE, "mark-1024.png")).convert("RGBA")
+
+    if not plate:
+        return mark.resize((size, size), Image.LANCZOS)
+
+    inner = int(size * 0.80)
+    mark = mark.resize((inner, inner), Image.LANCZOS)
+
     s = size * 4
-    img = Image.new("RGBA", (s, s), (0, 0, 0, 0))
-    d = ImageDraw.Draw(img)
-    d.ellipse([0, 0, s, s], fill=NAVY)
+    plate_img = Image.new("RGBA", (s, s), (0, 0, 0, 0))
+    ImageDraw.Draw(plate_img).ellipse([0, 0, s, s], fill=(255, 255, 255, 255))
+    plate_img = plate_img.resize((size, size), Image.LANCZOS)
 
-    inset = s * 0.06
-    box = [inset, inset, s - inset, s - inset]
-    for start, colour in ((270, SUN), (0, AUTUMN), (90, WINTER), (180, SPRING)):
-        d.pieslice(box, start, start + 90, fill=colour)
-
-    hole = s * 0.34
-    d.ellipse([(s - hole) / 2, (s - hole) / 2, (s + hole) / 2, (s + hole) / 2], fill=NAVY)
-    return img.resize((size, size), Image.LANCZOS)
+    off = (size - inner) // 2
+    plate_img.paste(mark, (off, off), mark)
+    return plate_img
 
 
 def wrap(draw, text, font, width):
@@ -84,13 +94,13 @@ def social_card():
     d = ImageDraw.Draw(img)
 
     pad = 78
-    mark = roundel(104)
+    mark = roundel(116, plate=True)
     img.paste(mark, (pad, pad), mark)
 
     title_font = fraunces(74, weight=600, opsz=144)
     sub_font = public_sans(29, weight=400)
 
-    y = pad + 104 + 54
+    y = pad + 116 + 48
     for line in wrap(d, TITLE, title_font, W - pad * 2):
         d.text((pad, y), line, font=title_font, fill=(255, 255, 255))
         y += 84
@@ -110,13 +120,15 @@ def social_card():
 
 
 def icons():
+    """Icons sit on a white plate. Browser tab bars and phone home screens
+    are usually light, and the mark's navy ring vanishes against dark ones."""
     for size, name in ((180, "apple-touch-icon.png"), (32, "favicon-32.png")):
-        roundel(size).save(os.path.join(OUT, name), optimize=True)
+        roundel(size, plate=True).save(os.path.join(OUT, name), optimize=True)
         print(f"assets/{name}")
 
     # A real .ico so old browsers and Windows pinning behave.
-    roundel(64).save(os.path.join(OUT, "favicon.ico"),
-                     sizes=[(16, 16), (32, 32), (48, 48)])
+    roundel(64, plate=True).save(os.path.join(OUT, "favicon.ico"),
+                                 sizes=[(16, 16), (32, 32), (48, 48)])
     print("assets/favicon.ico")
 
 

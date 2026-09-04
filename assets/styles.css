@@ -135,16 +135,27 @@ a:hover{ color:var(--tint-ink); }
   display:flex; align-items:center; gap:11px;
   text-decoration:none; flex:0 0 auto; padding:8px 0;
 }
-.brand svg{ width:38px; height:38px; display:block; flex:0 0 auto; }
-.brand-text{
-  font-family:'Fraunces',Georgia,serif;
-  font-size:1.02rem; font-weight:600; line-height:1.1;
-  letter-spacing:.005em;
+/* The roundel keeps its own white plate wherever it sits on navy. */
+.mark{
+  display:flex; align-items:center; justify-content:center;
+  background:#fff; border-radius:50%; padding:5px;
+  flex:0 0 auto;
 }
+.mark img{ width:38px; height:38px; display:block; }
+.mark.big{ padding:7px; }
+.mark.big img{ width:46px; height:46px; }
+
+.wordmark{ display:block; width:178px; height:auto; }
+
+.brand-text{ display:block; }
 .brand-text span{
   display:block; font-family:'Public Sans',sans-serif;
-  font-size:.68rem; font-weight:500; color:#9FB6BE;
-  letter-spacing:.04em; margin-top:2px;
+  font-size:.66rem; font-weight:500; color:#9FB6BE;
+  letter-spacing:.04em; margin-top:5px;
+}
+@media (max-width:420px){
+  .wordmark{ width:140px; }
+  .brand-text span{ display:none; }
 }
 
 .menu{ margin-left:auto; display:flex; align-items:center; gap:2px; }
@@ -469,7 +480,7 @@ details.faq .ans p{ margin:0; }
 .foot ul{ list-style:none; margin:0; padding:0; }
 .foot li{ margin-bottom:8px; }
 .foot p{ max-width:38ch; }
-.foot-brand svg{ width:44px; height:44px; margin-bottom:14px; }
+.foot-brand .mark{ display:inline-flex; margin-bottom:16px; }
 .foot-legal{
   margin-top:34px; padding-top:20px; border-top:1px solid rgba(255,255,255,.14);
   font-size:.85rem; color:#8FA8B1;

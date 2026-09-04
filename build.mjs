@@ -75,14 +75,21 @@ const catSeason = id => SEASONS[Math.max(0, CATEGORIES.findIndex(c => c.id === i
 
 /* ---------- shared chrome ------------------------------------------------ */
 
-const LOGO = `<svg viewBox="0 0 100 100" role="img" aria-label="Polk City Area Chamber of Commerce">
-<circle cx="50" cy="50" r="47" fill="#002734"/>
-<path d="M50 50 L50 11 A39 39 0 0 1 89 50 Z" fill="#F19C30"/>
-<path d="M50 50 L89 50 A39 39 0 0 1 50 89 Z" fill="#A36437"/>
-<path d="M50 50 L50 89 A39 39 0 0 1 11 50 Z" fill="#68A1B8"/>
-<path d="M50 50 L11 50 A39 39 0 0 1 50 11 Z" fill="#838E52"/>
-<circle cx="50" cy="50" r="16" fill="#002734"/>
-</svg>`;
+/* The real logo, as three separate files rather than one lockup.
+
+   The roundel cannot simply be recoloured for a dark background: its outer
+   ring is navy and its gazebo is white, so inverting one destroys the other.
+   So on navy it sits on a white plate, at full colour, as the brand intends.
+   The wordmark is plain text and does invert, hence two colour versions.
+
+   These are <img> references, not inline SVG. Inlining 38KB of paths into
+   all 31 pages would be 1.2MB of duplicated markup for no benefit. */
+
+const MARK = (cls = '') =>
+  `<span class="mark${cls ? ' ' + cls : ''}"><img src="/assets/mark.svg" alt="" width="40" height="40"></span>`;
+
+const WORDMARK = (colour = 'white') =>
+  `<img class="wordmark" src="/assets/wordmark-${colour}.svg" alt="Polk City Area Chamber of Commerce" width="180" height="32">`;
 
 function head({ title, description, canonical, season = 'navy' }) {
   const full = `${title} | ${SITE.shortName}`;
@@ -129,8 +136,11 @@ function header(current) {
 <header class="top">
   <div class="wrap">
     <a class="brand" href="/">
-      ${LOGO}
-      <span class="brand-text">Polk City Area Chamber<span>Polk City, Alleman, Elkhart, Sheldahl</span></span>
+      ${MARK()}
+      <span class="brand-text">
+        ${WORDMARK('white')}
+        <span>Polk City, Alleman, Elkhart, Sheldahl</span>
+      </span>
     </a>
     <button class="burger" id="burger" aria-expanded="false" aria-controls="menu">Menu</button>
     <nav class="menu" id="menu" aria-label="Main">
@@ -147,7 +157,7 @@ function footer() {
   <div class="wrap">
     <div class="foot-grid">
       <div class="foot-brand">
-        ${LOGO}
+        ${MARK('big')}
         <p>${esc(SITE.tagline)}</p>
         <p><a href="mailto:${SITE.email}">${SITE.email}</a><br>${esc(SITE.mail)}</p>
       </div>
