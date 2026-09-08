@@ -45,14 +45,30 @@
    a real member database would.
    ========================================================================== */
 
+/* Upstash shows its credentials as ready-to-paste lines:
+
+       UPSTASH_REDIS_REST_URL="https://something.upstash.io"
+
+   so people quite reasonably copy the whole thing, quotes and all, and
+   sometimes the NAME= part with it. Vercel then stores the quotes as part
+   of the value and the URL will not parse. Cleaning that up here is one
+   line; working out why it failed is an afternoon. */
+function clean(raw, name) {
+  let v = String(raw || '').trim();
+  if (name && v.toUpperCase().startsWith(name + '=')) v = v.slice(name.length + 1).trim();
+  if (v.length > 1 && ((v[0] === '"' && v.endsWith('"')) || (v[0] === "'" && v.endsWith("'")))) {
+    v = v.slice(1, -1).trim();
+  }
+  return v;
+}
+
 /* Either naming. The Vercel integration sets KV_*, the Upstash console
    shows UPSTASH_*, and having to rename one to the other is a pointless
    step that only exists to be got wrong. */
 const conf = () => ({
-  url: (process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL || '')
-    .trim().replace(/\/$/, ''),
-  token: (process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN || '')
-    .trim()
+  url: clean(process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL, 'UPSTASH_REDIS_REST_URL')
+    .replace(/\/$/, ''),
+  token: clean(process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN, 'UPSTASH_REDIS_REST_TOKEN')
 });
 
 export function storeReady() {
@@ -70,6 +86,16 @@ export function storeMissing() {
 
 async function command(...parts) {
   const { url, token } = conf();
+
+  /* Checked before calling, so a bad value says what is wrong with it
+     rather than surfacing as "Failed to parse URL". */
+  if (!/^https:\/\/[^\s"']+$/.test(url)) {
+    throw Object.assign(new Error(
+      `The credential store address is not a valid URL: "${url}". ` +
+      `It should look like https://something.upstash.io with no quotation marks around it. ` +
+      `Upstash shows it with quotes, and they must not be pasted in.`
+    ), { status: 503 });
+  }
   const res = await fetch(url, {
     method: 'POST',
     headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
