@@ -138,6 +138,31 @@ Two categories are marked as gaps: no accountant or CPA, and no attorney. Leave 
 
 ---
 
+## Is it set up? Ask the site
+
+There are nine settings across three services. Rather than working out which one is wrong by clicking around, open **`/setup/`** on the deployed site. It lists every setting, says whether it is in place, and flags the ones that are set but look wrong, such as a GitHub token that is not shaped like a token.
+
+It never shows a value, only whether one exists, which is why it needs no password of its own. It tells nobody anything they could not learn by trying each feature.
+
+### Every setting, in one place
+
+| Setting | For | Needed |
+| --- | --- | --- |
+| `MEMBER_SECRET` | Member sign in | Yes, 32+ random characters |
+| `KV_REST_API_URL` | Where passwords are kept | Yes, or `UPSTASH_REDIS_REST_URL` |
+| `KV_REST_API_TOKEN` | Same | Yes, or `UPSTASH_REDIS_REST_TOKEN` |
+| `RESEND_API_KEY` | Password setup and reset emails | Yes |
+| `MEMBER_EMAIL_FROM` | Same | Yes |
+| `MEMBER_PASSCODE` | Policy Center shared fallback | Until every member has an email |
+| `ADMIN_PASSCODE` | The admin | Yes, and not the same as `MEMBER_PASSCODE` |
+| `GITHUB_REPO` | The admin | Yes, as `owner/repository` |
+| `GITHUB_TOKEN` | The admin | Yes, Contents read and write |
+| `GITHUB_BRANCH` | The admin | Only if your default branch is not `main` |
+
+**Changing any of them needs a redeploy.** A running deployment keeps the settings it was built with, so editing a value and reloading the page shows no change and looks like the edit failed.
+
+---
+
 ## Member sign in
 
 At `/members/`. A member signs in with their email address and a password they chose themselves.
@@ -159,12 +184,30 @@ And every password change would be a commit, and every commit rebuilds the site.
     MEMBER_SECRET      32 or more characters of random text. Signs sessions
                        and setup links. Changing it signs everybody out,
                        which is how you revoke everything at once.
-    KV_REST_API_URL    both set for you when you add Upstash Redis from
-    KV_REST_API_TOKEN  the Vercel marketplace. Free at this size.
+    KV_REST_API_URL    from Upstash. See the note below, because the free
+    KV_REST_API_TOKEN  tier is not offered through the Vercel marketplace.
     RESEND_API_KEY     from resend.com, for setup and reset emails
     MEMBER_EMAIL_FROM  the address those come from
 
 Until they are set, the endpoint names the ones missing.
+
+### Getting the Upstash credentials, and the free tier
+
+The free tier is 256 MB and 500,000 commands a month, far more than 61 members will use. But it is **not offered through the Vercel marketplace**, because marketplace integrations bill through your Vercel account. Going that route you will only be shown paid plans.
+
+Sign up at upstash.com directly instead, create a Redis database on the free tier, and copy the two REST values from its console into the Vercel environment variables by hand. The marketplace integration is convenience, not a requirement: this code only ever needs two values.
+
+Either naming works, so paste whichever pair you are shown without renaming anything:
+
+    KV_REST_API_URL          what the Vercel integration sets
+    KV_REST_API_TOKEN
+
+    UPSTASH_REDIS_REST_URL   what the Upstash console shows
+    UPSTASH_REDIS_REST_TOKEN
+
+Use the REST values, not the `redis://` connection string. This talks to Upstash over HTTP, which is what works from a serverless function without a connection pool.
+
+---
 
 ### The password rules, and why they are what they are
 
@@ -185,6 +228,46 @@ Passwords are per address, not per business, so two people at the same member ca
 ### Who can sign in
 
 Each member can carry an `access` list of email addresses, editable in the admin. Anybody on it can hold a password for that business. Left empty, the public contact address is accepted so this works before anything is filled in.
+
+### Trying it before the services are connected
+
+Set one variable and a made-up sign in works, with no Upstash, no Resend and no password having been set by anybody:
+
+    DEMO_MEMBER = arcadia:somethinglongenough
+
+Before the colon is a member slug from the directory, after it is the password that will work. Sign in with any email address and that password.
+
+**Three things stop it becoming a back door.**
+
+It is ignored on production deployments. It only works on preview and development, unless `DEMO_MEMBER_ALLOW_PRODUCTION` is also set to `yes`, which nobody does by accident. Vercel sets `VERCEL_ENV` itself, so a request cannot influence which one it is.
+
+While it is on, the member page carries a red banner saying so, and `/setup/` reports it as a problem rather than a note. On production it reports it in stronger terms. It cannot be quietly left running.
+
+And it is one hard-coded pair, not a skip. A wrong password still fails.
+
+Delete `DEMO_MEMBER` when you are done. That is the whole cleanup.
+
+---
+
+### Members editing their own listing
+
+At `/members/listing/`, for anyone signed in. They change their name, description, category, contact details and tags. Their own record and nobody else's.
+
+**This is what fixes the 61 blank descriptions.** Collecting them was the chamber's job, the chamber has no staff, and it was never going to happen by phone. The member knows what their business does; the chamber does not.
+
+**Three things a member cannot change, and why each one:**
+
+`slug`, their web address, because changing it after search engines have found the page breaks every link to it. `tier`, because that is a billing decision. `access`, who can sign in as them, because otherwise anybody who got into one account could add themselves permanently.
+
+Those are not hidden in the form and rejected later. They are never read from the request, so sending them does nothing. There is a test for exactly that.
+
+**Edits go live immediately.** No approval queue: a queue in an organisation with no staff is a queue that never empties, and members stop bothering after the second time a change sits for a fortnight.
+
+The protection is that every edit is a git commit with the member's name on it, so the chamber can see who changed what and put it back in one click. An audit trail and an undo rather than a gate. If the board would rather have review before publishing, that is a real change and worth asking for deliberately.
+
+**Two members saving at once is handled.** Both write to `members.json` and the second is rejected because the file moved, but nothing is genuinely in conflict since each touches only their own record. So the write reads the file again, reapplies the change, and retries.
+
+---
 
 ### The thing standing in the way
 
@@ -374,6 +457,16 @@ The Policy Center already did this for its own source links, so it was left as i
 Write it as an ES module. `package.json` sets `"type": "module"`, so every `.js` file in the project is ESM. A function written with `require`, `module.exports` and `__dirname` throws on every invocation, the platform returns its own plain-text error page, and the browser reports a JSON parse error that has nothing to do with the real fault. `api/policy.js` is the working pattern: `import` at the top, `export default async function handler(req, res)`.
 
 Anything calling one of these endpoints should read the response as text before trying to parse it, for the same reason.
+
+---
+
+## The build checks its own JavaScript
+
+Every inline script is parsed before the build is called a success. A broken one fails the build.
+
+This exists because the join form, the event form and the listing editor all shipped with a syntax error across several deployments. A newline written as an escape inside a build-time template literal is turned into a real line break, which breaks the string it sits in. Nothing failed loudly: the pages rendered normally and the buttons simply did nothing.
+
+If you write JavaScript inside `build.mjs`, remember it passes through template literals on the way out. `String.fromCharCode(10)` for a newline sidesteps the question entirely.
 
 ---
 

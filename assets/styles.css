@@ -849,3 +849,20 @@ img.face{ display:block; }
   color:var(--navy); text-decoration:underline; text-underline-offset:3px;
 }
 .linkish:hover{ color:var(--tint-ink); }
+
+/* ---------- Setup check --------------------------------------------------- */
+
+.setuplist{ list-style:none; margin:0 0 32px; padding:0; }
+.setuplist li{
+  display:flex; flex-wrap:wrap; align-items:baseline; gap:6px 12px;
+  padding:11px 14px; margin-bottom:6px; border-radius:9px;
+  border:1px solid var(--rule); background:var(--paper);
+}
+.setuplist li.yes{ border-left:5px solid var(--spring); }
+.setuplist li.no{ border-left:5px solid var(--alert); background:#FDF0EE; }
+.setuplist li.optional{ border-left:5px solid var(--rule); background:var(--paper-warm); }
+.setuplist .state{ font-size:.8rem; font-weight:700; letter-spacing:.03em; }
+.setuplist li.yes .state{ color:var(--spring-ink); }
+.setuplist li.no .state{ color:var(--alert); }
+.setuplist li.optional .state{ color:var(--navy-soft); }
+.setuplist .why{ flex:1 0 100%; font-size:.9rem; color:var(--navy-mid); }

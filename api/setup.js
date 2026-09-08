@@ -71,6 +71,14 @@ export default async function handler(req, res) {
     }
   ];
 
+  /* A test sign in left switched on is worse than a missing setting, so it
+     is reported first and as a problem rather than as a note. */
+  const demoRaw = (process.env.DEMO_MEMBER || '').trim();
+  const onProduction = (process.env.VERCEL_ENV || '').trim() === 'production';
+  const allowedOnProduction =
+    (process.env.DEMO_MEMBER_ALLOW_PRODUCTION || '').trim().toLowerCase() === 'yes';
+  const demoActive = Boolean(demoRaw) && (!onProduction || allowedOnProduction);
+
   for (const g of groups) {
     const required = g.settings.filter(s => !s.optional);
     g.ready = required.every(s => s.ok);
@@ -80,7 +88,20 @@ export default async function handler(req, res) {
 
   res.setHeader('Cache-Control', 'no-store');
   res.status(200).json({
-    ready: groups.every(g => g.ready),
+    ready: groups.every(g => g.ready) && !demoActive,
+    environment: (process.env.VERCEL_ENV || 'unknown').trim(),
+    demo: {
+      set: Boolean(demoRaw),
+      active: demoActive,
+      member: demoActive ? demoRaw.split(':')[0] : null,
+      message: demoActive
+        ? (onProduction
+            ? 'A test sign in is switched on ON THE LIVE SITE. Anybody who knows the password can sign in as a member. Delete DEMO_MEMBER and DEMO_MEMBER_ALLOW_PRODUCTION now.'
+            : 'A test sign in is switched on for this preview. That is fine for testing. Delete DEMO_MEMBER when you are finished.')
+        : (demoRaw
+            ? 'DEMO_MEMBER is set but ignored here, because this is production and DEMO_MEMBER_ALLOW_PRODUCTION is not set to yes. That is the safeguard working.'
+            : null)
+    },
     groups
   });
 }

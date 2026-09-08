@@ -1301,6 +1301,14 @@ function formPage(form, { canonical, season, aside }) {
 </div>
 <script>
 (function(){
+  /* Written as an escape, a newline is consumed by the build's template
+     literals before it reaches the browser, breaking the string it sits
+     in. Built from its character code, nothing can eat it. */
+  var NEWLINE=String.fromCharCode(10);
+  /* Written as an escape, a newline is eaten by the build's template
+     literals before it reaches the browser and breaks the string it sits
+     in. Built from its character code, nothing can consume it. */
+  var NEWLINE=String.fromCharCode(10);
   var f=document.getElementById('theform'), done=document.getElementById('done');
   if(!f) return;
   var LIVE=${live ? 'true' : 'false'};
@@ -1317,7 +1325,7 @@ function formPage(form, { canonical, season, aside }) {
       var v = el.type==='checkbox' ? (el.checked?'Yes':'No') : (el.value||'').trim();
       if(v) out.push(LABELS[id] + ': ' + v);
     }
-    return out.join('\n');
+    return out.join(NEWLINE);
   }
 
   function missing(){
@@ -1577,6 +1585,9 @@ function membersPage() {
 <div class="wrap band" data-season="spring">
   <div class="cols">
     <div>
+      <div class="draft" id="demobanner" hidden>
+        <p><strong>Test sign in is switched on.</strong> A made-up password works on this deployment. Turn it off by deleting <code>DEMO_MEMBER</code> in the Vercel settings.</p>
+      </div>
       <div id="signedout">
         <form class="form" id="signinform" style="max-width:24rem">
           <h2 style="margin-bottom:18px">Sign in</h2>
@@ -1614,7 +1625,8 @@ function membersPage() {
         <p id="wholine"></p>
         <div class="btnrow">
           <a class="btn sun" href="/policy-center/">Open the Business Policy Center</a>
-          <a class="btn ghost" href="/directory/" id="mylisting">Your directory listing</a>
+          <a class="btn ghost" href="/members/listing/">Edit your listing</a>
+          <a class="btn ghost" href="/directory/" id="mylisting">See your public page</a>
         </div>
         <p style="margin-top:26px"><button class="linkish" id="signoutbtn">Sign out</button></p>
       </div>
@@ -1658,7 +1670,13 @@ function membersPage() {
     if(mine) mine.setAttribute('href','/directory/'+d.slug+'/');
   }
 
-  post({action:'whoami'}).then(function(d){ if(d&&d.signedIn) showSignedIn(d); }).catch(function(){});
+  post({action:'whoami'}).then(function(d){
+    if(d && d.demo){
+      var banner=document.getElementById('demobanner');
+      if(banner) banner.hidden=false;
+    }
+    if(d && d.signedIn) showSignedIn(d);
+  }).catch(function(){});
 
   signinForm.addEventListener('submit', function(e){
     e.preventDefault();
@@ -1779,7 +1797,256 @@ function passwordPage() {
   }, body);
 }
 
+
+/* ---------- setup check --------------------------------------------------- */
+
+function setupPage() {
+  const body = `
+<div class="pagehead" data-season="winter">
+  <div class="wrap">
+    <h1>Is this set up?</h1>
+    <p>What is in place and what is still missing. Nothing on this page shows a secret, only whether one exists.</p>
+  </div>
+</div>
+<div class="wrap band" data-season="winter">
+  <div class="col">
+    <div id="setupout"><p class="lede">Checking</p></div>
+  </div>
+</div>
+<script>
+(function(){
+  var out=document.getElementById('setupout');
+
+  fetch('/api/setup',{credentials:'same-origin'})
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      var html='';
+      if(d.demo && d.demo.active){
+        html += '<div class="draft"><p><strong>Test sign in is switched on.</strong> ' + d.demo.message + '</p></div>';
+      } else if (d.demo && d.demo.message){
+        html += '<div class="note"><p>' + d.demo.message + '</p></div>';
+      }
+      html += d.ready
+        ? '<div class="note"><p><strong>Everything is set.</strong> Every feature has what it needs.</p></div>'
+        : '<div class="draft"><p><strong>Not finished yet.</strong> The groups below with something missing will not work until it is filled in. Remember to redeploy after changing a setting, because a running deployment keeps the settings it was built with.</p></div>';
+
+      d.groups.forEach(function(g){
+        html += '<h2>' + g.title + '</h2>';
+        html += '<p>' + g.what + '</p>';
+        html += '<ul class="setuplist">';
+        g.settings.forEach(function(s){
+          var state = s.optional ? 'optional' : (s.ok ? 'yes' : 'no');
+          html += '<li class="' + state + '">'
+                + '<code>' + s.name + '</code> '
+                + '<span class="state">' + (s.optional ? 'optional' : (s.ok ? 'set' : 'missing')) + '</span>'
+                + (s.note ? '<span class="why">' + s.note + '</span>' : '')
+                + '</li>';
+        });
+        html += '</ul>';
+      });
+      out.innerHTML = html;
+    })
+    .catch(function(){
+      out.innerHTML = '<div class="draft"><p><strong>Could not check.</strong> The site may still be building, or the deployment failed. Try again in a minute.</p></div>';
+    });
+})();
+</script>`;
+
+  return page({
+    title: 'Setup check',
+    description: 'Which settings are in place.',
+    canonical: '/setup/',
+    season: 'winter',
+    noindex: true
+  }, body);
+}
+
+
+/* ---------- a member editing their own listing ---------------------------- */
+
+function listingPage() {
+  const cats = CATEGORIES.map(c => `<option value="${esc(c.id)}">${esc(c.label)}</option>`).join('');
+
+  const body = `
+<div class="pagehead" data-season="spring">
+  <div class="wrap">
+    <p class="crumb"><a href="/members/">Member sign in</a></p>
+    <h1>Your directory listing</h1>
+    <p>What people see when they find your business through the chamber.</p>
+  </div>
+</div>
+<div class="wrap band" data-season="spring">
+  <div class="cols">
+    <div>
+      <div id="needsignin" hidden>
+        <p class="lede">You need to be signed in to edit your listing.</p>
+        <div class="btnrow"><a class="btn sun" href="/members/?next=%2Fmembers%2Flisting%2F">Sign in</a></div>
+      </div>
+
+      <form class="form" id="listingform" hidden>
+        <div class="field">
+          <label for="l-name">Business name</label>
+          <input type="text" id="l-name" maxlength="120" required>
+        </div>
+
+        <div class="field">
+          <label for="l-summary">What you do, in one sentence</label>
+          <span class="help">This is the line people read in the directory before deciding to click. Plain beats polished. "Small animal vet with evening appointments" tells somebody more than "your trusted partner in animal wellness".</span>
+          <textarea id="l-summary" rows="2" maxlength="300"></textarea>
+          <span class="help" id="summarycount"></span>
+        </div>
+
+        <div class="field">
+          <label for="l-about">A longer description</label>
+          <span class="help">Optional. A paragraph on your own page. Room for what you actually offer and anything worth knowing before someone calls.</span>
+          <textarea id="l-about" rows="6" maxlength="1500"></textarea>
+        </div>
+
+        <div class="field">
+          <label for="l-category">Category</label>
+          <span class="help">Which part of the directory you appear under.</span>
+          <select id="l-category">${cats}</select>
+        </div>
+
+        <div class="field">
+          <label for="l-serves">What you offer</label>
+          <span class="help">One per line, up to eight. These show as tags on your page. For example: Business checking, SBA lending, Equipment loans.</span>
+          <textarea id="l-serves" rows="4"></textarea>
+        </div>
+
+        <h2 style="margin-top:34px">How people reach you</h2>
+        <div class="field">
+          <label for="l-person">Contact name</label>
+          <input type="text" id="l-person" maxlength="80">
+        </div>
+        <div class="field">
+          <label for="l-phone">Phone</label>
+          <input type="tel" id="l-phone" maxlength="40">
+        </div>
+        <div class="field">
+          <label for="l-email">Email</label>
+          <span class="help">This one is public, on your listing. It is not the address you sign in with.</span>
+          <input type="email" id="l-email" maxlength="120">
+        </div>
+        <div class="field">
+          <label for="l-web">Website</label>
+          <input type="text" id="l-web" maxlength="200" placeholder="example.com">
+        </div>
+        <div class="field">
+          <label for="l-address">Address</label>
+          <input type="text" id="l-address" maxlength="200">
+        </div>
+        <div class="field">
+          <label for="l-city">Town</label>
+          <input type="text" id="l-city" maxlength="60">
+        </div>
+
+        <div class="row sticky btnrow">
+          <button type="submit" class="btn sun">Save my listing</button>
+          <a class="btn ghost" href="/members/">Cancel</a>
+        </div>
+        <p class="help" id="listingmsg" role="status" aria-live="polite"></p>
+      </form>
+
+      <div class="done" id="listingdone" hidden>
+        <h3>Saved</h3>
+        <p>Your page updates in about a minute. If you look straight away and see no change, wait and reload. It is not broken.</p>
+        <div class="btnrow">
+          <a class="btn" href="/members/" id="backtoacct">Back to your account</a>
+          <a class="btn ghost" href="/directory/" id="viewpage">See your page</a>
+        </div>
+      </div>
+    </div>
+
+    <aside class="card">
+      <h4>Three things you cannot change here</h4>
+      <p style="font-size:.94rem;margin:0 0 10px"><strong>Your web address.</strong> Changing it would break every link and search result pointing at your page.</p>
+      <p style="font-size:.94rem;margin:0 0 10px"><strong>Your membership level.</strong> That is a billing matter. <a href="mailto:${SITE.email}?subject=Membership%20level">Email the chamber</a>.</p>
+      <p style="font-size:.94rem;margin:0"><strong>Who can sign in as you.</strong> Also the chamber, so that nobody who got into one account could add themselves permanently.</p>
+    </aside>
+  </div>
+</div>
+<script>
+(function(){
+  var NEWLINE=String.fromCharCode(10);
+  var form=document.getElementById('listingform'),
+      need=document.getElementById('needsignin'),
+      done=document.getElementById('listingdone'),
+      msg=document.getElementById('listingmsg'),
+      count=document.getElementById('summarycount');
+
+  var F=['name','summary','about','category','serves','person','phone','email','web','address','city'];
+  var el={}; F.forEach(function(k){ el[k]=document.getElementById('l-'+k); });
+
+  function post(payload){
+    return fetch('/api/listing',{method:'POST',credentials:'same-origin',
+      headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)})
+      .then(function(r){ return r.text().then(function(txt){
+        var b=null; try{ b=JSON.parse(txt); }catch(e){}
+        if(!r.ok) throw new Error((b&&b.message)||'Something went wrong.');
+        return b;
+      });});
+  }
+
+  function tally(){
+    var n=el.summary.value.trim().length;
+    count.textContent = n ? n + ' of 300 characters' : '';
+  }
+  el.summary.addEventListener('input', tally);
+
+  post({action:'load'}).then(function(d){
+    var m=d.member, c=m.contact||{};
+    el.name.value=m.name||'';
+    el.summary.value=m.summary||'';
+    el.about.value=m.about||'';
+    el.category.value=m.category||'';
+    el.serves.value=(m.serves||[]).join(NEWLINE);
+    el.person.value=c.person||''; el.phone.value=c.phone||'';
+    el.email.value=c.email||''; el.web.value=c.web||'';
+    el.address.value=c.address||''; el.city.value=m.city||'';
+    var v=document.getElementById('viewpage');
+    if(v) v.setAttribute('href','/directory/'+m.slug+'/');
+    form.hidden=false; tally();
+    if(!m.summary) msg.textContent='Your listing has no description yet, which is the one that matters most.';
+  }).catch(function(){ need.hidden=false; });
+
+  form.addEventListener('submit', function(e){
+    e.preventDefault();
+    var btn=form.querySelector('button');
+    btn.disabled=true; msg.textContent='Saving';
+    post({
+      name:el.name.value, summary:el.summary.value, about:el.about.value,
+      category:el.category.value,
+      serves:el.serves.value.split(NEWLINE).map(function(s){return s.trim();}).filter(Boolean),
+      person:el.person.value, phone:el.phone.value, email:el.email.value,
+      web:el.web.value, address:el.address.value, city:el.city.value
+    }).then(function(){ form.hidden=true; done.hidden=false; })
+      .catch(function(err){ btn.disabled=false; msg.textContent=err.message; });
+  });
+})();
+</script>`;
+
+  return page({
+    title: 'Your directory listing',
+    description: 'Edit your chamber directory listing.',
+    canonical: '/members/listing/',
+    season: 'spring',
+    noindex: true
+  }, body);
+}
+
 /* ---------- write it out -------------------------------------------------- */
+
+async function allHtml(dir) {
+  const { readdir } = await import('node:fs/promises');
+  const out = [];
+  for (const entry of await readdir(dir, { withFileTypes: true })) {
+    const full = path.join(dir, entry.name);
+    if (entry.isDirectory()) out.push(...await allHtml(full));
+    else if (entry.name.endsWith('.html')) out.push(full);
+  }
+  return out;
+}
 
 async function put(rel, html) {
   const file = path.join(OUT, rel, 'index.html');
@@ -1828,8 +2095,10 @@ async function main() {
     await cp(path.join('admin', f), path.join(OUT, 'admin', f));
   }
 
+  await put('setup', setupPage());
   await put('members', membersPage());
   await put(path.join('members', 'password'), passwordPage());
+  await put(path.join('members', 'listing'), listingPage());
   await put('policy-center', policyCenterPage());
   await mkdir(path.join(OUT, 'policy-center'), { recursive: true });
   await cp(path.join('policy', 'app.js'), path.join(OUT, 'policy-center', 'app.js'));
@@ -1857,12 +2126,41 @@ Allow: /
 Disallow: /policy-center/
 Disallow: /members/
 Disallow: /admin/
+Disallow: /setup/
 Disallow: /api/
 
 Sitemap: ${SITE.url}/sitemap.xml
 `);
 
+  /* Every inline script is parsed before the build is called a success.
+
+     The join form, the event form and the listing editor all shipped with
+     a syntax error for several deployments, because a newline escape
+     written inside a build-time template literal is turned into a real
+     line break and breaks the string it sits in. Nothing failed loudly:
+     the pages rendered and the buttons simply did nothing.
+
+     A broken script now fails the build instead of reaching anybody. */
+  let scripts = 0;
+  const broken = [];
+  for (const file of await allHtml(OUT)) {
+    const html = await readFile(file, 'utf8');
+    for (const block of html.match(/<script>[\s\S]*?<\/script>/g) || []) {
+      scripts++;
+      try {
+        new Function(block.replace(/<\/?script>/g, ''));
+      } catch (err) {
+        broken.push(`${file}: ${err.message}`);
+      }
+    }
+  }
+  if (broken.length) {
+    console.error(`\n${broken.length} inline script(s) will not parse:\n  ` + broken.join('\n  ') + '\n');
+    process.exit(1);
+  }
+
   console.log(`Built ${urls.length} pages into /${OUT}`);
+  console.log(`  ${scripts} inline scripts, all parsing`);
   console.log(`  ${MEMBERS.length} member pages, ${CATEGORIES.length} categories`);
 }
 
