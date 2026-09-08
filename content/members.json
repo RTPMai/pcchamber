@@ -549,7 +549,10 @@
         "phone": "515-984-7740",
         "web": "https://www.pmapparel.com",
         "address": "1100 S 5th St., Polk City, IA, 50226"
-      }
+      },
+      "access": [
+        "ryan@pmapparel.com"
+      ]
     },
     {
       "slug": "papas-pizzeria",
