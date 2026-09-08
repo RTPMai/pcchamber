@@ -39,6 +39,30 @@
    With no access list, the public contact address is accepted, so this
    works before anything has been filled in.
 
+   THE TEST SIGN IN
+
+   Setting DEMO_MEMBER lets one made-up sign in work without Upstash, without
+   Resend, and without anybody having set a password. It is for trying the
+   member area before the real services are connected.
+
+       DEMO_MEMBER = arcadia:somethinglongenough
+
+   The part before the colon is a member slug from the directory. The part
+   after is the password that will work.
+
+   THREE THINGS STOP THIS BECOMING A BACKDOOR
+
+   It only works on preview and development deployments. On production it is
+   ignored, unless DEMO_MEMBER_ALLOW_PRODUCTION is also set to yes, which
+   nobody does by accident.
+
+   While it is on, the member area shows a red banner saying so, and /setup/
+   reports it as a problem. It cannot be quietly left running.
+
+   And it is one hard-coded pair, not a skip. A wrong password still fails.
+
+   Delete DEMO_MEMBER when you are done. That is the whole cleanup.
+
    LOCKOUT
 
    Five wrong passwords for one address and it stops accepting them for
@@ -56,6 +80,7 @@ import { kvGet, kvSet, kvDel, kvBump, storeReady, storeMissing } from './_lib/st
 import { hash, matches, checkStrength, wasteTime, MIN_LENGTH } from './_lib/passwords.js';
 
 const COOKIE = 'pcc_member';
+const DEMO_DAYS = 1;
 const SESSION_DAYS = 30;
 const LINK_MINUTES = 30;
 const MAX_TRIES = 5;
@@ -100,6 +125,27 @@ const findByEmail = email => {
    same business do not share one and cannot lock each other out. */
 const pwKey = email => `pw:${tidy(email)}`;
 const tryKey = email => `try:${tidy(email)}`;
+
+/* ---------- the test sign in ---------------------------------------------- */
+
+/* Off unless DEMO_MEMBER is set, and off on production even then unless
+   somebody has also said so explicitly. VERCEL_ENV is set by the platform
+   and is not something a request can influence. */
+function demoConfig() {
+  const raw = (process.env.DEMO_MEMBER || '').trim();
+  if (!raw) return null;
+
+  const onProduction = (process.env.VERCEL_ENV || '').trim() === 'production';
+  const allowed = (process.env.DEMO_MEMBER_ALLOW_PRODUCTION || '').trim().toLowerCase() === 'yes';
+  if (onProduction && !allowed) return null;
+
+  const at = raw.indexOf(':');
+  if (at < 1 || at === raw.length - 1) return null;
+
+  return { slug: raw.slice(0, at).trim(), password: raw.slice(at + 1) };
+}
+
+export const demoOn = () => Boolean(demoConfig());
 
 /* ---------- signing ------------------------------------------------------- */
 
@@ -212,7 +258,11 @@ export default async function handler(req, res) {
       return;
     }
 
-    if (!storeReady()) {
+    const demo = demoConfig();
+
+    /* Checked before the store, because the point of the test sign in is
+       to work before any of that has been set up. */
+    if (!storeReady() && !demo) {
       res.status(503).json({
         error: 'not_configured',
         message: `Passwords have nowhere to live yet. Add Upstash Redis from the Vercel marketplace, which sets ${storeMissing().join(' and ')}.`
@@ -241,7 +291,12 @@ export default async function handler(req, res) {
 
       case 'whoami': {
         const m = currentMember(req);
-        res.status(200).json(m ? { signedIn: true, slug: m.slug, name: m.name } : { signedIn: false });
+        res.status(200).json({
+          ...(m ? { signedIn: true, slug: m.slug, name: m.name } : { signedIn: false }),
+          /* So the page can show a banner. If this is ever true on the
+             live site, something has been left switched on. */
+          demo: Boolean(demo)
+        });
         return;
       }
 
@@ -254,6 +309,38 @@ export default async function handler(req, res) {
       case 'signin': {
         const email = tidy(body.email);
         const password = String(body.password || '');
+
+        /* The test sign in. One pair, checked in constant time, no store
+           and no email. A wrong password still fails. */
+        if (demo) {
+          const member = members().find(m => m.slug === demo.slug);
+          if (!member) {
+            res.status(500).json({
+              error: 'bad_demo',
+              message: `DEMO_MEMBER names "${demo.slug}", which is not a slug in the member directory.`
+            });
+            return;
+          }
+
+          const a = Buffer.from(password);
+          const b = Buffer.from(demo.password);
+          const ok = a.length === b.length && timingSafeEqual(a, b);
+
+          if (!ok) {
+            await wasteTime();
+            res.status(401).json({ error: 'no', message: 'That is not the test password.' });
+            return;
+          }
+
+          const token = sign({
+            kind: 'session', slug: member.slug, email: email || 'demo',
+            exp: Date.now() + DEMO_DAYS * 24 * 60 * 60 * 1000
+          });
+          res.setHeader('Set-Cookie',
+            `${COOKIE}=${token}; Path=/; Max-Age=${DEMO_DAYS * 24 * 60 * 60}; HttpOnly; Secure; SameSite=Lax`);
+          res.status(200).json({ ok: true, name: member.name, slug: member.slug, demo: true });
+          return;
+        }
 
         const tries = Number(await kvGet(tryKey(email))) || 0;
         if (tries >= MAX_TRIES) {
