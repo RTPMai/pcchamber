@@ -161,9 +161,15 @@ a:hover{ color:var(--tint-ink); }
   color:#fff; border-bottom-color:var(--tint);
   background:rgba(255,255,255,.06);
 }
+.menu .signin{
+  border:1px solid rgba(255,255,255,.34); color:#fff;
+  margin-left:10px; border-bottom:1px solid rgba(255,255,255,.34);
+}
+.menu .signin:hover{ background:rgba(255,255,255,.14); border-color:rgba(255,255,255,.55); }
+.menu .signin[aria-current="page"]{ background:rgba(255,255,255,.14); border-bottom-color:rgba(255,255,255,.55); }
 .menu .join{
   background:var(--sun); color:var(--navy); font-weight:700;
-  margin-left:10px; border-bottom:none;
+  margin-left:8px; border-bottom:none;
 }
 .menu .join:hover{ background:#F7AE4E; color:var(--navy); }
 
@@ -173,7 +179,8 @@ a:hover{ color:var(--tint-ink); }
   cursor:pointer;
 }
 
-@media (max-width:1000px){
+/* Nine items plus the wordmark stop fitting before 1100px. */
+@media (max-width:1100px){
   .burger{ display:block; }
   .menu{
     display:none; position:absolute; top:100%; left:0; right:0;
@@ -183,7 +190,8 @@ a:hover{ color:var(--tint-ink); }
   .menu.open{ display:flex; }
   .menu a{ padding:13px 8px; border-radius:6px; border-bottom:none; }
   .menu a[aria-current="page"]{ background:rgba(255,255,255,.1); }
-  .menu .join{ margin:10px 0 0; text-align:center; }
+  .menu .signin{ margin:12px 0 0; text-align:center; padding:12px 8px; }
+  .menu .join{ margin:8px 0 0; text-align:center; }
 }
 
 /* ---------- Hero ------------------------------------------------------ */

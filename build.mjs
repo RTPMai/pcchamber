@@ -151,6 +151,7 @@ function header(current) {
     <button class="burger" id="burger" aria-expanded="false" aria-controls="menu">Menu</button>
     <nav class="menu" id="menu" aria-label="Main">
       ${items}
+      <a class="signin" href="/members/"${current && current.startsWith('/members') ? ' aria-current="page"' : ''}>Sign in</a>
       <a class="join" href="/join/">Join</a>
     </nav>
   </div>
