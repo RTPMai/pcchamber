@@ -253,9 +253,23 @@ function homePage() {
 
   const body = `
 <section class="hero">
-  <div class="wrap">
-    <h1>The business network for Polk City, Alleman, Elkhart and Sheldahl.</h1>
-    <p>We connect local businesses to customers, to each other, and to the information they need to run. Find a member, come to a luncheon, or join.</p>
+  <div class="hero-copy">
+    <div class="hero-copy-inner">
+      <span class="hero-lockup">
+        <span class="mark"><img src="/assets/mark.svg" alt="" width="56" height="56"></span>
+        <img class="wordmark" src="/assets/wordmark-white.svg" alt="Polk City Area Chamber of Commerce" width="210" height="38">
+      </span>
+      <h1>The business network for Polk City, Alleman, Elkhart and Sheldahl.</h1>
+      <p>We connect local businesses to customers, to each other, and to the information they need to run. Find a member, come to a luncheon, or join.</p>
+    </div>
+  </div>
+  <div class="hero-stage">
+    <video class="hero-video" autoplay muted loop playsinline preload="metadata"
+           poster="/assets/media/chamber-hero-poster.jpg" aria-hidden="true" tabindex="-1">
+      <source src="/assets/media/chamber-hero.mp4" type="video/mp4" media="(min-width: 768px)">
+      <source src="/assets/media/chamber-hero-mobile.mp4" type="video/mp4">
+    </video>
+    <span class="hero-blend" aria-hidden="true"></span>
   </div>
 </section>
 ${strip}

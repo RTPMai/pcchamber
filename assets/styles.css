@@ -188,26 +188,64 @@ a:hover{ color:var(--tint-ink); }
 
 /* ---------- Hero ------------------------------------------------------ */
 
+/* Two columns: the lockup and headline sit on solid navy, the b-roll runs
+   beside them. Nothing reads on top of the footage, so contrast never
+   depends on which shot is playing. */
 .hero{
   background:var(--navy);
   color:#fff;
-  padding:64px 0 56px;
   border-bottom:5px solid var(--sun);
+  display:grid;
+  grid-template-columns:minmax(0,1fr) minmax(0,1fr);
+  align-items:stretch;
 }
-.hero .wrap{
-  display:grid; grid-template-columns:1.25fr 1fr; gap:20px 52px; align-items:end;
+.hero-copy{
+  display:flex; align-items:center;
+  /* Left edge lines up with .wrap on the rest of the page. */
+  padding:56px 48px 52px max(24px, calc((100vw - 1080px) / 2 + 24px));
 }
+.hero-copy-inner{ max-width:34rem; }
+.hero-lockup{
+  display:flex; align-items:center; gap:14px; margin-bottom:26px;
+}
+.hero-lockup .mark img{ width:52px; height:52px; }
+.hero-lockup .wordmark{ width:206px; }
 .hero h1{
-  color:#fff; font-size:clamp(2.2rem,5.2vw,3.5rem);
-  font-weight:600; margin:0;
+  color:#fff; font-size:clamp(1.9rem,3vw,2.6rem);
+  font-weight:600; margin:0; text-wrap:balance;
 }
 .hero p{
-  color:#C9D9DF; font-size:1.09rem; max-width:44ch; margin:0 0 .35em;
+  color:#C9D9DF; font-size:1.05rem; max-width:44ch; margin:.75em 0 0;
+}
+.hero-stage{
+  position:relative; overflow:hidden;
+  min-height:clamp(340px,48vh,470px);
+  background:var(--navy);
+}
+.hero-video{
+  position:absolute; inset:0;
+  width:100%; height:100%; object-fit:cover; display:block;
+}
+/* Feathers the cut between the navy panel and the first frame of footage. */
+.hero-blend{
+  position:absolute; inset:0; pointer-events:none;
+  background:linear-gradient(to right,var(--navy) 0%,rgba(0,39,52,0) 24%);
 }
 @media (max-width:860px){
-  .hero{ padding:44px 0 40px; }
-  .hero .wrap{ grid-template-columns:1fr; gap:18px; }
-  .hero p{ margin-bottom:0; }
+  .hero{ grid-template-columns:1fr; }
+  .hero-copy{ padding:38px 24px 34px; }
+  .hero-lockup{ margin-bottom:20px; }
+  .hero-lockup .mark img{ width:44px; height:44px; }
+  .hero-lockup .wordmark{ width:178px; }
+  .hero-stage{ min-height:0; height:230px; }
+  .hero-blend{ background:linear-gradient(to top,rgba(0,39,52,.4) 0%,rgba(0,39,52,0) 45%); }
+}
+/* Anyone who has asked their system to cut motion gets the still instead. */
+@media (prefers-reduced-motion: reduce){
+  .hero-video{ display:none; }
+  .hero-stage{
+    background:var(--navy) url("/assets/media/chamber-hero-poster.jpg") center/cover no-repeat;
+  }
 }
 
 /* The next thing happening. This is the most useful fact on the page. */
