@@ -155,6 +155,51 @@ main{ padding:32px 0 80px; }
 .msg{ color:var(--alert); font-size:.95rem; margin:12px 0 0; }
 .loading{ color:var(--navy-soft); padding:40px 0; }
 
+/* ---------- member benefits ----------------------------------------------- */
+
+.filters{ display:flex; flex-wrap:wrap; gap:14px; margin:18px 0 6px; }
+.mini{ display:flex; flex-direction:column; gap:4px; font-size:.85rem; font-weight:600; color:var(--navy-soft); }
+.mini select{
+  font:inherit; font-size:.97rem; font-weight:400; color:var(--navy);
+  padding:9px 12px; border:1px solid var(--rule); border-radius:9px; background:var(--paper);
+}
+.tally{ font-size:.95rem; color:var(--navy-mid); margin:14px 0 0; }
+.tally strong{ color:#8C2416; }
+
+.meter{ display:block; height:5px; background:var(--rule-soft); border-radius:999px; margin-top:8px; overflow:hidden; }
+.meter i{ display:block; height:100%; background:var(--sun); border-radius:999px; }
+
+.logform{ margin:22px 0 10px; border-left:6px solid var(--autumn); }
+.logform h2, .bgroup-title{ font-family:'Fraunces',Georgia,serif; font-weight:600; font-size:1.25rem; margin:0 0 16px; }
+.split{ display:flex; flex-wrap:wrap; gap:0 16px; }
+.field.half{ flex:1 1 12rem; }
+.field[hidden]{ display:none; }
+.msg.ok{ color:var(--spring); font-weight:600; }
+
+.bgroup{ margin-top:34px; }
+.blist{ list-style:none; margin:0; padding:0; border-top:1px solid var(--rule); }
+.blist li{
+  display:grid; grid-template-columns:1fr auto auto; gap:4px 14px; align-items:center;
+  padding:11px 0; border-bottom:1px solid var(--rule-soft);
+}
+.bname{ font-weight:600; }
+.bsays{ font-size:.92rem; color:var(--navy-mid); text-align:right; }
+.blist li.done .bsays{ color:#4E5629; font-weight:600; }
+.blist li.over .bsays{ color:#8C2416; font-weight:600; }
+.bquick{
+  font:inherit; font-size:.85rem; cursor:pointer; background:var(--paper);
+  border:1px solid var(--rule); border-radius:8px; padding:5px 12px; color:var(--navy);
+}
+.bquick:hover{ border-color:var(--sun); background:var(--sun-wash); }
+.row-open.static{ cursor:default; }
+.row-open.static:hover{ background:var(--paper); border-color:var(--rule); }
+
+@media (max-width:560px){
+  .blist li{ grid-template-columns:1fr auto; }
+  .bsays{ grid-column:1; grid-row:2; text-align:left; }
+  .bquick{ grid-row:1 / span 2; grid-column:2; }
+}
+
 @media (max-width:560px){
   h1{ font-size:1.55rem; }
   .panel{ padding:20px; }

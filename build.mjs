@@ -317,8 +317,8 @@ ${strip}
 }
 
 function directoryIndex() {
-  /* Tier first, then alphabetical. Every member is currently 'basic', so
-     in practice this is alphabetical until tiers are assigned. */
+  /* Tier first, then alphabetical. Until levels are assigned in the admin
+     everybody is 'basic', so in practice this is alphabetical. */
   const sorted = [...MEMBERS].sort((a, b) => {
     const r = (TIERS[a.tier]?.rank ?? 9) - (TIERS[b.tier]?.rank ?? 9);
     return r !== 0 ? r : a.name.localeCompare(b.name);
@@ -338,7 +338,9 @@ function directoryIndex() {
        board has not agreed to, and it outranked the tier badge, so a
        paying Premier member could show nothing while a Basic member
        showed a badge. */
-    const badge = m.tier !== 'basic'
+    /* Community Partner and up. Basic and Individual members carry no
+       badge, so a badge means somebody paid for visibility. */
+    const badge = (TIERS[m.tier]?.rank ?? 9) < TIERS.basic.rank
       ? `<span class="badge">${esc(TIERS[m.tier].label)}</span>` : '';
     const hay = [m.name, m.summary, m.about, catLabel(m.category), ...(m.serves || [])]
       .join(' ').toLowerCase();
@@ -1594,7 +1596,7 @@ function membersPage() {
 <div class="pagehead" data-season="spring">
   <div class="wrap">
     <h1>Member sign in</h1>
-    <p>For chamber members. Signing in gets you the Business Policy Center and anything else reserved for members.</p>
+    <p>For chamber members. Signing in gets you the Business Policy Center, your benefits for the year, and anything else reserved for members.</p>
   </div>
 </div>
 <div class="wrap band" data-season="spring">
@@ -1643,6 +1645,26 @@ function membersPage() {
           <a class="btn ghost" href="/members/listing/">Edit your listing</a>
           <a class="btn ghost" href="/directory/" id="mylisting">See your public page</a>
         </div>
+
+        <section class="bens" id="bens" hidden aria-labelledby="benshead">
+          <div class="bens-head">
+            <div>
+              <h2 id="benshead">Your benefits</h2>
+              <p class="bens-sub" id="benssub"></p>
+            </div>
+            <label class="bens-year" id="bensyearwrap" hidden>Year
+              <select id="bensyear"></select>
+            </label>
+          </div>
+          <div id="bensbody"></div>
+          <details class="bens-log" id="benslogwrap" hidden>
+            <summary>Everything logged this year</summary>
+            <ul id="benslog"></ul>
+          </details>
+          <p class="bens-foot">Used something that is not showing here? <a href="mailto:${SITE.email}?subject=Benefits%20tracker">Tell the chamber</a> and it gets added.</p>
+        </section>
+        <p class="help" id="bensmsg" role="status"></p>
+
         <p style="margin-top:26px"><button class="linkish" id="signoutbtn">Sign out</button></p>
       </div>
     </div>
@@ -1683,7 +1705,100 @@ function membersPage() {
     who.textContent='Signed in as ' + d.name + '.';
     var mine=document.getElementById('mylisting');
     if(mine) mine.setAttribute('href','/directory/'+d.slug+'/');
+    loadBenefits();
   }
+
+  /* Your benefits. Built with createElement and textContent, never
+     innerHTML, because the notes are typed by a person. */
+  function make(tag, cls, text){
+    var n=document.createElement(tag);
+    if(cls) n.className=cls;
+    if(text!=null) n.textContent=text;
+    return n;
+  }
+
+  var GROUPS=[
+    { kinds:['count','dollars'], title:'Counted each year' },
+    { kinds:['once'], title:'Once a year' },
+    { kinds:['open'], title:'Included, use as often as you like' }
+  ];
+
+  function benefitRow(r){
+    var li=make('li','ben' + (r.kind==='once' && r.used ? ' ben-done' : '') + (r.outside ? ' ben-outside' : ''));
+    var top=make('div','ben-top');
+    top.appendChild(make('span','ben-name', r.label));
+    top.appendChild(make('span','ben-says', r.says));
+    li.appendChild(top);
+    if(r.allowed!=null && r.kind!=='once'){
+      var bar=make('div','ben-bar');
+      var fill=make('span');
+      fill.style.width=Math.min(100, Math.round(r.used / r.allowed * 100)) + '%';
+      bar.appendChild(fill);
+      li.appendChild(bar);
+      if(r.left>0){
+        li.appendChild(make('p','ben-left', (r.kind==='dollars' ? '$' + r.left.toLocaleString('en-US') : r.left) + ' left'));
+      }
+    }
+    if(r.detail) li.appendChild(make('p','ben-detail', r.detail));
+    return li;
+  }
+
+  function drawBenefits(d){
+    var box=document.getElementById('bensbody');
+    box.replaceChildren();
+    document.getElementById('benssub').textContent =
+      d.tierName + ', membership year ' + d.year + '.';
+
+    GROUPS.forEach(function(g){
+      var rows=d.rows.filter(function(r){ return g.kinds.indexOf(r.kind)>-1 && !r.outside; });
+      if(!rows.length) return;
+      box.appendChild(make('h3','bens-group', g.title));
+      var ul=make('ul','ben-list');
+      rows.forEach(function(r){ ul.appendChild(benefitRow(r)); });
+      box.appendChild(ul);
+    });
+
+    var extra=d.rows.filter(function(r){ return r.outside; });
+    if(extra.length){
+      box.appendChild(make('h3','bens-group','Not part of your current level'));
+      var ul2=make('ul','ben-list');
+      extra.forEach(function(r){ ul2.appendChild(benefitRow(r)); });
+      box.appendChild(ul2);
+    }
+
+    var logWrap=document.getElementById('benslogwrap'), log=document.getElementById('benslog');
+    log.replaceChildren();
+    d.log.forEach(function(u){
+      var li=make('li');
+      li.appendChild(make('span','log-date', u.date));
+      var what=u.benefit + (u.amount ? ', $' + u.amount.toLocaleString('en-US') : '') + (u.qty ? ', ' + u.qty : '');
+      li.appendChild(make('span','log-what', what));
+      if(u.note) li.appendChild(make('span','log-note', u.note));
+      log.appendChild(li);
+    });
+    logWrap.hidden=!d.log.length;
+
+    var sel=document.getElementById('bensyear');
+    if(d.years.length>1){
+      sel.replaceChildren();
+      d.years.forEach(function(y){
+        var o=make('option',null,String(y)); o.value=y; if(y===d.year) o.selected=true;
+        sel.appendChild(o);
+      });
+      document.getElementById('bensyearwrap').hidden=false;
+    }
+    document.getElementById('bens').hidden=false;
+  }
+
+  function loadBenefits(year){
+    var msg=document.getElementById('bensmsg');
+    post({action:'benefits', year:year||null})
+      .then(function(d){ msg.textContent=''; drawBenefits(d); })
+      .catch(function(err){ msg.textContent='Your benefits could not be loaded. ' + err.message; });
+  }
+
+  var yearSel=document.getElementById('bensyear');
+  if(yearSel) yearSel.addEventListener('change', function(){ loadBenefits(Number(yearSel.value)); });
 
   post({action:'whoami'}).then(function(d){
     if(d && d.demo){
@@ -2072,6 +2187,17 @@ async function put(rel, html) {
 }
 
 async function main() {
+  /* A member on a level that does not exist would crash the directory
+     page halfway through, or worse, get no benefits in the tracker without
+     anybody noticing. Caught here instead, by name. */
+  const badTier = MEMBERS.filter(m => !TIERS[m.tier] || !TIER_LIST.some(t => t.id === m.tier));
+  if (badTier.length) {
+    console.error('\nThese members are on a membership level that does not exist:\n  ' +
+      badTier.map(m => `${m.name}: "${m.tier}"`).join('\n  ') +
+      '\nFix the level in the admin, under Member directory.\n');
+    process.exit(1);
+  }
+
   if (existsSync(OUT)) await rm(OUT, { recursive: true });
   await mkdir(OUT, { recursive: true });
 
@@ -2108,6 +2234,12 @@ async function main() {
   await writeFile(path.join(OUT, 'admin', 'index.html'), adminPage());
   for (const f of ['app.js', 'schema.js', 'admin.css']) {
     await cp(path.join('admin', f), path.join(OUT, 'admin', f));
+  }
+  /* The benefits tracker counts in the browser with the same code the
+     member account uses on the server. Both files are plain modules with
+     nothing in them the public membership page does not already say. */
+  for (const f of ['benefits.js', 'membership.js']) {
+    await cp(path.join('data', f), path.join(OUT, 'admin', f));
   }
 
   await put('setup', setupPage());

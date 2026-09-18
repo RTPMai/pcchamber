@@ -912,3 +912,52 @@ img.face{ display:block; }
 .setuplist li.no .state{ color:var(--alert); }
 .setuplist li.optional .state{ color:var(--navy-soft); }
 .setuplist .why{ flex:1 0 100%; font-size:.9rem; color:var(--navy-mid); }
+
+/* ---------- Your benefits, on the member account page ----------------- */
+/* A ledger rather than a dashboard: what you get, what you have used, in
+   the order a member would think about it. Counted things first because
+   those are the ones that run out. */
+
+.bens{ margin-top:40px; padding-top:28px; border-top:1px solid var(--rule); }
+.bens-head{ display:flex; flex-wrap:wrap; align-items:flex-end; justify-content:space-between; gap:12px 24px; }
+.bens-head h2{ margin:0; }
+.bens-sub{ color:var(--navy-soft); margin:4px 0 0; }
+.bens-year{ font-size:.92rem; font-weight:600; display:flex; align-items:center; gap:8px; }
+.bens-year select{
+  font:inherit; font-weight:400; padding:6px 10px;
+  border:1px solid var(--rule); border-radius:8px; background:var(--paper); color:var(--navy);
+}
+.bens-group{
+  font-family:'Public Sans',system-ui,sans-serif; font-size:.78rem; font-weight:700;
+  letter-spacing:.08em; text-transform:uppercase; color:var(--navy-soft);
+  margin:28px 0 10px;
+}
+.ben-list{ list-style:none; margin:0; padding:0; border-top:1px solid var(--rule-soft); }
+.ben{ padding:13px 0; border-bottom:1px solid var(--rule-soft); }
+.ben-top{ display:flex; justify-content:space-between; gap:16px; align-items:baseline; }
+.ben-name{ font-weight:600; }
+.ben-says{ font-size:.92rem; color:var(--navy-mid); text-align:right; white-space:nowrap; font-variant-numeric:tabular-nums; }
+.ben.ben-done .ben-says{ color:var(--spring-ink); font-weight:600; }
+.ben.ben-done .ben-says::before{ content:'\2713\00a0'; }
+.ben.ben-outside .ben-name{ color:var(--navy-soft); }
+.ben-bar{ height:6px; background:var(--rule-soft); border-radius:999px; margin-top:9px; overflow:hidden; }
+.ben-bar span{ display:block; height:100%; background:var(--sun); border-radius:999px; }
+.ben-left{ font-size:.85rem; color:var(--navy-soft); margin:5px 0 0; }
+.ben-detail{ font-size:.85rem; color:var(--navy-soft); margin:4px 0 0; }
+.bens-log{ margin-top:26px; }
+.bens-log summary{ cursor:pointer; font-weight:600; }
+.bens-log ul{ list-style:none; margin:12px 0 0; padding:0; }
+.bens-log li{
+  display:grid; grid-template-columns:7.5rem 1fr; gap:2px 14px;
+  padding:9px 0; border-bottom:1px solid var(--rule-soft); font-size:.94rem;
+}
+.log-date{ color:var(--navy-soft); font-variant-numeric:tabular-nums; }
+.log-note{ grid-column:2; color:var(--navy-soft); font-size:.88rem; }
+.bens-foot{ font-size:.92rem; color:var(--navy-soft); margin-top:22px; }
+
+@media (max-width:560px){
+  .ben-top{ flex-direction:column; gap:2px; }
+  .ben-says{ text-align:left; white-space:normal; }
+  .bens-log li{ grid-template-columns:1fr; }
+  .log-note{ grid-column:1; }
+}

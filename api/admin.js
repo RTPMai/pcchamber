@@ -40,7 +40,9 @@
    than silently overwriting their work.
    ========================================================================== */
 
-import { createHash } from 'node:crypto';
+import { createHash, randomBytes } from 'node:crypto';
+import { updateContent } from './_lib/github.js';
+import { BENEFITS } from '../data/benefits.js';
 
 const COOKIE = 'pcc_admin';
 const MAX_AGE = 60 * 60 * 8;   // a working day, then sign in again
@@ -48,7 +50,8 @@ const MAX_AGE = 60 * 60 * 8;   // a working day, then sign in again
 /* Only these. A bug or a bad actor cannot reach anything else in the repo. */
 const ALLOWED = new Set([
   'members.json', 'events.json', 'jobs.json',
-  'news.json', 'board.json', 'referrals.json'
+  'news.json', 'board.json', 'referrals.json',
+  'benefits.json'
 ]);
 
 const api = () => ({
@@ -327,6 +330,72 @@ export default async function handler(req, res) {
         return;
       }
       const out = await saveFile(file, data, sha, String(who).trim(), note);
+      res.status(200).json({ ok: true, ...out });
+      return;
+    }
+
+    /* The benefits log. Adding and removing one entry at a time, on the
+       server, rather than saving the whole file from the browser. Two
+       people logging at once then both land, instead of the second being
+       told to reload and do it again. */
+    if (action === 'loguse') {
+      const who = String(body.who || '').trim();
+      if (!who) {
+        res.status(400).json({ error: 'no_name', message: 'Say who you are before saving.' });
+        return;
+      }
+      const u = body.use || {};
+      const b = BENEFITS.find(x => x.id === u.benefit);
+      const problem =
+        !/^[a-z0-9-]{1,80}$/.test(String(u.member || '')) ? 'Pick a member.' :
+        !b ? 'Pick which benefit they used.' :
+        !/^\d{4}-\d{2}-\d{2}$/.test(String(u.date || '')) ? 'Put in the date it was used.' :
+        (b.kind === 'dollars' && !(Number(u.amount) > 0)) ? 'Put in the dollar amount.' :
+        null;
+      if (problem) {
+        res.status(400).json({ error: 'bad_use', message: problem });
+        return;
+      }
+
+      const entry = {
+        id: randomBytes(5).toString('hex'),
+        member: u.member,
+        benefit: b.id,
+        date: u.date,
+        ...(b.kind === 'dollars'
+          ? { amount: Math.round(Number(u.amount) * 100) / 100 }
+          : (b.kind === 'count' && Number(u.qty) > 1 ? { qty: Math.min(99, Math.floor(Number(u.qty))) } : {})),
+        ...(String(u.note || '').trim() ? { note: String(u.note).replace(/\s+/g, ' ').trim().slice(0, 300) } : {}),
+        by: who.slice(0, 80),
+        at: new Date().toISOString()
+      };
+
+      const out = await updateContent('benefits.json', data => {
+        data.uses = Array.isArray(data.uses) ? data.uses : [];
+        data.uses.push(entry);
+      }, `Log ${b.label.toLowerCase()} for ${u.member} (via admin, by ${who})`, `${who} via chamber admin`);
+
+      res.status(200).json({ ok: true, entry, ...out });
+      return;
+    }
+
+    if (action === 'unloguse') {
+      const who = String(body.who || '').trim();
+      if (!who) {
+        res.status(400).json({ error: 'no_name', message: 'Say who you are before saving.' });
+        return;
+      }
+      let gone = null;
+      const out = await updateContent('benefits.json', data => {
+        data.uses = (data.uses || []).filter(u => {
+          if (u.id === body.id) { gone = u; return false; }
+          return true;
+        });
+      }, `Remove a logged benefit use (via admin, by ${who})`, `${who} via chamber admin`);
+      if (!gone) {
+        res.status(404).json({ error: 'gone', message: 'That entry was already removed.' });
+        return;
+      }
       res.status(200).json({ ok: true, ...out });
       return;
     }

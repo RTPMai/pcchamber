@@ -1,18 +1,25 @@
 /* ==========================================================================
    MEMBERSHIP
 
-   Taken from "Membership levels and benefits", the proposal currently in
-   front of the board.
+   Approved by the board in September 2026.
 
    THE DRAFT SWITCH
 
-   draft stays true until the board votes. While it is true a red banner
+   draft was true until the board voted. While it is true a red banner
    sits at the top of the membership page and the prices are marked as not
-   final. Turn it off only after the vote.
+   final. If the structure goes back to the board for changes, turn it back
+   on until they are approved.
+
+   IF YOU CHANGE A BENEFIT HERE
+
+   What each level gets is written twice: once below as words for the
+   membership page, and once in data/benefits.js as numbers the benefits
+   tracker counts against. Change one, change the other, or the tracker and
+   the page will tell members different things.
    ========================================================================== */
 
 export const MEMBERSHIP = {
-  draft: true,
+  draft: false,
   draftNote:
     'This structure is a proposal under review by the chamber board. Prices and benefits are not final and should not be quoted to prospective members yet.'
 };
@@ -22,7 +29,7 @@ export const TIER_LIST = [
     id: 'individual',
     season: 'winter',
     name: 'Individual Membership',
-    price: '$100 to $125',
+    price: '$125',
     per: 'a year',
     who: 'For a person rather than a business. Residents, retirees, job seekers, and people who want to be part of the local business community without owning a business.',
     includes: [
@@ -94,8 +101,7 @@ export const TIER_LIST = [
       '$250 sponsorship credit',
       '6 luncheon tickets total, not 6 more',
       '2 social media spotlights a year',
-      'Stand-alone email to the full membership',
-      'Negotiated financial institution rate'
+      'Stand-alone email to the full membership'
     ]
   },
   {

@@ -1,7 +1,9 @@
 /* ==========================================================================
    THE ADMIN
 
-   Three screens: sign in, pick a collection, edit a thing in it.
+   Three screens: sign in, pick a collection, edit a thing in it. Plus the
+   benefits tracker, which works differently and is explained where it
+   starts, further down.
 
    Nothing is saved until Save is pressed. Saving makes a commit on GitHub,
    which starts a rebuild, which takes about a minute. The interface says
@@ -11,6 +13,7 @@
    ========================================================================== */
 
 import { COLLECTIONS } from './schema.js';
+import { BENEFITS, TIER_NAMES, benefitsFor, summarize, uptake, describe, thisYear, yearOf } from './benefits.js';
 
 const $ = sel => document.querySelector(sel);
 const el = (tag, attrs = {}, ...kids) => {
@@ -131,6 +134,9 @@ function screenHome() {
     el('div', {},
       el('h1', {}, 'What would you like to change?'),
       el('div', { class: 'cards' },
+        el('button', { class: 'card', 'data-season': 'autumn', onclick: () => screenBenefits() },
+          el('strong', {}, 'Member benefits'),
+          el('span', {}, 'Log it when a member uses a benefit, and see who is not using theirs.')),
         COLLECTIONS.map(c =>
           el('button', { class: 'card', 'data-season': c.season, onclick: () => openCollection(c) },
             el('strong', {}, c.title),
@@ -309,7 +315,7 @@ async function loadDirectory() {
   if (DIRECTORY.length) return;
   const members = await call({ action: 'load', file: 'members.json' });
   DIRECTORY = (members.data.members || [])
-    .map(m => ({ slug: m.slug, name: m.name }))
+    .map(m => ({ slug: m.slug, name: m.name, tier: m.tier }))
     .sort((a, b) => a.name.localeCompare(b.name));
 }
 
@@ -415,7 +421,7 @@ async function save() {
     /* A member added or renamed should appear in the picker straight away. */
     if (c.file === 'members.json') {
       DIRECTORY = (state.file.data.members || [])
-        .map(m => ({ slug: m.slug, name: m.name }))
+        .map(m => ({ slug: m.slug, name: m.name, tier: m.tier }))
         .sort((a, b) => a.name.localeCompare(b.name));
     }
     render(
@@ -436,6 +442,278 @@ async function save() {
           el('button', { class: 'btn primary', onclick: save }, 'Try again'),
           el('button', { class: 'btn', onclick: screenList }, 'Back'))));
   }
+}
+
+/* ---------- the benefits tracker ------------------------------------------
+
+   Not a collection like the others, for two reasons.
+
+   What it shows is worked out, not typed: how many luncheon tickets are
+   left is the allowance for their level minus what has been logged. So it
+   has its own screens rather than a form.
+
+   And it saves one entry at a time, straight away. There is no Save
+   button to forget. Each entry is its own commit in content/benefits.json,
+   with the name of whoever logged it, and the member sees it on their
+   account page as soon as it is saved, without waiting for a rebuild.
+   -------------------------------------------------------------------------- */
+
+const bens = { uses: [], year: thisYear(), tier: 'all', sort: 'low' };
+
+async function loadUses() {
+  const file = await call({ action: 'load', file: 'benefits.json' });
+  bens.uses = Array.isArray(file.data.uses) ? file.data.uses : [];
+}
+
+const today = () => new Date().toISOString().slice(0, 10);
+const tierName = t => TIER_NAMES[t] || t || 'No level set';
+const usesFor = slug => bens.uses.filter(u => u.member === slug);
+const benefitLabel = id => (BENEFITS.find(b => b.id === id) || {}).label || id;
+
+function yearsAvailable() {
+  return [...new Set(bens.uses.map(u => yearOf(u.date)).concat(thisYear(), bens.year))]
+    .filter(Boolean).sort((a, b) => b - a);
+}
+
+async function screenBenefits() {
+  render(el('p', { class: 'loading' }, 'Loading benefits'));
+  try {
+    await loadDirectory();
+    await loadUses();
+    drawBenefitsOverview();
+  } catch (e) {
+    render(el('div', { class: 'panel' },
+      el('h1', {}, 'Could not open that'),
+      el('p', { class: 'msg' }, e.message),
+      el('div', { class: 'row' }, el('button', { class: 'btn', onclick: screenHome }, 'Back'))));
+  }
+}
+
+function overviewRows() {
+  return DIRECTORY
+    .filter(m => bens.tier === 'all' || m.tier === bens.tier)
+    .map(m => {
+      const mine = usesFor(m.slug).filter(u => yearOf(u.date) === bens.year);
+      const rows = summarize(m.tier, mine, bens.year);
+      return {
+        m, rows, logged: mine.length,
+        pct: uptake(rows),
+        last: mine.map(u => u.date).sort().pop() || null
+      };
+    });
+}
+
+function drawBenefitsOverview() {
+  const list = overviewRows();
+  if (bens.sort === 'low') {
+    list.sort((a, b) => (a.pct ?? -1) - (b.pct ?? -1) || a.logged - b.logged || a.m.name.localeCompare(b.m.name));
+  } else {
+    list.sort((a, b) => a.m.name.localeCompare(b.m.name));
+  }
+  const idle = list.filter(r => !r.logged).length;
+  const tiersInUse = [...new Set(DIRECTORY.map(m => m.tier))];
+
+  const pick = (label, value, options, onpick) => {
+    const s = el('select', {}, options.map(([v, t]) => el('option', { value: v, selected: String(v) === String(value) }, t)));
+    s.addEventListener('change', () => onpick(s.value));
+    return el('label', { class: 'mini' }, label, s);
+  };
+
+  render(
+    el('div', {},
+      el('button', { class: 'back', onclick: screenHome }, 'All sections'),
+      el('h1', {}, 'Member benefits'),
+      el('p', { class: 'note' },
+        'Log it when a member uses something: a luncheon ticket, a spotlight, a ribbon cutting. ',
+        'It saves straight away and they see it on their account page.'),
+      tiersInUse.length === 1 && tiersInUse[0] === 'basic' && el('p', { class: 'note warn' },
+        'Every member is still on Basic Business, so everybody shows the Basic allowances. ',
+        'Set each member\u2019s level under Member directory first.'),
+      el('div', { class: 'filters' },
+        pick('Year', bens.year, yearsAvailable().map(y => [y, String(y)]), v => { bens.year = Number(v); drawBenefitsOverview(); }),
+        pick('Level', bens.tier, [['all', 'Every level']].concat(
+          ['individual', 'basic', 'partner', 'investor', 'sponsor', 'champion'].map(t => [t, tierName(t)])),
+          v => { bens.tier = v; drawBenefitsOverview(); }),
+        pick('Order', bens.sort, [['low', 'Least used first'], ['name', 'By name']], v => { bens.sort = v; drawBenefitsOverview(); })),
+      el('p', { class: 'tally' },
+        `${list.length} member${list.length === 1 ? '' : 's'}. `,
+        idle ? el('strong', {}, `${idle} with nothing logged for ${bens.year}.`) : 'All have something logged.'),
+      el('ul', { class: 'list' },
+        list.length ? list.map(r =>
+          el('li', {},
+            el('button', { class: 'row-open', onclick: () => drawBenefitsMember(r.m.slug) },
+              el('strong', {}, r.m.name),
+              el('span', {}, [
+                tierName(r.m.tier),
+                r.pct == null ? null : `${r.pct}% of counted benefits used`,
+                r.last ? 'last logged ' + r.last : null
+              ].filter(Boolean).join(' \u00b7 ')),
+              r.pct != null && r.logged > 0 && el('span', { class: 'meter', 'aria-hidden': 'true' },
+                el('i', { style: `width:${r.pct}%` })),
+              !r.logged && el('em', { class: 'flag' }, 'Nothing used yet'))))
+          : el('li', { class: 'empty' }, 'No members on that level.')),
+      el('div', { class: 'row' },
+        el('button', { class: 'btn', onclick: downloadSummary }, `Download ${bens.year} summary`),
+        el('button', { class: 'btn', onclick: downloadLog }, `Download ${bens.year} log`)),
+      el('p', { class: 'help' }, 'Both open in Excel. The summary is one line per member per benefit; the log is every entry.')
+    ));
+}
+
+function drawBenefitsMember(slug, message) {
+  const m = DIRECTORY.find(x => x.slug === slug);
+  const mine = usesFor(slug).filter(u => yearOf(u.date) === bens.year);
+  const rows = summarize(m.tier, mine, bens.year);
+  const offered = benefitsFor(m.tier);
+
+  /* The log form. */
+  const benefit = el('select', { id: 'b-benefit' },
+    el('option', { value: '' }, 'Pick one'),
+    offered.map(b => el('option', { value: b.id }, b.label)),
+    el('optgroup', { label: 'Not on their level' },
+      BENEFITS.filter(b => !offered.includes(b)).map(b => el('option', { value: b.id }, b.label))));
+  const date = el('input', { type: 'date', id: 'b-date', value: today() });
+  const qty = el('input', { type: 'number', id: 'b-qty', min: '1', max: '99', value: '1' });
+  const amount = el('input', { type: 'number', id: 'b-amount', min: '1', step: '1', placeholder: '250' });
+  const note = el('input', { type: 'text', id: 'b-note', maxlength: '300' });
+  const qtyRow = el('div', { class: 'field half' }, el('label', { for: 'b-qty' }, 'How many'), qty);
+  const amountRow = el('div', { class: 'field half' }, el('label', { for: 'b-amount' }, 'Dollar amount'), amount);
+  const msg = el('p', { class: 'msg', role: 'status' }, message || '');
+  if (message) msg.classList.add('ok');
+
+  const showExtra = () => {
+    const b = BENEFITS.find(x => x.id === benefit.value);
+    qtyRow.hidden = !b || b.kind !== 'count';
+    amountRow.hidden = !b || b.kind !== 'dollars';
+  };
+  benefit.addEventListener('change', showExtra);
+  showExtra();
+
+  const logIt = async btn => {
+    btn.disabled = true;
+    msg.classList.remove('ok');
+    msg.textContent = 'Saving';
+    try {
+      const out = await call({
+        action: 'loguse', who: state.who,
+        use: { member: slug, benefit: benefit.value, date: date.value, qty: qty.value, amount: amount.value, note: note.value }
+      });
+      bens.uses.push(out.entry);
+      bens.year = yearOf(out.entry.date);
+      drawBenefitsMember(slug, `Logged ${benefitLabel(out.entry.benefit).toLowerCase()}. ${m.name} can see it now.`);
+    } catch (e) {
+      btn.disabled = false;
+      msg.textContent = e.message;
+    }
+  };
+
+  const removeUse = async u => {
+    if (!confirm(`Remove ${benefitLabel(u.benefit).toLowerCase()} on ${u.date}? It comes off their account page too.`)) return;
+    try {
+      await call({ action: 'unloguse', who: state.who, id: u.id });
+      bens.uses = bens.uses.filter(x => x.id !== u.id);
+      drawBenefitsMember(slug, 'Removed.');
+    } catch (e) {
+      alert(e.message);
+    }
+  };
+
+  const logBtn = el('button', { class: 'btn primary' }, 'Log it');
+  logBtn.addEventListener('click', () => logIt(logBtn));
+
+  const groups = [
+    ['Counted each year', r => (r.kind === 'count' || r.kind === 'dollars') && !r.outside],
+    ['Once a year', r => r.kind === 'once' && !r.outside],
+    ['Included, no limit', r => r.kind === 'open' && !r.outside],
+    ['Not part of their level', r => r.outside]
+  ];
+
+  render(
+    el('div', {},
+      el('button', { class: 'back', onclick: drawBenefitsOverview }, 'Back to member benefits'),
+      el('h1', {}, m.name),
+      el('p', { class: 'lede' }, `${tierName(m.tier)}, membership year ${bens.year}.`),
+
+      el('div', { class: 'panel logform' },
+        el('h2', {}, 'Log a use'),
+        el('div', { class: 'field' }, el('label', { for: 'b-benefit' }, 'What did they use'), benefit),
+        el('div', { class: 'split' },
+          el('div', { class: 'field half' }, el('label', { for: 'b-date' }, 'When'), date),
+          qtyRow, amountRow),
+        el('div', { class: 'field' },
+          el('label', { for: 'b-note' }, 'Note'),
+          el('span', { class: 'help' }, 'Optional. Which event, which post. The member can see this, so write it for them.'),
+          note),
+        el('div', { class: 'row' }, logBtn),
+        msg),
+
+      groups.map(([title, test]) => {
+        const these = rows.filter(test);
+        if (!these.length) return null;
+        return el('section', { class: 'bgroup' },
+          el('h2', { class: 'bgroup-title' }, title),
+          el('ul', { class: 'blist' }, these.map(r =>
+            el('li', { class: r.over ? 'over' : (r.kind === 'once' && r.used ? 'done' : '') },
+              el('span', { class: 'bname' }, r.label),
+              el('span', { class: 'bsays' }, describe(r),
+                r.over ? ' \u00b7 over the allowance' : '',
+                r.left > 0 && r.kind !== 'once' ? ` \u00b7 ${r.kind === 'dollars' ? '$' + r.left.toLocaleString('en-US') : r.left} left` : ''),
+              el('button', { class: 'bquick', onclick: () => {
+                benefit.value = r.id; showExtra(); benefit.scrollIntoView({ behavior: 'smooth', block: 'center' }); date.focus();
+              } }, 'Log')))));
+      }),
+
+      el('section', { class: 'bgroup' },
+        el('h2', { class: 'bgroup-title' }, `Logged in ${bens.year}`),
+        mine.length
+          ? el('ul', { class: 'list' }, [...mine].sort((a, b) => b.date.localeCompare(a.date)).map(u =>
+              el('li', {},
+                el('div', { class: 'row-open static' },
+                  el('strong', {}, benefitLabel(u.benefit) +
+                    (u.qty ? ` \u00d7 ${u.qty}` : '') + (u.amount ? `, $${u.amount.toLocaleString('en-US')}` : '')),
+                  el('span', {}, [u.date, u.note, u.by ? 'logged by ' + u.by : null].filter(Boolean).join(' \u00b7 '))),
+                el('button', { class: 'row-del', title: 'Remove', onclick: () => removeUse(u) }, 'Remove'))))
+          : el('p', { class: 'help' }, 'Nothing logged yet this year.'))
+    ));
+}
+
+/* ---------- spreadsheets ---------------------------------------------------- */
+
+function csv(rows) {
+  const cell = v => {
+    const t = v == null ? '' : String(v);
+    return /[",\n]/.test(t) ? '"' + t.replace(/"/g, '""') + '"' : t;
+  };
+  return rows.map(r => r.map(cell).join(',')).join('\r\n');
+}
+
+function download(name, text) {
+  const url = URL.createObjectURL(new Blob(['\ufeff' + text], { type: 'text/csv;charset=utf-8' }));
+  const a = el('a', { href: url, download: name });
+  document.body.append(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+function downloadSummary() {
+  const out = [['Member', 'Level', 'Benefit', 'Allowed', 'Used', 'Left', 'Status']];
+  for (const { m, rows } of overviewRows()) {
+    for (const r of rows) {
+      out.push([m.name, tierName(m.tier), r.label, r.allowed ?? 'No limit', r.used, r.left ?? '', describe(r)]);
+    }
+  }
+  download(`chamber-benefits-summary-${bens.year}.csv`, csv(out));
+}
+
+function downloadLog() {
+  const names = Object.fromEntries(DIRECTORY.map(m => [m.slug, m.name]));
+  const out = [['Date', 'Member', 'Benefit', 'How many', 'Amount', 'Note', 'Logged by']];
+  bens.uses
+    .filter(u => yearOf(u.date) === bens.year)
+    .sort((a, b) => a.date.localeCompare(b.date))
+    .forEach(u => out.push([u.date, names[u.member] || u.member, benefitLabel(u.benefit),
+      u.qty || (BENEFITS.find(b => b.id === u.benefit)?.kind === 'dollars' ? '' : 1), u.amount || '', u.note || '', u.by || '']));
+  download(`chamber-benefits-log-${bens.year}.csv`, csv(out));
 }
 
 /* ---------- shell --------------------------------------------------------- */

@@ -78,6 +78,8 @@ import { fileURLToPath } from 'node:url';
 
 import { kvGet, kvSet, kvDel, kvBump, storeReady, storeMissing } from './_lib/store.js';
 import { hash, matches, checkStrength, wasteTime, MIN_LENGTH } from './_lib/passwords.js';
+import { readContent, ghMissing } from './_lib/github.js';
+import { BENEFITS, TIER_NAMES, summarize, describe, thisYear, yearOf } from '../data/benefits.js';
 
 const COOKIE = 'pcc_member';
 const DEMO_DAYS = 1;
@@ -450,6 +452,53 @@ export default async function handler(req, res) {
 
         setSession(res, member, payload.email);
         res.status(200).json({ ok: true, name: member.name, slug: member.slug });
+        return;
+      }
+
+      /* What their level includes and what they have used this year.
+         Read live from GitHub rather than from the deployed copy, so an
+         entry the chamber logs shows up straight away, not after the next
+         rebuild. Only ever their own entries. */
+      case 'benefits': {
+        const m = currentMember(req);
+        if (!m) {
+          res.status(401).json({ error: 'signed_out', message: 'Please sign in again.' });
+          return;
+        }
+        const missing = ghMissing();
+        if (missing.length) {
+          res.status(503).json({
+            error: 'not_configured',
+            message: `The benefits tracker is not connected yet. Missing in the Vercel project settings: ${missing.join(', ')}.`
+          });
+          return;
+        }
+
+        const { data } = await readContent('benefits.json');
+        const mine = (data.uses || []).filter(u => u.member === m.slug);
+        const year = Number(body.year) || thisYear();
+        const label = id => (BENEFITS.find(b => b.id === id) || {}).label || id;
+
+        const rows = summarize(m.tier, mine, year).map(r => ({ ...r, says: describe(r) }));
+        const years = [...new Set(mine.map(u => yearOf(u.date)).concat(thisYear()))].sort((a, b) => b - a);
+
+        res.status(200).json({
+          tier: m.tier,
+          tierName: TIER_NAMES[m.tier] || m.tier,
+          year,
+          years,
+          rows,
+          log: mine
+            .filter(u => yearOf(u.date) === year)
+            .sort((a, b) => b.date.localeCompare(a.date))
+            .map(u => ({
+              date: u.date,
+              benefit: label(u.benefit),
+              qty: u.qty || null,
+              amount: u.amount || null,
+              note: u.note || ''
+            }))
+        });
         return;
       }
 

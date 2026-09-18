@@ -54,17 +54,29 @@
     }
   ],
   "tiers": {
-    "premier": {
-      "label": "Premier member",
+    "champion": {
+      "label": "Community Champion",
       "rank": 0
     },
-    "pro": {
-      "label": "Pro member",
+    "sponsor": {
+      "label": "Community Sponsor",
       "rank": 1
+    },
+    "investor": {
+      "label": "Community Investor",
+      "rank": 2
+    },
+    "partner": {
+      "label": "Community Partner",
+      "rank": 3
     },
     "basic": {
       "label": "Member",
-      "rank": 2
+      "rank": 4
+    },
+    "individual": {
+      "label": "Individual member",
+      "rank": 5
     }
   },
   "members": [

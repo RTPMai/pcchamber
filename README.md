@@ -120,7 +120,7 @@ Node 18 or newer. No dependencies to install.
 
 **Set formEndpoint** to have the forms submit directly rather than opening an email.
 
-**Vote on the membership structure.** `data/membership.js` has `draft: true`, which puts a red banner on the page. Turn it off after the board votes, not before.
+**Assign every member their membership level.** The board approved the six levels in September 2026 and the draft banner is off. Every member is still on Basic Business, so the directory order, the badges, and the benefits tracker all treat them that way until each one is set in the admin under Member directory.
 
 **Get the board to agree the referral list.** `data/referrals.js` drives `/resources/who-to-call/`. The fourteen members named in it were picked off their category during the import, not chosen by anyone at the chamber, and referral exclusivity is a paid benefit. Treat the current list as a first draft.
 

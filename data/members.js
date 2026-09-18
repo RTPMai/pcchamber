@@ -19,7 +19,8 @@
      slug      the web address. Lowercase, hyphens, never change once live.
      name      business name as they want it written
      category  must match one of the CATEGORIES ids below
-     tier      basic | pro | premier   (drives sort order and the badge)
+     tier      individual | basic | partner | investor | sponsor | champion
+               (drives sort order, the badge, and the benefits tracker)
      summary   one plain sentence. Shows in the list, before anyone clicks.
      about     a short paragraph. Shows on their page.
      contact   any of: person, phone, email, web, address
