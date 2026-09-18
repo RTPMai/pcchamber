@@ -70,9 +70,8 @@
       "address": "107 N 2nd St, Polk City, IA 50226",
       "summary": "Early networking before the day starts. Turn up, buy a coffee, talk to people.",
       "cost": "Free",
-      "audience": "public",
-      "season": "winter",
-      "register": true
+      "audience": "members",
+      "season": "winter"
     },
     {
       "id": "luncheon-2026-10-14",
