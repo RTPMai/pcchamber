@@ -556,14 +556,26 @@
       "category": "retail",
       "tier": "basic",
       "city": "Polk City",
-      "summary": "",
+      "summary": "Family-owned screen printing, embroidery, and promotional products shop since 1987.",
       "contact": {
+        "person": "Ryan Toney",
         "phone": "515-984-7740",
+        "email": "info@pmapparel.com",
         "web": "https://www.pmapparel.com",
         "address": "1100 S 5th St., Polk City, IA, 50226"
       },
       "access": [
         "ryan@pmapparel.com"
+      ],
+      "about": "P&M Apparel has been decorating apparel since 1987. We handle screen printing, embroidery, and promotional products for businesses, schools, teams, and events, from a few shirts to a few thousand. We're a family-owned shop with 16 people, all under one roof. We're also a Gildan brand partner and host Flyover Con, an education conference for the decorated apparel industry.",
+      "serves": [
+        "Screen printing",
+        "Embroidery",
+        "Promotional products",
+        "Custom apparel",
+        "Team and school gear",
+        "Business uniforms",
+        "Event shirts"
       ]
     },
     {
