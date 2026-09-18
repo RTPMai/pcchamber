@@ -1069,3 +1069,4 @@ img.face{ display:block; }
 .stat{ background:var(--paper-warm); border:1px solid var(--rule); border-radius:10px; padding:12px 14px; }
 .stat strong{ display:block; font-family:'Fraunces',Georgia,serif; font-size:1.6rem; font-weight:600; line-height:1.1; font-variant-numeric:tabular-nums; }
 .stat span{ font-size:.85rem; color:var(--navy-soft); }
+.offsite{ align-self:center; font-size:.85rem; color:var(--navy-soft); }

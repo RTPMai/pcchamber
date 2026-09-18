@@ -772,6 +772,16 @@ function memberPage(m) {
 }
 
 
+/* A button that leaves the chamber site says where it goes, so nobody
+   confuses the club's registration with the chamber's own. */
+function offsite(href) {
+  try {
+    const u = new URL(href, SITE.url);
+    if (u.host === new URL(SITE.url).host) return '';
+    return `<span class="offsite">On ${esc(u.host.replace(/^www\./, ''))}</span>`;
+  } catch { return ''; }
+}
+
 function eventsPage() {
   const t = todayISO();
   const upcoming = CALENDAR.filter(e => e.date >= t).sort((a, b) => a.date.localeCompare(b.date));
@@ -810,7 +820,7 @@ function eventsPage() {
        bottom of the page when the button is pressed. */
     const reg = e.register && e.id
       ? `<div class="reg" data-event="${esc(e.id)}"${e.tickets ? ' data-tickets="1"' : ''}>
-    <button type="button" class="btn sun reg-open">Register</button>
+    <button type="button" class="btn sun reg-open">Save my spot</button>
   </div>` : '';
 
     return `<article class="event" id="${esc(e.id || '')}" data-season="${e.season || 'sun'}">
@@ -821,7 +831,7 @@ function eventsPage() {
   <p>${esc(e.summary)}</p>
   ${e.detail ? `<p>${esc(e.detail)}</p>` : ''}
   ${e.cost ? `<p class="cost">${esc(e.cost)}</p>` : ''}
-  ${e.rsvp ? `<div class="btnrow"><a class="btn" href="${esc(e.rsvp.href)}">${esc(e.rsvp.label)}</a></div>` : ''}
+  ${e.rsvp ? `<div class="btnrow"><a class="btn" href="${esc(e.rsvp.href)}">${esc(e.rsvp.label)}</a>${offsite(e.rsvp.href)}</div>` : ''}
   ${reg}
   ${add}
 </article>`;
@@ -1015,7 +1025,7 @@ ${eventLd.map(o => `<script type="application/ld+json">${JSON.stringify(o)}</scr
     ticketWrap.appendChild(make('span',null,' Use one of our luncheon tickets for this person'));
     form.appendChild(ticketWrap);
 
-    var go=make('button',{type:'submit','class':'btn sun'},'Register');
+    var go=make('button',{type:'submit','class':'btn sun'},'Save my spot');
     var msg=make('p',{'class':'reg-msg',role:'status'});
     form.appendChild(go); form.appendChild(msg);
     box.appendChild(form);
