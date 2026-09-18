@@ -99,3 +99,50 @@ export async function updateContent(name, apply, message, author, attempts = 3) 
     { status: 409, cause: lastError }
   );
 }
+
+/* ---------- files outside content/ ----------------------------------------
+
+   Only used for member logos, which live in assets/members/ so the build
+   copies them into the site like any other image. Each upload gets a new
+   file name, so it never has to overwrite anything and no browser ever
+   shows last month's logo from its cache. */
+
+export async function writeAsset(path, base64, message, author) {
+  const { branch } = gh();
+  const res = await call(path, {
+    method: 'PUT',
+    body: JSON.stringify({
+      message,
+      content: base64,
+      branch,
+      committer: { name: author, email: 'admin@polkcitychamber.com' }
+    })
+  });
+  /* 422 here means the file is already there, which only happens when
+     somebody uploads the exact same image twice. That is fine. */
+  if (res.status === 422) return { existed: true };
+  if (!res.ok) {
+    throw Object.assign(
+      new Error(`GitHub refused the upload (${res.status}).`),
+      { status: 502, detail: await res.text() }
+    );
+  }
+  return { existed: false };
+}
+
+/* Best effort. A logo left behind costs a few kilobytes; failing a save
+   over it would cost the member their change. */
+export async function deleteAsset(path, message, author) {
+  try {
+    const { branch } = gh();
+    const meta = await call(`${path}?ref=${encodeURIComponent(branch)}`);
+    if (!meta.ok) return;
+    const { sha } = await meta.json();
+    await call(path, {
+      method: 'DELETE',
+      body: JSON.stringify({ message, sha, branch, committer: { name: author, email: 'admin@polkcitychamber.com' } })
+    });
+  } catch (err) {
+    console.error('could not remove old logo', path, err);
+  }
+}

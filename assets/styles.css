@@ -961,3 +961,24 @@ img.face{ display:block; }
   .bens-log li{ grid-template-columns:1fr; }
   .log-note{ grid-column:1; }
 }
+
+/* ---------- Logo, in the listing editor -------------------------------- */
+/* The preview is the same plate the directory uses, at the size of the
+   member's own page, so what they see here is what everyone else sees. */
+
+.field .lbl{ display:block; font-weight:600; font-size:.95rem; margin-bottom:5px; }
+.logoedit{ display:flex; align-items:center; gap:20px; margin-top:8px; }
+.logoprev{
+  flex:0 0 auto; width:96px; height:96px; border-radius:12px; background:#fff;
+  border:1px solid var(--rule); display:flex; align-items:center; justify-content:center; overflow:hidden;
+}
+.logoprev img{ max-width:78%; max-height:78%; display:block; }
+.logoprev .initial{ font-family:'Fraunces',Georgia,serif; font-size:2.4rem; font-weight:600; color:var(--tint-ink); }
+.logobtns{ display:flex; flex-direction:column; align-items:flex-start; gap:10px; }
+.field .logobtns label.btn{ display:inline-flex; margin:0; font-size:.93rem; cursor:pointer; }
+.btn.small{ padding:9px 18px; }
+.visually-hidden{
+  position:absolute !important; width:1px; height:1px; overflow:hidden;
+  clip:rect(0 0 0 0); clip-path:inset(50%); white-space:nowrap;
+}
+.logobtns input:focus-visible + .linkish, .logobtns:focus-within label.btn{ outline:3px solid var(--sun); outline-offset:2px; }

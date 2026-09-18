@@ -2022,6 +2022,20 @@ function listingPage() {
         </div>
 
         <div class="field">
+          <span class="lbl" id="logolbl">Logo</span>
+          <span class="help">Shows beside your name in the directory and on your page. A square-ish version with a plain or see-through background looks best. PNG, JPEG, WebP or SVG.</span>
+          <div class="logoedit" aria-labelledby="logolbl">
+            <span class="logoprev" id="logoprev"><span class="initial" id="logoinit" aria-hidden="true"></span></span>
+            <div class="logobtns">
+              <label class="btn ghost small" for="l-logo">Choose a file</label>
+              <input type="file" id="l-logo" accept="image/png,image/jpeg,image/webp,image/svg+xml" class="visually-hidden">
+              <button type="button" class="linkish" id="logoremove" hidden>Remove logo</button>
+            </div>
+          </div>
+          <p class="help" id="logomsg" role="status" aria-live="polite"></p>
+        </div>
+
+        <div class="field">
           <label for="l-summary">What you do, in one sentence</label>
           <span class="help">This is the line people read in the directory before deciding to click. Plain beats polished. "Small animal vet with evening appointments" tells somebody more than "your trusted partner in animal wellness".</span>
           <textarea id="l-summary" rows="2" maxlength="300"></textarea>
@@ -2126,8 +2140,73 @@ function listingPage() {
   }
   el.summary.addEventListener('input', tally);
 
+  /* ---------- logo ----------
+     Whatever file is picked is drawn onto a canvas and sent as a small
+     WebP or PNG. The server accepts nothing else, which is what keeps an
+     SVG with script in it off the chamber website. */
+  var logoPrev=document.getElementById('logoprev'),
+      logoInit=document.getElementById('logoinit'),
+      logoFile=document.getElementById('l-logo'),
+      logoRemove=document.getElementById('logoremove'),
+      logoMsg=document.getElementById('logomsg');
+
+  function showLogo(src, name){
+    logoPrev.replaceChildren();
+    if(src){
+      var img=document.createElement('img'); img.src=src; img.alt='Your logo';
+      logoPrev.appendChild(img);
+    } else {
+      logoInit.textContent=(name||'?').trim().charAt(0);
+      logoPrev.appendChild(logoInit);
+    }
+    logoRemove.hidden=!src;
+  }
+
+  function shrink(file, size){
+    return new Promise(function(resolve, reject){
+      var url=URL.createObjectURL(file), img=new Image();
+      img.onload=function(){
+        var w=img.naturalWidth||size, h=img.naturalHeight||size;
+        var scale=Math.min(1, size/Math.max(w,h));
+        /* SVGs have no real size, so draw them at full size rather than
+           as a postage stamp. */
+        if(file.type==='image/svg+xml') scale=size/Math.max(w,h);
+        var c=document.createElement('canvas');
+        c.width=Math.max(1,Math.round(w*scale)); c.height=Math.max(1,Math.round(h*scale));
+        c.getContext('2d').drawImage(img,0,0,c.width,c.height);
+        URL.revokeObjectURL(url);
+        var out=c.toDataURL('image/webp',0.9);
+        if(out.indexOf('data:image/webp')!==0) out=c.toDataURL('image/png');
+        resolve(out);
+      };
+      img.onerror=function(){ URL.revokeObjectURL(url); reject(new Error('That file could not be opened as an image.')); };
+      img.src=url;
+    });
+  }
+
+  logoFile.addEventListener('change', function(){
+    var f=logoFile.files && logoFile.files[0];
+    if(!f) return;
+    if(f.size>10*1024*1024){ logoMsg.textContent='That file is over 10 MB. Try a smaller copy of the logo.'; return; }
+    logoMsg.textContent='Uploading';
+    shrink(f,400)
+      .then(function(data){ return data.length>520000 ? shrink(f,240) : data; })
+      .then(function(data){ return post({action:'logo', image:data}).then(function(d){ showLogo(data); logoMsg.textContent=d.message; }); })
+      .catch(function(err){ logoMsg.textContent=err.message; })
+      .then(function(){ logoFile.value=''; });
+  });
+
+  logoRemove.addEventListener('click', function(){
+    if(!confirm('Remove your logo? Your page will show your initial instead.')) return;
+    logoMsg.textContent='Removing';
+    post({action:'removelogo'})
+      .then(function(d){ showLogo(null, el.name.value); logoMsg.textContent=d.message; })
+      .catch(function(err){ logoMsg.textContent=err.message; });
+  });
+
   post({action:'load'}).then(function(d){
     var m=d.member, c=m.contact||{};
+    showLogo(m.logo, m.name);
     el.name.value=m.name||'';
     el.summary.value=m.summary||'';
     el.about.value=m.about||'';
