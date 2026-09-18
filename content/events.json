@@ -57,7 +57,8 @@
       },
       "audience": "public",
       "season": "sun",
-      "tickets": true
+      "tickets": true,
+      "register": true
     },
     {
       "id": "coffee-2026-09-24",
