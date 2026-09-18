@@ -989,3 +989,83 @@ img.face{ display:block; }
 .logodark{ display:flex; align-items:center; gap:8px; font-size:.9rem; font-weight:400 !important; cursor:pointer; margin:0 !important; }
 .logodark[hidden]{ display:none; }
 .logodark input{ width:18px; height:18px; margin:0; accent-color:var(--navy); }
+
+/* ---------- Member deals ---------------------------------------------- */
+
+.deals{ display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:18px; margin-top:22px; }
+.deal{
+  background:var(--paper); border:1px solid var(--rule); border-radius:14px;
+  padding:20px 20px 18px; display:flex; flex-direction:column; gap:6px;
+  border-top:5px solid var(--autumn);
+}
+.deal[hidden]{ display:none; }
+.deal-who{ display:flex; align-items:center; gap:10px; text-decoration:none; color:var(--navy); font-weight:600; font-size:.95rem; margin-bottom:6px; }
+.deal-who:hover span{ text-decoration:underline; }
+.deal-who .logo{
+  width:40px; height:40px; border-radius:8px; background:#fff; border:1px solid var(--rule);
+  display:flex; align-items:center; justify-content:center; overflow:hidden; flex:0 0 auto;
+}
+.deal-who .logo.dark{ background:var(--navy); border-color:var(--navy); }
+.deal-who .logo img{ max-width:78%; max-height:78%; }
+.deal-who .logo .initial{ font-family:'Fraunces',Georgia,serif; font-weight:600; color:var(--tint-ink); }
+.deal-for{ font-size:.74rem; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--navy-soft); }
+.deal h3{ margin:2px 0 0; font-size:1.2rem; }
+.deal p{ margin:0; font-size:.95rem; }
+.deal-code strong{ font-family:ui-monospace,Menlo,monospace; background:var(--sun-wash); padding:2px 8px; border-radius:6px; letter-spacing:.04em; }
+.deal-ends{ color:var(--navy-soft); font-size:.88rem !important; margin-top:auto !important; padding-top:6px; }
+.deals-on-page{ margin-top:34px; }
+.deals-on-page h2{ font-size:1.35rem; }
+.deals-on-page .more{ margin-top:12px; font-size:.95rem; }
+
+/* ---------- New to Polk City ------------------------------------------ */
+
+.nc-section{ margin-bottom:46px; }
+.nc-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:18px; margin-top:16px; }
+.nc-item{ border-left:4px solid var(--spring); padding:4px 0 4px 18px; }
+.nc-item h3{ font-size:1.12rem; margin:0 0 6px; }
+.nc-item p{ margin:0 0 8px; font-size:.97rem; }
+.nc-cats{ list-style:none; padding:0; margin:16px 0 0; display:flex; flex-wrap:wrap; gap:10px; }
+.nc-cats li{ background:var(--paper-warm); border:1px solid var(--rule); border-radius:999px; padding:7px 14px; font-size:.95rem; }
+.nc-cats span{ color:var(--navy-soft); font-variant-numeric:tabular-nums; margin-left:4px; }
+.nc-checked{ font-size:.92rem; color:var(--navy-soft); border-top:1px solid var(--rule); padding-top:18px; }
+.mydeal{ border:1px solid var(--rule); border-left:5px solid var(--autumn); border-radius:12px; padding:16px 18px; margin-bottom:14px; background:var(--paper); }
+.mydeal.gone{ opacity:.6; }
+.mydeal h3{ margin:4px 0 6px; font-size:1.15rem; }
+.mydeal p{ margin:0 0 6px; }
+.mydeal .btnrow{ margin-top:10px; align-items:center; }
+.radio{ display:flex !important; align-items:center; gap:8px; font-weight:400 !important; margin:6px 0 !important; }
+.radio input{ width:18px; height:18px; accent-color:var(--navy); }
+
+/* ---------- Registering for an event ---------------------------------- */
+.reg{ margin-top:14px; }
+.reg-form{
+  display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:12px 16px; align-items:end;
+  background:var(--paper-warm); border:1px solid var(--rule); border-radius:12px; padding:16px; margin-top:4px;
+}
+.reg-field{ display:flex; flex-direction:column; gap:5px; font-size:.9rem; font-weight:600; }
+.reg-field input, .reg-field select{
+  font:inherit; font-weight:400; padding:10px 12px; border:1px solid var(--rule); border-radius:9px; background:var(--paper); color:var(--navy);
+}
+.reg-ticket{ grid-column:1 / -1; display:flex; align-items:center; gap:6px; font-size:.95rem; }
+.reg-ticket[hidden]{ display:none; }
+.reg-ticket input{ width:18px; height:18px; accent-color:var(--navy); }
+.reg-form .btn{ justify-self:start; }
+.reg-msg{ grid-column:1 / -1; margin:0; font-size:.93rem; color:var(--alert, #8C2416); }
+.reg-msg:empty{ display:none; }
+.reg-done{ grid-column:1 / -1; margin:0; font-weight:600; color:var(--spring-ink); }
+
+/* ---------- Newsletter sign up ---------------------------------------- */
+.foot-nl{ display:flex; flex-wrap:wrap; gap:8px; max-width:340px; }
+.foot-nl input{
+  flex:1 1 180px; font:inherit; font-size:.95rem; padding:10px 12px; border-radius:9px;
+  border:1px solid rgba(255,255,255,.35); background:rgba(255,255,255,.08); color:#fff;
+}
+.foot-nl input::placeholder{ color:rgba(255,255,255,.6); }
+.foot-nl .btn{ padding:10px 16px; }
+.foot-nl-msg{ flex-basis:100%; margin:4px 0 0; font-size:.88rem; color:rgba(255,255,255,.85); }
+.foot-nl-msg:empty{ display:none; }
+.nl-big{ max-width:460px; }
+.stat-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(110px,1fr)); gap:10px; }
+.stat{ background:var(--paper-warm); border:1px solid var(--rule); border-radius:10px; padding:12px 14px; }
+.stat strong{ display:block; font-family:'Fraunces',Georgia,serif; font-size:1.6rem; font-weight:600; line-height:1.1; font-variant-numeric:tabular-nums; }
+.stat span{ font-size:.85rem; color:var(--navy-soft); }

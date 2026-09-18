@@ -74,6 +74,12 @@ export const COLLECTIONS = [
       { id: 'rsvpHref', label: 'Button link', type: 'url', path: 'rsvp.href' },
       { id: 'audience', label: 'Who can come', type: 'select', options: ['public', 'members'],
         labels: { public: 'Anyone', members: 'Members only' } },
+      { id: 'register', label: 'Take registrations on this site', type: 'check',
+        help: 'Adds a Register button that collects names here. Leave it off if people register somewhere else, like the club for the luncheon. Any event can still be checked in at the door.' },
+      { id: 'capacity', label: 'How many people fit', type: 'text',
+        help: 'Optional. Registration closes when it is full, counting guests. Leave empty for no limit.' },
+      { id: 'tickets', label: 'Luncheon tickets can be used', type: 'check',
+        help: 'Lets members bring someone on one of their luncheon tickets. Checking that person in logs the ticket in the benefits tracker.' },
       { id: 'season', label: 'Colour', type: 'select', options: ['sun', 'autumn', 'spring', 'winter'],
         labels: { sun: 'Orange', autumn: 'Brown', spring: 'Green', winter: 'Blue' },
         help: 'Cosmetic. Keeps the luncheons looking like each other.' },
@@ -125,6 +131,31 @@ export const COLLECTIONS = [
       { id: 'slug', label: 'Web address', type: 'text', required: true, advanced: true,
         derive: m => slug(m.name || ''),
         help: 'Filled in from the business name. Their page is at /directory/this/. Do not change it once the site is live.' }
+    ]
+  },
+
+  {
+    id: 'deals',
+    file: 'deals.json',
+    key: 'deals',
+    season: 'autumn',
+    title: 'Member deals',
+    blurb: 'Discounts members post for each other and for everyone. Members manage their own; this is for fixing or taking one down.',
+    note: 'Members post these themselves from their account. Change one here only to fix a mistake or take down something that should not be up.',
+    sort: 'added',
+    label: d => d.title || 'Untitled deal',
+    sub: d => [d.member, d.for === 'members' ? 'for members' : 'for everyone', d.expires ? 'ends ' + d.expires : null].filter(Boolean).join(' \u00b7 '),
+    fields: [
+      { id: 'member', label: 'Member', type: 'members', max: 1, required: true },
+      { id: 'title', label: 'The offer', type: 'text', required: true },
+      { id: 'detail', label: 'How to claim it', type: 'textarea' },
+      { id: 'for', label: 'Who it is for', type: 'select', options: ['everyone', 'members'],
+        labels: { everyone: 'Anyone', members: 'Other chamber members' } },
+      { id: 'code', label: 'Promo code', type: 'text' },
+      { id: 'expires', label: 'Ends', type: 'date', help: 'Optional. Comes down by itself the day after.' },
+      { id: 'added', label: 'Posted', type: 'date', advanced: true },
+      { id: 'id', label: 'Reference', type: 'text', required: true, advanced: true,
+        derive: d => slug(`${d.member || 'deal'}-${d.title || ''}`).slice(0, 40) }
     ]
   },
 

@@ -1,0 +1,68 @@
+{
+  "checked": "September 2026",
+  "items": [
+    {
+      "section": "Get set up",
+      "title": "Water, sewer, trash and recycling",
+      "body": "All of it goes through City Hall at 200 S 4th Street, 515-984-6233, weekdays. Call to start service when you move in. Bills can be paid and set to autopay online.",
+      "href": "https://www.polkcityia.gov/home/pages/faqs",
+      "link": "City utilities FAQ"
+    },
+    {
+      "section": "Get set up",
+      "title": "Gas and electric",
+      "body": "MidAmerican Energy for most of town, 888-427-5632. Some addresses outside town are served by Midland Coop.",
+      "href": "https://www.midamericanenergy.com/",
+      "link": "MidAmerican Energy"
+    },
+    {
+      "section": "Get set up",
+      "title": "Internet",
+      "body": "CenturyLink, Mediacom and Mi-Fiber all serve Polk City. Which ones reach your street varies, so check your address with each before you choose.",
+      "href": "https://www.polkcityia.gov/node/626",
+      "link": "The city's utility list"
+    },
+    {
+      "section": "Get set up",
+      "title": "Recycling center and brush pile",
+      "body": "At the Public Works facility, 409 E Northside Drive. The recycling side is open every day. The yard waste side is for residents on city utilities, on set days.",
+      "href": "https://www.polkcityia.gov/node/626",
+      "link": "Hours and rules"
+    },
+    {
+      "section": "Get set up",
+      "title": "Emergencies and alerts",
+      "body": "Dial 911 for anything urgent. For water or sewer trouble after hours, Polk County dispatch is 515-286-3333. The city sends weather and emergency alerts by text and email if you sign up.",
+      "href": "https://www.polkcityia.gov/",
+      "link": "polkcityia.gov"
+    },
+    {
+      "section": "Schools",
+      "title": "North Polk Community School District",
+      "body": "Almost all of Polk City is in North Polk. West Elementary (preschool to 2nd) and Big Creek Elementary (3rd to 5th) are in Polk City. Central Elementary, the middle school and the high school are in Alleman. New families enroll online.",
+      "href": "https://www.northpolk.org/families/school-registration",
+      "link": "Enroll a student"
+    },
+    {
+      "section": "Get outside",
+      "title": "Big Creek, Saylorville and the trails",
+      "body": "Big Creek State Park and Saylorville Lake are on the edge of town: beaches, boating, fishing and miles of paved trail. The High Trestle Trail is a short drive north.",
+      "href": "https://www.iowadnr.gov/",
+      "link": "Iowa DNR"
+    },
+    {
+      "section": "Meet people",
+      "title": "Come to a chamber event",
+      "body": "Coffee and Connections and the monthly luncheon are open to anyone, members or not. It is the quickest way to know who runs what in town.",
+      "href": "/events/",
+      "link": "Upcoming events"
+    },
+    {
+      "section": "Meet people",
+      "title": "Volunteer",
+      "body": "The chamber runs community events all year and always needs hands. So do the schools, the library and the churches.",
+      "href": "/get-involved/",
+      "link": "Get involved"
+    }
+  ]
+}

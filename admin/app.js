@@ -41,8 +41,8 @@ const state = {
 
 /* ---------- talking to the server ---------------------------------------- */
 
-async function call(payload) {
-  const res = await fetch('/api/admin', {
+async function call(payload, url = '/api/admin') {
+  const res = await fetch(url, {
     method: 'POST',
     credentials: 'same-origin',
     headers: { 'Content-Type': 'application/json' },
@@ -137,6 +137,15 @@ function screenHome() {
         el('button', { class: 'card', 'data-season': 'autumn', onclick: () => screenBenefits() },
           el('strong', {}, 'Member benefits'),
           el('span', {}, 'Log it when a member uses a benefit, and see who is not using theirs.')),
+        el('button', { class: 'card', 'data-season': 'sun', onclick: () => screenEvents() },
+          el('strong', {}, 'Event check-in'),
+          el('span', {}, 'Who registered, who showed up, and luncheon tickets used at the door.')),
+        el('button', { class: 'card', 'data-season': 'winter', onclick: () => screenNewsletter() },
+          el('strong', {}, 'Newsletter'),
+          el('span', {}, 'Write a short opening. Events, news and deals fill in the rest.')),
+        el('button', { class: 'card', 'data-season': 'spring', onclick: () => screenDigest() },
+          el('strong', {}, 'Quarterly member email'),
+          el('span', {}, 'Each member\u2019s listing stats and unused benefits, once a quarter.')),
         COLLECTIONS.map(c =>
           el('button', { class: 'card', 'data-season': c.season, onclick: () => openCollection(c) },
             el('strong', {}, c.title),
@@ -470,6 +479,19 @@ const tierName = t => TIER_NAMES[t] || t || 'No level set';
 const usesFor = slug => bens.uses.filter(u => u.member === slug);
 const benefitLabel = id => (BENEFITS.find(b => b.id === id) || {}).label || id;
 
+/* Listing stats, when the store has them. */
+function viewsText(slug) {
+  const st = bens.stats && bens.stats[slug] && bens.stats[slug].year;
+  if (!st) return null;
+  return `${(st.view || 0).toLocaleString('en-US')} page view${st.view === 1 ? '' : 's'}`;
+}
+function clicksText(slug) {
+  const st = bens.stats && bens.stats[slug] && bens.stats[slug].year;
+  if (!st) return '';
+  const n = (st.web || 0) + (st.phone || 0) + (st.email || 0) + (st.map || 0);
+  return n ? `, ${n} contact click${n === 1 ? '' : 's'}` : '';
+}
+
 function yearsAvailable() {
   return [...new Set(bens.uses.map(u => yearOf(u.date)).concat(thisYear(), bens.year))]
     .filter(Boolean).sort((a, b) => b - a);
@@ -480,6 +502,9 @@ async function screenBenefits() {
   try {
     await loadDirectory();
     await loadUses();
+    try {
+      bens.stats = (await call({ action: 'stats', year: bens.year, slugs: DIRECTORY.map(m => m.slug) })).stats || {};
+    } catch { bens.stats = {}; }
     drawBenefitsOverview();
   } catch (e) {
     render(el('div', { class: 'panel' },
@@ -532,7 +557,8 @@ function drawBenefitsOverview() {
         el('span', {}, [
           tierName(r.m.tier),
           r.pct == null ? null : `${r.pct}% of counted benefits used`,
-          r.last ? 'last logged ' + r.last : null
+          r.last ? 'last logged ' + r.last : null,
+          viewsText(r.m.slug)
         ].filter(Boolean).join(' \u00b7 ')),
         r.pct != null && r.logged > 0 && el('span', { class: 'meter', 'aria-hidden': 'true' },
           el('i', { style: `width:${r.pct}%` })),
@@ -695,7 +721,8 @@ function drawBenefitsMember(slug, flash) {
     el('div', {},
       el('button', { class: 'back', onclick: drawBenefitsOverview }, 'Back to member benefits'),
       el('h1', {}, m.name),
-      el('p', { class: 'lede' }, `${tierName(m.tier)}, membership year ${bens.year}.`),
+      el('p', { class: 'lede' }, `${tierName(m.tier)}, membership year ${bens.year}.`,
+        viewsText(slug) ? ` Their page: ${viewsText(slug)}${clicksText(slug)}.` : ''),
       status,
 
       groups.map(([title, test]) => {
@@ -758,6 +785,265 @@ function downloadLog() {
     .forEach(u => out.push([u.date, names[u.member] || u.member, benefitLabel(u.benefit),
       u.qty || (BENEFITS.find(b => b.id === u.benefit)?.kind === 'dollars' ? '' : 1), u.amount || '', u.note || '', u.by || '']));
   download(`chamber-benefits-log-${bens.year}.csv`, csv(out));
+}
+
+/* ---------- event check-in ------------------------------------------------
+
+   Every event from the last six weeks and everything coming up. Open one
+   to see who registered, check people in, and add walk-ins. On luncheons,
+   checking in somebody who came on a member's ticket logs the ticket in
+   the benefits tracker. Undoing the check-in gives it back.
+   -------------------------------------------------------------------------- */
+
+const EV = '/api/events';
+
+function failScreen(e, back) {
+  render(el('div', { class: 'panel' },
+    el('h1', {}, 'Could not open that'),
+    el('p', { class: 'msg' }, e.message),
+    el('div', { class: 'row' }, el('button', { class: 'btn', onclick: back || screenHome }, 'Back'))));
+}
+
+async function screenEvents() {
+  render(el('p', { class: 'loading' }, 'Loading events'));
+  let d;
+  try { d = await call({ action: 'overview' }, EV); } catch (e) { return failScreen(e); }
+  const up = d.events.filter(e => e.date >= d.today);
+  const past = d.events.filter(e => e.date < d.today).reverse();
+
+  const row = e => el('li', {},
+    el('button', { class: 'row-open', onclick: () => screenEvent(e.id) },
+      el('strong', {}, e.title),
+      el('span', {}, [
+        e.date, e.where,
+        e.entries ? `${e.entries} on the list` : null,
+        e.register ? 'registration on' : null,
+        e.tickets ? 'luncheon tickets' : null
+      ].filter(Boolean).join(' \u00b7 '))));
+
+  render(el('div', {},
+    el('button', { class: 'back', onclick: screenHome }, 'All sections'),
+    el('h1', {}, 'Event check-in'),
+    el('p', { class: 'note' }, 'Open an event on the day to check people in. To take registrations on the website, tick "Take registrations on this site" on the event under Events.'),
+    el('h2', { class: 'bgroup-title' }, 'Coming up'),
+    up.length ? el('ul', { class: 'list' }, up.map(row)) : el('p', { class: 'help' }, 'Nothing on the calendar.'),
+    past.length > 0 && el('h2', { class: 'bgroup-title', style: 'margin-top:30px' }, 'Recent'),
+    past.length > 0 && el('ul', { class: 'list' }, past.map(row))));
+}
+
+async function screenEvent(id, flash) {
+  render(el('p', { class: 'loading' }, 'Loading the list'));
+  let d;
+  try {
+    await loadDirectory();
+    d = await call({ action: 'attendees', event: id }, EV);
+  } catch (e) { return failScreen(e, screenEvents); }
+  const ev = d.event;
+  const people = d.attendees;
+  const inCount = people.filter(p => p.checkedIn).reduce((n, p) => n + 1 + (p.guests || 0), 0);
+
+  const status = el('div', { class: 'flash', role: 'status' }, flash || '');
+  const act = async (payload, okText) => {
+    status.textContent = 'Saving';
+    try {
+      await call({ ...payload, event: id, who: state.who }, EV);
+      screenEvent(id, okText);
+    } catch (e) { status.replaceChildren(el('span', { class: 'err' }, e.message)); }
+  };
+
+  /* Add at the door: pick a member from the list, or type any name. */
+  const list = el('datalist', { id: 'dl-members' }, DIRECTORY.map(m => el('option', { value: m.name })));
+  const who = el('input', { type: 'text', list: 'dl-members', placeholder: 'Name, or start typing a member', 'aria-label': 'Who' });
+  const guestOf = el('input', { type: 'text', placeholder: 'Guest\u2019s name, if on a ticket', 'aria-label': 'Guest name', hidden: true });
+  const ticket = el('input', { type: 'checkbox' });
+  const ticketRow = ev.tickets && el('label', { class: 'inline-check' }, ticket, ' On this member\u2019s luncheon ticket');
+  const findMember = () => DIRECTORY.find(m => m.name.toLowerCase() === who.value.trim().toLowerCase());
+  const sync = () => { guestOf.hidden = !(ticket.checked && findMember()); };
+  ticket.addEventListener('change', sync);
+  who.addEventListener('input', sync);
+
+  const addBtn = el('button', { class: 'btn primary small' }, 'Add and check in');
+  addBtn.addEventListener('click', () => {
+    const m = findMember();
+    act({
+      action: 'add',
+      member: m ? m.slug : null,
+      name: m ? (guestOf.value.trim() || m.name) : who.value,
+      ticket: Boolean(m && ticket.checked)
+    }, 'Added and checked in.');
+  });
+
+  const search = el('input', { type: 'search', class: 'bsearch', placeholder: 'Find someone on the list' });
+  const rows = people.map(p => {
+    const t = ev.tickets && p.member && !p.checkedIn && el('input', { type: 'checkbox', checked: p.ticket, title: 'On a luncheon ticket' });
+    const li = el('li', { 'data-find': [p.name, p.business, p.email].join(' ').toLowerCase(), class: p.checkedIn ? 'is-in' : '' },
+      el('div', { class: 'row-open static' },
+        el('strong', {}, p.name + (p.guests ? ` + ${p.guests}` : '')),
+        el('span', {}, [
+          p.business, p.email,
+          p.ticket && p.memberName ? `on ${p.memberName}\u2019s ticket` + (p.ticketUse ? ' (logged)' : '') : null,
+          p.walkin ? 'added at the door' : null,
+          p.checkedIn ? 'checked in ' + new Date(p.checkedIn).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }) : null
+        ].filter(Boolean).join(' \u00b7 '))),
+      el('span', { class: 'bbtns' },
+        t && el('label', { class: 'inline-check small' }, t, ' ticket'),
+        p.checkedIn
+          ? el('button', { class: 'bquick', onclick: () => act({ action: 'checkin', id: p.id, undo: true }, `${p.name} un-checked.`) }, 'Undo')
+          : el('button', { class: 'bquick primary', onclick: () => act({ action: 'checkin', id: p.id, ...(t ? { ticket: t.checked } : {}) }, `${p.name} checked in.`) }, 'Check in'),
+        el('button', { class: 'bquick', onclick: () => confirm(`Take ${p.name} off the list?`) && act({ action: 'remove', id: p.id }, 'Removed.') }, 'Remove')));
+    return li;
+  });
+  search.addEventListener('input', () => {
+    const q = search.value.trim().toLowerCase();
+    rows.forEach(li => { li.hidden = q && !li.dataset.find.includes(q); });
+  });
+
+  const exportCsv = () => download(`${ev.id}-attendees.csv`, csv([
+    ['Name', 'Business', 'Email', 'Guests', 'On a ticket of', 'Registered', 'Checked in'],
+    ...people.map(p => [p.name, p.business, p.email, p.guests || 0, p.ticket ? p.memberName : '', p.at.slice(0, 16).replace('T', ' '), p.checkedIn ? 'yes' : ''])
+  ]));
+
+  render(el('div', {},
+    el('button', { class: 'back', onclick: screenEvents }, 'All events'),
+    el('h1', {}, ev.title),
+    el('p', { class: 'lede' }, `${ev.date} \u00b7 ${ev.where}. ${d.headcount} on the list${ev.capacity ? ` of ${ev.capacity}` : ''}, ${inCount} checked in.`),
+    ev.tickets && !d.trackerReady && el('p', { class: 'note warn' }, 'The benefits tracker is not connected, so tickets will not be logged. Check GITHUB_REPO and GITHUB_TOKEN.'),
+    status,
+    el('div', { class: 'panel logform' },
+      el('h2', {}, 'Add at the door'),
+      list, who, ticketRow, guestOf,
+      el('div', { class: 'row' }, addBtn)),
+    people.length > 8 && search,
+    people.length
+      ? el('ul', { class: 'list checkin' }, rows)
+      : el('p', { class: 'help' }, 'Nobody on the list yet.'),
+    people.length > 0 && el('div', { class: 'row' }, el('button', { class: 'btn', onclick: exportCsv }, 'Download the list'))));
+}
+
+/* ---------- newsletter ------------------------------------------------------ */
+
+const NL = '/api/newsletter';
+const adminEmail = () => localStorage.getItem('pcc-admin-email') || '';
+
+async function screenNewsletter(flash) {
+  render(el('p', { class: 'loading' }, 'Loading the newsletter'));
+  let st;
+  try { st = await call({ action: 'status' }, NL); } catch (e) { return failScreen(e); }
+
+  const subject = el('input', { type: 'text', maxlength: '150', placeholder: 'What is on in October' });
+  const intro = el('textarea', { rows: '5', placeholder: 'A few sentences in your own words. Blank lines make new paragraphs.' });
+  subject.value = sessionStorage.getItem('pcc-nl-subject') || '';
+  intro.value = sessionStorage.getItem('pcc-nl-intro') || '';
+  const keep = () => { sessionStorage.setItem('pcc-nl-subject', subject.value); sessionStorage.setItem('pcc-nl-intro', intro.value); };
+  subject.addEventListener('input', keep); intro.addEventListener('input', keep);
+
+  const frame = el('iframe', { class: 'mailpreview', title: 'Preview', hidden: true });
+  const status = el('div', { class: 'flash', role: 'status' }, flash || '');
+  const testTo = el('input', { type: 'email', value: adminEmail(), placeholder: 'you@example.com', 'aria-label': 'Send a test to' });
+
+  const run = async (payload, then) => {
+    status.textContent = 'Working';
+    try {
+      const r = await call({ subject: subject.value, intro: intro.value, who: state.who, ...payload }, NL);
+      status.textContent = r.message || '';
+      if (then) then(r);
+    } catch (e) { status.replaceChildren(el('span', { class: 'err' }, e.message)); }
+  };
+
+  const preview = () => run({ action: 'preview' }, r => { frame.srcdoc = r.html; frame.hidden = false; status.textContent = ''; });
+  const test = () => { localStorage.setItem('pcc-admin-email', testTo.value.trim()); run({ action: 'test', to: testTo.value }); };
+  const send = () => {
+    if (!subject.value.trim()) { status.textContent = 'Give it a subject line first.'; return; }
+    if (!confirm(`Send "${subject.value}" to ${st.subscribers} subscriber${st.subscribers === 1 ? '' : 's'} now? This cannot be undone.`)) return;
+    run({ action: 'send', expect: st.subscribers }, () => {
+      sessionStorage.removeItem('pcc-nl-subject'); sessionStorage.removeItem('pcc-nl-intro');
+      setTimeout(() => screenNewsletter('Sent.'), 800);
+    });
+  };
+  const exportCsv = async () => {
+    const r = await call({ action: 'export' }, NL);
+    download('newsletter-subscribers.csv', csv([['Email', 'Confirmed'], ...r.subscribers.map(x => [x.email, x.at.slice(0, 10)])]));
+  };
+
+  const c = st.counts;
+  render(el('div', {},
+    el('button', { class: 'back', onclick: screenHome }, 'All sections'),
+    el('h1', {}, 'Newsletter'),
+    el('p', { class: 'lede' },
+      `${st.subscribers} subscriber${st.subscribers === 1 ? '' : 's'}. `,
+      st.last ? `Last sent ${st.last.at.slice(0, 10)}: \u201c${st.last.subject}\u201d.` : 'Nothing sent yet.'),
+    st.missing.length > 0 && el('p', { class: 'note warn' }, `Email is not set up. Missing in Vercel: ${st.missing.join(', ')}.`),
+    st.subscribers > st.dailyLimit && el('p', { class: 'note warn' },
+      `Resend\u2019s free plan sends ${st.dailyLimit} emails a day, and the list is ${st.subscribers}. Upgrade Resend before sending, or the rest will fail.`),
+    el('p', { class: 'note' },
+      `Filled in for you: ${c.events} upcoming event${c.events === 1 ? '' : 's'}, ${c.posts} news post${c.posts === 1 ? '' : 's'} and ${c.deals} new deal${c.deals === 1 ? '' : 's'} since the last one. Add a subject and an opening, preview, test, send.`),
+    el('div', { class: 'field' }, el('label', {}, 'Subject'), subject),
+    el('div', { class: 'field' }, el('label', {}, 'Opening'), el('span', { class: 'help' }, 'Optional, and short. The events, news and deals follow it.'), intro),
+    el('div', { class: 'row' },
+      el('button', { class: 'btn', onclick: preview }, 'Preview'),
+      testTo, el('button', { class: 'btn', onclick: test }, 'Send a test'),
+      el('button', { class: 'btn primary', onclick: send, disabled: !st.subscribers || st.missing.length > 0 }, `Send to ${st.subscribers}`)),
+    status,
+    frame,
+    el('div', { class: 'row', style: 'margin-top:26px' },
+      el('button', { class: 'btn', onclick: exportCsv }, 'Download the subscriber list')),
+    el('p', { class: 'help' }, 'Keep a copy now and then. The list lives in the credential store, not in git.')));
+}
+
+/* ---------- quarterly member email ------------------------------------------ */
+
+const DG = '/api/digest';
+
+async function screenDigest() {
+  render(el('p', { class: 'loading' }, 'Loading'));
+  let st;
+  try {
+    await loadDirectory();
+    st = await call({ action: 'status' }, DG);
+  } catch (e) { return failScreen(e); }
+
+  const pick = el('select', {}, DIRECTORY.map(m => el('option', { value: m.slug }, m.name)));
+  const frame = el('iframe', { class: 'mailpreview', title: 'Preview', hidden: true });
+  const status = el('div', { class: 'flash', role: 'status' });
+  const testTo = el('input', { type: 'email', value: adminEmail(), placeholder: 'you@example.com', 'aria-label': 'Send a test to' });
+
+  const run = async (payload, then) => {
+    status.textContent = 'Working';
+    try {
+      const r = await call({ who: state.who, member: pick.value, ...payload }, DG);
+      status.textContent = r.message || '';
+      if (then) then(r);
+    } catch (e) { status.replaceChildren(el('span', { class: 'err' }, e.message)); }
+  };
+  const preview = () => run({ action: 'preview' }, r => {
+    frame.srcdoc = r.html; frame.hidden = false;
+    status.textContent = r.to.length ? `Goes to ${r.to.join(', ')}.` : 'This member has no email on file, so they would not get one.';
+  });
+  pick.addEventListener('change', preview);
+
+  const l = st.last;
+  render(el('div', {},
+    el('button', { class: 'back', onclick: screenHome }, 'All sections'),
+    el('h1', {}, 'Quarterly member email'),
+    el('p', { class: 'lede' }, `Covers ${st.quarter}. ${st.withEmail} members have an email on file.`),
+    el('p', { class: 'note' }, st.auto
+      ? 'Automatic sending is on. It goes out by itself on the 5th of January, April, July and October.'
+      : 'Automatic sending is off. Send it from here, or set DIGEST_AUTO to on in Vercel when you are happy with it.'),
+    st.missing.length > 0 && el('p', { class: 'note warn' }, `Not fully set up. Missing in Vercel: ${st.missing.join(', ')}.`),
+    l && el('p', { class: 'help' }, `Last run ${l.at.slice(0, 10)} for ${l.quarter}: ${l.sent} sent${l.skipped ? `, ${l.skipped} already had it` : ''}.`),
+    st.withoutEmail.length > 0 && el('details', {},
+      el('summary', {}, `${st.withoutEmail.length} members have no email and will not get it`),
+      el('p', { class: 'help' }, st.withoutEmail.join(', '))),
+    el('div', { class: 'field', style: 'margin-top:20px' }, el('label', {}, 'See it as'), pick),
+    el('div', { class: 'row' },
+      el('button', { class: 'btn', onclick: preview }, 'Preview'),
+      testTo,
+      el('button', { class: 'btn', onclick: () => { localStorage.setItem('pcc-admin-email', testTo.value.trim()); run({ action: 'test', to: testTo.value }); } }, 'Send me a test'),
+      el('button', { class: 'btn primary', disabled: st.missing.length > 0, onclick: () =>
+        confirm(`Send this quarter's email to every member now? Anyone who already got it this quarter is skipped.`) && run({ action: 'send' }, () => screenDigest()) },
+        'Send to all members')),
+    status,
+    frame));
 }
 
 /* ---------- shell --------------------------------------------------------- */

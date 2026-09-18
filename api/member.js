@@ -80,6 +80,7 @@ import { kvGet, kvSet, kvDel, kvBump, storeReady, storeMissing } from './_lib/st
 import { hash, matches, checkStrength, wasteTime, MIN_LENGTH } from './_lib/passwords.js';
 import { readContent, ghMissing } from './_lib/github.js';
 import { BENEFITS, TIER_NAMES, summarize, describe, thisYear, yearOf } from '../data/benefits.js';
+import { statsFor } from './_lib/stats.js';
 
 const COOKIE = 'pcc_member';
 const DEMO_DAYS = 1;
@@ -480,6 +481,11 @@ export default async function handler(req, res) {
         const label = id => (BENEFITS.find(b => b.id === id) || {}).label || id;
 
         const rows = summarize(m.tier, mine, year).map(r => ({ ...r, says: describe(r) }));
+
+        /* Listing stats are a nicety. If the store is down, the benefits
+           still show. */
+        let stats = null;
+        try { stats = (await statsFor([m.slug], year))[m.slug].year; } catch (err) { console.error('stats', err); }
         const years = [...new Set(mine.map(u => yearOf(u.date)).concat(thisYear()))].sort((a, b) => b - a);
 
         res.status(200).json({
@@ -488,6 +494,7 @@ export default async function handler(req, res) {
           year,
           years,
           rows,
+          stats,
           log: mine
             .filter(u => yearOf(u.date) === year)
             .sort((a, b) => b.date.localeCompare(a.date))

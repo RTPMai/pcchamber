@@ -43,6 +43,7 @@
 import { createHash, randomBytes } from 'node:crypto';
 import { updateContent } from './_lib/github.js';
 import { BENEFITS } from '../data/benefits.js';
+import { statsFor } from './_lib/stats.js';
 
 const COOKIE = 'pcc_admin';
 const MAX_AGE = 60 * 60 * 8;   // a working day, then sign in again
@@ -338,6 +339,17 @@ export default async function handler(req, res) {
        server, rather than saving the whole file from the browser. Two
        people logging at once then both land, instead of the second being
        told to reload and do it again. */
+    /* Listing stats for every member, for the benefits screens. */
+    if (action === 'stats') {
+      const slugs = Array.isArray(body.slugs) ? body.slugs.map(String).slice(0, 500) : [];
+      try {
+        res.status(200).json({ stats: await statsFor(slugs, Number(body.year) || new Date().getUTCFullYear()) });
+      } catch (err) {
+        res.status(200).json({ stats: {}, note: 'Listing stats are not available right now.' });
+      }
+      return;
+    }
+
     if (action === 'loguse') {
       const who = String(body.who || '').trim();
       if (!who) {

@@ -61,6 +61,14 @@ export const PRIVACY = {
       body: 'If you email the chamber, apply for membership, or register for an event, the chamber keeps what you sent so it can respond and keep records. Membership records include business contact details and payment history.'
     },
     {
+      title: 'Listing stats',
+      body: 'Member directory pages count how often they are viewed and how often someone taps to call, email, visit the website or get directions, so members can see what their listing does for them. Only the totals are kept. To avoid counting one person twice, a scrambled code made from your connection and the date is kept for one day and then deleted. No cookies are involved.'
+    },
+    {
+      title: 'The newsletter',
+      body: 'If you sign up, the chamber keeps your email address and the date you confirmed, and uses it only to send chamber news. Every newsletter has a one-click unsubscribe link, and unsubscribing deletes your address from the list.'
+    },
+    {
       title: 'Who else sees it',
       body: 'Your directory listing is public by design, because being found is the point. Nothing else is shared, sold, or rented. Event registration handled by a venue is subject to that venue\u2019s own policy.'
     },

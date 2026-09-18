@@ -25,6 +25,8 @@ import { INVOLVED, PRIVACY } from './data/involved.js';
 import { POSTS } from './data/news.js';
 import { JOBS } from './data/jobs.js';
 import { REFERRALS } from './data/referrals.js';
+import { DEALS } from './data/deals.js';
+import { NEWCOMERS } from './data/newcomers.js';
 import { JOIN_FORM, EVENT_FORM } from './data/forms.js';
 import { scopeCss } from './tools/scope-policy-css.mjs';
 import { externalLinks } from './tools/external-links.mjs';
@@ -56,6 +58,195 @@ function longDate(iso) {
 }
 
 const todayISO = () => new Date().toISOString().slice(0, 10);
+
+/* "1100 S 5th St., Polk City, IA, 50226" into the parts search engines
+   want. Falls back to the plain string when an address does not split
+   cleanly, which search engines also accept. */
+function postalAddress(raw) {
+  const m = /^(.+?),\s*([^,]+?),\s*([A-Z]{2}),?\s*(\d{5})(?:-\d{4})?\s*$/.exec(String(raw).trim());
+  if (!m) return raw;
+  return {
+    '@type': 'PostalAddress',
+    streetAddress: m[1].replace(/\.$/, ''),
+    addressLocality: m[2],
+    addressRegion: m[3],
+    postalCode: m[4],
+    addressCountry: 'US'
+  };
+}
+
+/* ---------- deals ---------------------------------------------------------- */
+
+/* Live deals, by expiry at build time. Anything that expires between
+   builds is also hidden in the browser, by the data-expires attribute and
+   the few lines of script on the deals page. */
+const liveDeals = () => DEALS
+  .filter(d => MEMBERS.some(m => m.slug === d.member))
+  .filter(d => !d.expires || d.expires >= todayISO())
+  .sort((a, b) => (b.added || '').localeCompare(a.added || ''));
+
+function dealCard(d, withMember = true) {
+  const m = MEMBERS.find(x => x.slug === d.member);
+  return `<article class="deal" data-for="${esc(d.for)}"${d.expires ? ` data-expires="${esc(d.expires)}"` : ''}>
+  ${withMember ? `<a class="deal-who" href="/directory/${m.slug}/">${logoPlate(m, 'logo small')}<span>${esc(m.name)}</span></a>` : ''}
+  <span class="deal-for">${d.for === 'members' ? 'For chamber members' : 'For everyone'}</span>
+  <h3>${esc(d.title)}</h3>
+  ${d.detail ? `<p>${esc(d.detail)}</p>` : ''}
+  ${d.code ? `<p class="deal-code">Code <strong>${esc(d.code)}</strong></p>` : ''}
+  ${d.expires ? `<p class="deal-ends">Ends ${esc(longDate(d.expires))}</p>` : ''}
+</article>`;
+}
+
+function memberDeals(m) {
+  const mine = liveDeals().filter(d => d.member === m.slug);
+  if (!mine.length) return '';
+  return `<section class="deals-on-page">
+  <h2>Deals from ${esc(m.name)}</h2>
+  <div class="deals">${mine.map(d => dealCard(d, false)).join('')}</div>
+  <p class="more"><a href="/deals/">Every member deal</a></p>
+</section>`;
+}
+
+const HIDE_EXPIRED = `<script>
+(function(){
+  var t=new Date().toISOString().slice(0,10);
+  [].forEach.call(document.querySelectorAll('[data-expires]'), function(el){
+    if(el.getAttribute('data-expires')<t) el.hidden=true;
+  });
+})();
+</script>`;
+
+function newcomersPage() {
+  const sections = [...new Set(NEWCOMERS.items.map(i => i.section))];
+  const item = i => `<div class="nc-item">
+    <h3>${esc(i.title)}</h3>
+    <p>${esc(i.body)}</p>
+    ${i.href ? `<a href="${esc(i.href)}"${/^https?:/.test(i.href) ? ' rel="noopener"' : ''}>${esc(i.link || 'More')}</a>` : ''}
+  </div>`;
+  const block = name => `<section class="nc-section">
+  <h2>${esc(name)}</h2>
+  <div class="nc-grid">${NEWCOMERS.items.filter(i => i.section === name).map(item).join('')}</div>
+</section>`;
+
+  /* Built from the directory rather than typed, so it cannot go stale. */
+  const cats = CATEGORIES
+    .map(c => ({ c, n: MEMBERS.filter(m => m.category === c.id).length }))
+    .filter(x => x.n);
+  const local = `<section class="nc-section">
+  <h2>Find local businesses</h2>
+  <p>${MEMBERS.length} businesses in the chamber directory, every one of them local. Start with whatever you need this week.</p>
+  <ul class="nc-cats">${cats.map(({ c, n }) => `<li><a href="/directory/#${esc(c.id)}">${esc(c.label)}</a> <span>${n}</span></li>`).join('')}</ul>
+  <div class="btnrow"><a class="btn" href="/directory/">The whole directory</a><a class="btn ghost" href="/deals/">Member deals</a><a class="btn ghost" href="/resources/who-to-call/">Who to call</a></div>
+</section>`;
+
+  const order = sections.filter(x => x !== 'Meet people');
+  const body = `
+<div class="pagehead" data-season="spring">
+  <div class="wrap">
+    <h1>New to Polk City</h1>
+    <p>Welcome. Here is how to get set up, where the kids go to school, who to call, and how to meet people.</p>
+  </div>
+</div>
+<div class="wrap band">
+  ${order.map(block).join('')}
+  ${local}
+  ${sections.includes('Meet people') ? block('Meet people') : ''}
+  <p class="nc-checked">Checked ${esc(NEWCOMERS.checked)}. The chamber is not the city, so for anything official the city’s own site wins. Something wrong or missing? <a href="mailto:${SITE.email}?subject=New%20to%20Polk%20City%20page">Tell us</a>.</p>
+</div>`;
+
+  return page({
+    title: 'New to Polk City',
+    description: 'Moving to Polk City, Iowa: utilities, schools, trash and recycling, parks, and local businesses, in one place.',
+    canonical: '/new-to-polk-city/',
+    season: 'spring'
+  }, body);
+}
+
+function newsletterPage() {
+  const body = `
+<div class="pagehead" data-season="winter">
+  <div class="wrap">
+    <h1>Chamber news by email</h1>
+    <p>What is coming up, what is new, and deals from local businesses. About once a month, never sold or shared.</p>
+  </div>
+</div>
+<div class="wrap band"><div class="col">
+  <p class="lede" id="nlstatus" hidden></p>
+  <form class="form nl-big" data-nl>
+    <div class="field">
+      <label for="nl-email">Your email</label>
+      <input type="email" id="nl-email" required autocomplete="email" placeholder="you@example.com">
+    </div>
+    <div class="btnrow"><button type="submit" class="btn sun">Sign up</button></div>
+    <p class="help" role="status"></p>
+  </form>
+  <p style="margin-top:26px;font-size:.94rem;color:var(--navy-soft)">You will get one email to confirm. Every newsletter has an unsubscribe link at the bottom that works in one click.</p>
+</div></div>
+<script>
+(function(){
+  var s=(location.search.match(/status=([a-z]+)/)||[])[1];
+  var say={ confirmed:'You are on the list. Thanks for signing up.',
+            unsubscribed:'You are off the list. Sorry to see you go.',
+            expired:'That confirmation link has expired or was already used. Sign up again below.' };
+  if(s && say[s]){ var p=document.getElementById('nlstatus'); p.textContent=say[s]; p.hidden=false; }
+})();
+</script>`;
+  return page({
+    title: 'Newsletter',
+    description: 'Sign up for Polk City Area Chamber news: events, local business news and member deals.',
+    canonical: '/newsletter/',
+    season: 'winter'
+  }, body);
+}
+
+function dealsPage() {
+  const deals = liveDeals();
+  const body = `
+<div class="pagehead" data-season="autumn">
+  <div class="wrap">
+    <h1>Member deals</h1>
+    <p>Discounts from chamber members. Some are for anyone, some are for other members. Either way, it pays to shop local.</p>
+  </div>
+</div>
+<div class="wrap band">
+  ${deals.length ? `<div class="viewswitch" id="dealfilter">
+    <button type="button" data-for="all" aria-pressed="true">All</button>
+    <button type="button" data-for="everyone" aria-pressed="false">For everyone</button>
+    <button type="button" data-for="members" aria-pressed="false">For members</button>
+  </div>
+  <div class="deals" id="deals">${deals.map(d => dealCard(d)).join('')}</div>`
+  : `<p class="lede">No deals posted yet.</p>`}
+  <div class="band">
+    <h2>Are you a member?</h2>
+    <p>Post a deal from your account and it shows here and on your directory page. It is free, it is part of every membership, and it gives people a reason to pick you.</p>
+    <div class="btnrow"><a class="btn sun" href="/members/deals/">Post a deal</a><a class="btn ghost" href="/join/">Join the chamber</a></div>
+  </div>
+</div>
+${HIDE_EXPIRED}
+<script>
+(function(){
+  var bar=document.getElementById('dealfilter');
+  if(!bar) return;
+  bar.addEventListener('click', function(e){
+    var b=e.target.closest('button'); if(!b) return;
+    var want=b.getAttribute('data-for');
+    [].forEach.call(bar.querySelectorAll('button'), function(x){ x.setAttribute('aria-pressed', String(x===b)); });
+    var t=new Date().toISOString().slice(0,10);
+    [].forEach.call(document.querySelectorAll('#deals .deal'), function(d){
+      var gone=d.getAttribute('data-expires') && d.getAttribute('data-expires')<t;
+      d.hidden = gone || (want!=='all' && d.getAttribute('data-for')!==want);
+    });
+  });
+})();
+</script>`;
+
+  return page({
+    title: 'Member deals',
+    description: 'Discounts and offers from Polk City Area Chamber members, for residents and for other members.',
+    canonical: '/deals/',
+    season: 'autumn'
+  }, body);
+}
 
 /* 11:30 and 13:00 become "11:30 am to 1:00 pm". One source of truth for
    the time, so the display and the calendar file cannot disagree. */
@@ -177,13 +368,22 @@ function footer() {
           ${SITE.nav.filter(n => n.href !== '/').map(n => `<li><a href="${n.href}">${esc(n.label)}</a></li>`).join('')}
           <li><a href="/jobs/">Jobs</a></li>
           <li><a href="/news/">News and spotlights</a></li>
+          <li><a href="/deals/">Member deals</a></li>
+          <li><a href="/new-to-polk-city/">New to Polk City</a></li>
           <li><a href="/policy-center/">Business Policy Center<span class="memberonly"> (members)</span></a></li>
           <li><a href="/members/">Member sign in</a></li>
           <li><a href="/privacy/">Privacy</a></li>
         </ul>
       </div>
       <div>
-        <h4>Follow along</h4>
+        <h4>Chamber news by email</h4>
+        <form class="foot-nl" data-nl>
+          <label class="skip" for="foot-nl-email">Your email</label>
+          <input type="email" id="foot-nl-email" placeholder="you@example.com" required autocomplete="email">
+          <button type="submit" class="btn sun">Sign up</button>
+          <p class="foot-nl-msg" role="status"></p>
+        </form>
+        <h4 style="margin-top:22px">Follow along</h4>
         <ul>
           <li><a href="${s.facebook}">Facebook</a></li>
           <li><a href="${s.instagram}">Instagram</a></li>
@@ -215,8 +415,27 @@ const TAIL = `<script>
 </body>
 </html>`;
 
+/* Every newsletter sign-up form on the site, the footer's and the one on
+   /newsletter/, is handled by this. */
+const NL_SCRIPT = `<script>
+(function(){
+  [].forEach.call(document.querySelectorAll('form[data-nl]'), function(f){
+    f.addEventListener('submit', function(e){
+      e.preventDefault();
+      var input=f.querySelector('input[type=email]'), btn=f.querySelector('button'), msg=f.querySelector('[role=status]');
+      btn.disabled=true; msg.textContent='Signing you up';
+      fetch('/api/newsletter',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'subscribe',email:input.value})})
+        .then(function(r){ return r.json().then(function(b){ if(!r.ok) throw new Error(b.message||'That did not work.'); return b; }); })
+        .then(function(b){ msg.textContent=b.message; input.value=''; })
+        .catch(function(err){ msg.textContent=err.message; })
+        .then(function(){ btn.disabled=false; });
+    });
+  });
+})();
+</script>`;
+
 function page(meta, body, extraScript = '') {
-  return head(meta) + header(meta.canonical) + `<main id="main">` + body + `</main>` + footer() + extraScript + TAIL;
+  return head(meta) + header(meta.canonical) + `<main id="main">` + body + `</main>` + footer() + extraScript + NL_SCRIPT + TAIL;
 }
 
 /* ---------- pages -------------------------------------------------------- */
@@ -362,7 +581,7 @@ function directoryIndex() {
 <div class="pagehead" data-season="spring">
   <div class="wrap">
     <h1>Member directory</h1>
-    <p>Every business in the chamber, with a page of its own. Hire local first.</p>
+    <p>Every business in the chamber, with a page of its own. Hire local first. And see the <a href="/deals/">member deals</a>.</p>
   </div>
 </div>
 <div class="wrap">
@@ -423,6 +642,14 @@ function directoryIndex() {
     });
     apply();
   });
+
+  /* /directory/#food-and-drink opens on that category. Used by the New to
+     Polk City page, and handy for linking from anywhere else. */
+  var start=(location.hash||'').slice(1);
+  if(start){
+    var chip=chips.querySelector('.chip[data-cat="'+start+'"]');
+    if(chip) chip.click();
+  }
 })();
 </script>`;
 
@@ -439,24 +666,34 @@ function memberPage(m) {
   const c = m.contact || {};
   const rows = [];
   if (c.person)  rows.push(['Contact', esc(c.person)]);
-  if (c.phone)   rows.push(['Phone', `<a href="tel:${esc(c.phone).replace(/[^0-9+]/g, '')}">${esc(c.phone)}</a>`]);
-  if (c.email)   rows.push(['Email', `<a href="mailto:${esc(c.email)}">${esc(c.email)}</a>`]);
-  if (c.web)     rows.push(['Website', `<a href="${esc(c.web)}" rel="noopener">${esc(c.web.replace(/^https?:\/\//, ''))}</a>`]);
-  if (c.address) rows.push(['Address', esc(c.address)]);
+  /* data-track marks the links that count as somebody getting in touch,
+     for the stats the member sees on their account page. */
+  if (c.phone)   rows.push(['Phone', `<a href="tel:${esc(c.phone).replace(/[^0-9+]/g, '')}" data-track="phone">${esc(c.phone)}</a>`]);
+  if (c.email)   rows.push(['Email', `<a href="mailto:${esc(c.email)}" data-track="email">${esc(c.email)}</a>`]);
+  if (c.web)     rows.push(['Website', `<a href="${esc(c.web)}" rel="noopener" data-track="web">${esc(c.web.replace(/^https?:\/\//, ''))}</a>`]);
+  if (c.address) rows.push(['Address', `<a href="https://www.google.com/maps/dir/?api=1&amp;destination=${encodeURIComponent(c.address)}" rel="noopener" data-track="map">${esc(c.address)}</a>`]);
   if (m.joined)  rows.push(['Member since', String(m.joined)]);
 
   const dl = rows.map(([k, v]) => `<dt>${k}</dt><dd>${v}</dd>`).join('');
   const tags = (m.serves || []).length
     ? `<ul class="tags">${m.serves.map(s => `<li>${esc(s)}</li>`).join('')}</ul>` : '';
 
+  /* Search engines use this to tie the page to the business: its own
+     website, its logo, its phone number. The @id lets Google treat the
+     listing and the business's own site as the same thing. */
   const jsonld = {
     '@context': 'https://schema.org',
     '@type': 'LocalBusiness',
+    '@id': `${SITE.url}/directory/${m.slug}/#business`,
     name: m.name,
-    description: m.summary,
+    ...(m.summary || m.about ? { description: m.about || m.summary } : {}),
     url: `${SITE.url}/directory/${m.slug}/`,
+    ...(c.web ? { sameAs: [c.web] } : {}),
+    ...(m.logo ? { logo: SITE.url + m.logo, image: SITE.url + m.logo } : {}),
     ...(c.phone ? { telephone: c.phone } : {}),
-    ...(c.address ? { address: c.address } : {}),
+    ...(c.email ? { email: c.email } : {}),
+    ...(c.address ? { address: postalAddress(c.address) } : {}),
+    ...(m.serves && m.serves.length ? { knowsAbout: m.serves } : {}),
     memberOf: { '@type': 'Organization', name: SITE.name, url: SITE.url }
   };
 
@@ -471,9 +708,9 @@ function memberPage(m) {
 </div>` : '';
 
   const reach = c.web
-    ? `<a class="btn" href="${esc(c.web)}" rel="noopener">Visit the website</a>`
+    ? `<a class="btn" href="${esc(c.web)}" rel="noopener" data-track="web">Visit the website</a>`
     : c.phone
-      ? `<a class="btn" href="tel:${esc(c.phone).replace(/[^0-9+]/g, '')}">Call ${esc(m.name)}</a>`
+      ? `<a class="btn" href="tel:${esc(c.phone).replace(/[^0-9+]/g, '')}" data-track="phone">Call ${esc(m.name)}</a>`
       : `<a class="btn" href="mailto:${SITE.email}?subject=${encodeURIComponent('Introduction to ' + m.name)}">Ask for an introduction</a>`;
 
   const body = `
@@ -491,8 +728,9 @@ function memberPage(m) {
       ${m.about || m.summary
         ? `<p>${esc(m.about || m.summary)}</p>`
         : `<p class="lede">A ${esc(catLabel(m.category).toLowerCase().replace(/ and .*$/, ''))} business and a member of the Polk City Area Chamber of Commerce. Contact details are on the right.</p>
-           <p style="font-size:.93rem;color:var(--navy-soft)">Are you this member? Send the chamber a sentence about what you do and it goes here. <a href="mailto:${SITE.email}?subject=${encodeURIComponent('Listing for ' + m.name)}">Email your listing</a>.</p>`}
+           <p style="font-size:.93rem;color:var(--navy-soft)">Are you this member? <a href="/members/listing/">Sign in and add a description</a>. It takes two minutes and it is the thing people read first.</p>`}
       ${tags}
+      ${memberDeals(m)}
       ${related}
       <a class="back" href="/directory/">Back to the directory</a>
     </div>
@@ -504,7 +742,24 @@ function memberPage(m) {
     </aside>
   </div>
 </div>
-<script type="application/ld+json">${JSON.stringify(jsonld)}</script>`;
+<script type="application/ld+json">${JSON.stringify(jsonld)}</script>
+<script>
+(function(){
+  /* Counts for the member's own stats. A beacon, so it never slows the
+     page, and nothing here sets a cookie. */
+  function hit(k){
+    try{
+      var b=new Blob([JSON.stringify({s:'${m.slug}',k:k})],{type:'text/plain'});
+      if(navigator.sendBeacon) navigator.sendBeacon('/api/track', b);
+    }catch(e){}
+  }
+  hit('view');
+  document.addEventListener('click', function(e){
+    var a=e.target.closest && e.target.closest('[data-track]');
+    if(a) hit(a.getAttribute('data-track'));
+  });
+})();
+</script>`;
 
   return page({
     title: m.name,
@@ -551,7 +806,14 @@ function eventsPage() {
     </div>` : '';
 
     const when = timeRange(e);
-    return `<article class="event" data-season="${e.season || 'sun'}">
+    /* Registering on this site. The form is drawn by the script at the
+       bottom of the page when the button is pressed. */
+    const reg = e.register && e.id
+      ? `<div class="reg" data-event="${esc(e.id)}"${e.tickets ? ' data-tickets="1"' : ''}>
+    <button type="button" class="btn sun reg-open">Register</button>
+  </div>` : '';
+
+    return `<article class="event" id="${esc(e.id || '')}" data-season="${e.season || 'sun'}">
   <div class="date">${e.date ? esc(longDate(e.date)) : esc(e.when)}</div>
   <h3>${esc(e.title)}</h3>
   <div class="meta">${venue}${when ? ` &middot; ${esc(when)}` : ''}${e.audience === 'members' ? ' &middot; Members only' : ''}</div>
@@ -560,6 +822,7 @@ function eventsPage() {
   ${e.detail ? `<p>${esc(e.detail)}</p>` : ''}
   ${e.cost ? `<p class="cost">${esc(e.cost)}</p>` : ''}
   ${e.rsvp ? `<div class="btnrow"><a class="btn" href="${esc(e.rsvp.href)}">${esc(e.rsvp.label)}</a></div>` : ''}
+  ${reg}
   ${add}
 </article>`;
   };
@@ -703,6 +966,78 @@ ${eventLd.map(o => `<script type="application/ld+json">${JSON.stringify(o)}</scr
       x.setAttribute('aria-pressed', x===b ? 'true':'false');
     });
     if(wantCal) draw();
+  });
+})();
+</script>
+<script>
+(function(){
+  /* Registering on this site. One small form, drawn under whichever
+     event's button was pressed. A signed-in member gets their business
+     filled in, and on luncheons can put the person on one of their
+     tickets. */
+  var who=null;
+  function whoami(){
+    if(who) return Promise.resolve(who);
+    return fetch('/api/member',{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'whoami'})})
+      .then(function(r){ return r.json(); }).then(function(d){ who=d; return d; })
+      .catch(function(){ who={signedIn:false}; return who; });
+  }
+  function make(tag, attrs, text){
+    var n=document.createElement(tag);
+    for(var k in (attrs||{})) n.setAttribute(k, attrs[k]);
+    if(text!=null) n.textContent=text;
+    return n;
+  }
+  function field(label, input){
+    var w=make('label',{'class':'reg-field'}); w.appendChild(make('span',null,label)); w.appendChild(input); return w;
+  }
+
+  document.addEventListener('click', function(e){
+    var btn=e.target.closest && e.target.closest('.reg-open');
+    if(!btn) return;
+    var box=btn.parentNode, id=box.getAttribute('data-event'), tickets=box.hasAttribute('data-tickets');
+    btn.style.display='none';
+
+    var form=make('form',{'class':'reg-form'});
+    var name=make('input',{type:'text',required:'',maxlength:'80',autocomplete:'name'});
+    var email=make('input',{type:'email',required:'',maxlength:'120',autocomplete:'email'});
+    var biz=make('input',{type:'text',maxlength:'120',autocomplete:'organization'});
+    var guests=make('select');
+    for(var i=0;i<=5;i++){ var o=make('option',{value:String(i)}, i===0?'Just me':'Me plus '+i); guests.appendChild(o); }
+    form.appendChild(field('Your name', name));
+    form.appendChild(field('Email', email));
+    form.appendChild(field('Business (optional)', biz));
+    form.appendChild(field('How many', guests));
+
+    var ticketWrap=make('label',{'class':'reg-ticket',hidden:''});
+    var ticket=make('input',{type:'checkbox'});
+    ticketWrap.appendChild(ticket);
+    ticketWrap.appendChild(make('span',null,' Use one of our luncheon tickets for this person'));
+    form.appendChild(ticketWrap);
+
+    var go=make('button',{type:'submit','class':'btn sun'},'Register');
+    var msg=make('p',{'class':'reg-msg',role:'status'});
+    form.appendChild(go); form.appendChild(msg);
+    box.appendChild(form);
+    name.focus();
+
+    whoami().then(function(d){
+      if(d.signedIn){
+        biz.value=d.name;
+        if(tickets) ticketWrap.hidden=false;
+      }
+    });
+
+    form.addEventListener('submit', function(ev){
+      ev.preventDefault();
+      go.disabled=true; msg.textContent='Registering';
+      fetch('/api/events',{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({action:'register', event:id, name:name.value, email:email.value,
+          business:biz.value, guests:guests.value, ticket:ticket.checked})})
+        .then(function(r){ return r.json().then(function(b){ if(!r.ok) throw new Error(b.message||'That did not work.'); return b; }); })
+        .then(function(b){ form.replaceChildren(make('p',{'class':'reg-done'}, b.message)); })
+        .catch(function(err){ go.disabled=false; msg.textContent=err.message; });
+    });
   });
 })();
 </script>`;
@@ -1647,6 +1982,7 @@ function membersPage() {
           <a class="btn sun" href="/policy-center/">Open the Business Policy Center</a>
           <a class="btn ghost" href="/members/listing/">Edit your listing</a>
           <a class="btn ghost" href="/directory/" id="mylisting">See your public page</a>
+          <a class="btn ghost" href="/members/deals/">Your deals</a>
         </div>
 
         <section class="bens" id="bens" hidden aria-labelledby="benshead">
@@ -1659,6 +1995,7 @@ function membersPage() {
               <select id="bensyear"></select>
             </label>
           </div>
+          <div class="bens-stats" id="bensstats" hidden></div>
           <div id="bensbody"></div>
           <details class="bens-log" id="benslogwrap" hidden>
             <summary>Everything logged this year</summary>
@@ -1748,7 +2085,26 @@ function membersPage() {
     return li;
   }
 
+  function drawStats(st, year){
+    var box=document.getElementById('bensstats');
+    box.replaceChildren();
+    if(!st) { box.hidden=true; return; }
+    var cells=[['view','Page views'],['web','Website visits'],['phone','Call taps'],['email','Email taps'],['map','Directions']];
+    box.appendChild(make('h3','bens-group','Your listing in ' + year));
+    var grid=make('div','stat-grid');
+    cells.forEach(function(c){
+      var cell=make('div','stat');
+      cell.appendChild(make('strong',null,(st[c[0]]||0).toLocaleString('en-US')));
+      cell.appendChild(make('span',null,c[1]));
+      grid.appendChild(cell);
+    });
+    box.appendChild(grid);
+    if(!st.view) box.appendChild(make('p','ben-detail','No views yet this year. A description and a logo help people find and pick you.'));
+    box.hidden=false;
+  }
+
   function drawBenefits(d){
+    drawStats(d.stats, d.year);
     var box=document.getElementById('bensbody');
     box.replaceChildren();
     document.getElementById('benssub').textContent =
@@ -1998,6 +2354,161 @@ function setupPage() {
 
 
 /* ---------- a member editing their own listing ---------------------------- */
+
+function myDealsPage() {
+  const body = `
+<div class="pagehead" data-season="autumn">
+  <div class="wrap">
+    <p class="crumb"><a href="/members/">Your account</a></p>
+    <h1>Your deals</h1>
+    <p>Offer something to other chamber members, or to anyone. It shows on the <a href="/deals/">deals page</a> and on your directory listing.</p>
+  </div>
+</div>
+<div class="wrap band" data-season="autumn">
+  <div class="cols">
+    <div>
+      <div id="dneed" hidden>
+        <p class="lede">You need to be signed in to post deals.</p>
+        <div class="btnrow"><a class="btn sun" href="/members/?next=%2Fmembers%2Fdeals%2F">Sign in</a></div>
+      </div>
+
+      <div id="dbox" hidden>
+        <div id="dlist"></div>
+        <p class="help" id="dmsg" role="status" aria-live="polite"></p>
+        <div class="btnrow" id="daddrow"><button type="button" class="btn sun" id="dadd">Post a deal</button></div>
+
+        <form class="form" id="dform" hidden>
+          <h2 id="dformhead">New deal</h2>
+          <div class="field">
+            <label for="d-title">The offer, in a few words</label>
+            <span class="help">For example: 10% off embroidery, Free first consultation, $20 off any detail.</span>
+            <input type="text" id="d-title" maxlength="80" required>
+          </div>
+          <div class="field">
+            <label for="d-detail">How to claim it</label>
+            <span class="help">Optional. What it covers, what to say or show, anything it does not include.</span>
+            <textarea id="d-detail" rows="3" maxlength="400"></textarea>
+          </div>
+          <div class="field">
+            <span class="lbl">Who is it for</span>
+            <label class="radio"><input type="radio" name="d-for" value="everyone" checked> Anyone</label>
+            <label class="radio"><input type="radio" name="d-for" value="members"> Other chamber members</label>
+          </div>
+          <div class="field">
+            <label for="d-code">Promo code</label>
+            <span class="help">Optional.</span>
+            <input type="text" id="d-code" maxlength="30">
+          </div>
+          <div class="field">
+            <label for="d-expires">Ends</label>
+            <span class="help">Optional. It comes down by itself the day after. Leave empty to keep it up until you take it down.</span>
+            <input type="date" id="d-expires">
+          </div>
+          <div class="btnrow">
+            <button type="submit" class="btn sun">Save deal</button>
+            <button type="button" class="btn ghost" id="dcancel">Cancel</button>
+          </div>
+        </form>
+      </div>
+    </div>
+    <aside class="card">
+      <h4>What works</h4>
+      <p style="font-size:.94rem;margin:0 0 10px">Something specific. "15% off" beats "great savings".</p>
+      <p style="font-size:.94rem;margin:0 0 10px">A members-only deal is still public. It tells every business reading the page that joining the chamber pays for itself.</p>
+      <p style="font-size:.94rem;margin:0">Up to three at once.</p>
+    </aside>
+  </div>
+</div>
+<script>
+(function(){
+  var need=document.getElementById('dneed'), box=document.getElementById('dbox'),
+      list=document.getElementById('dlist'), msg=document.getElementById('dmsg'),
+      form=document.getElementById('dform'), addRow=document.getElementById('daddrow'),
+      head=document.getElementById('dformhead');
+  var f={ title:document.getElementById('d-title'), detail:document.getElementById('d-detail'),
+          code:document.getElementById('d-code'), expires:document.getElementById('d-expires') };
+  var deals=[], max=3, editing=null;
+
+  function post(payload){
+    return fetch('/api/deals',{method:'POST',credentials:'same-origin',
+      headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)})
+      .then(function(r){ return r.text().then(function(txt){
+        var b=null; try{ b=JSON.parse(txt); }catch(e){}
+        if(r.status===401){ var err=new Error('signed out'); err.out=true; throw err; }
+        if(!r.ok) throw new Error((b&&b.message)||'Something went wrong.');
+        return b;
+      });});
+  }
+  function make(tag, cls, text){ var n=document.createElement(tag); if(cls) n.className=cls; if(text!=null) n.textContent=text; return n; }
+  var today=new Date().toISOString().slice(0,10);
+
+  function draw(){
+    list.replaceChildren();
+    var live=deals.filter(function(d){ return !d.expires || d.expires>=today; });
+    if(!deals.length) list.appendChild(make('p','lede','No deals posted yet.'));
+    deals.forEach(function(d){
+      var gone=d.expires && d.expires<today;
+      var card=make('div','mydeal'+(gone?' gone':''));
+      card.appendChild(make('span','deal-for', (gone?'Ended. ':'') + (d['for']==='members'?'For chamber members':'For everyone')));
+      card.appendChild(make('h3',null,d.title));
+      if(d.detail) card.appendChild(make('p',null,d.detail));
+      var bits=[]; if(d.code) bits.push('Code '+d.code); if(d.expires) bits.push('Ends '+d.expires);
+      if(bits.length) card.appendChild(make('p','deal-ends',bits.join(' · ')));
+      var row=make('div','btnrow');
+      var ed=make('button','btn ghost small','Edit'); ed.type='button';
+      ed.addEventListener('click',function(){ open(d); });
+      var rm=make('button','linkish','Take down'); rm.type='button';
+      rm.addEventListener('click',function(){
+        if(!confirm('Take this deal down?')) return;
+        msg.textContent='Taking it down';
+        post({action:'remove', id:d.id}).then(function(r){
+          deals=deals.filter(function(x){ return x.id!==d.id; }); msg.textContent=r.message; draw();
+        }).catch(function(e){ msg.textContent=e.message; });
+      });
+      row.appendChild(ed); row.appendChild(rm); card.appendChild(row);
+      list.appendChild(card);
+    });
+    addRow.hidden = live.length>=max || !form.hidden;
+  }
+
+  function open(d){
+    editing=d||null;
+    head.textContent=d?'Edit deal':'New deal';
+    f.title.value=d?d.title:''; f.detail.value=d&&d.detail||''; f.code.value=d&&d.code||''; f.expires.value=d&&d.expires||'';
+    [].forEach.call(form.querySelectorAll('input[name="d-for"]'),function(r){ r.checked = r.value===((d&&d['for'])||'everyone'); });
+    form.hidden=false; addRow.hidden=true; f.title.focus();
+  }
+
+  document.getElementById('dadd').addEventListener('click',function(){ open(null); });
+  document.getElementById('dcancel').addEventListener('click',function(){ form.hidden=true; draw(); });
+
+  form.addEventListener('submit',function(e){
+    e.preventDefault();
+    var btn=form.querySelector('button[type=submit]'); btn.disabled=true; msg.textContent='Saving';
+    var who=form.querySelector('input[name="d-for"]:checked');
+    post({action:'save', deal:{ id:editing?editing.id:null, title:f.title.value, detail:f.detail.value,
+      code:f.code.value, expires:f.expires.value, 'for':who?who.value:'everyone' }})
+      .then(function(r){
+        btn.disabled=false;
+        if(editing) deals=deals.map(function(x){ return x.id===r.deal.id?r.deal:x; }); else deals.push(r.deal);
+        form.hidden=true; msg.textContent=r.message; draw();
+      })
+      .catch(function(err){ btn.disabled=false; msg.textContent=err.message; });
+  });
+
+  post({action:'list'}).then(function(r){ deals=r.deals; max=r.max; box.hidden=false; draw(); })
+    .catch(function(err){ if(err.out) need.hidden=false; else { box.hidden=false; msg.textContent=err.message; } });
+})();
+</script>`;
+
+  return page({
+    title: 'Your deals',
+    description: 'Post and manage your member deals.',
+    canonical: '/members/deals/',
+    season: 'autumn',
+    noindex: true
+  }, body);
+}
 
 function listingPage() {
   const cats = CATEGORIES.map(c => `<option value="${esc(c.id)}">${esc(c.label)}</option>`).join('');
@@ -2331,6 +2842,9 @@ async function main() {
   for (const g of RESOURCE_GROUPS) await put(path.join('resources', g.slug), resourceSectionPage(g));
   await put(path.join('resources', 'who-to-call'), whoToCallPage());
   await put('about', aboutPage());
+  await put('deals', dealsPage());
+  await put('newsletter', newsletterPage());
+  await put('new-to-polk-city', newcomersPage());
   await put('get-involved', involvedPage());
   await put('privacy', privacyPage());
   await put('news', newsIndex());
@@ -2368,6 +2882,7 @@ async function main() {
   await put('members', membersPage());
   await put(path.join('members', 'password'), passwordPage());
   await put(path.join('members', 'listing'), listingPage());
+  await put(path.join('members', 'deals'), myDealsPage());
   await put('policy-center', policyCenterPage());
   await mkdir(path.join(OUT, 'policy-center'), { recursive: true });
   await cp(path.join('policy', 'app.js'), path.join(OUT, 'policy-center', 'app.js'));
@@ -2378,7 +2893,7 @@ async function main() {
 
   await cp('assets', path.join(OUT, 'assets'), { recursive: true });
 
-  const urls = ['/', '/directory/', '/events/', '/membership/', '/resources/', '/about/', '/get-involved/', '/privacy/', '/news/', '/jobs/', '/join/', '/events/add/', '/resources/who-to-call/']
+  const urls = ['/', '/directory/', '/events/', '/membership/', '/resources/', '/about/', '/get-involved/', '/privacy/', '/news/', '/jobs/', '/join/', '/events/add/', '/resources/who-to-call/', '/deals/', '/new-to-polk-city/', '/newsletter/']
     .concat(RESOURCE_GROUPS.map(g => `/resources/${g.slug}/`))
     .concat(MEMBERS.map(m => `/directory/${m.slug}/`))
     .concat(POSTS.map(p => `/news/${p.slug}/`));

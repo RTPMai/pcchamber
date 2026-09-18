@@ -29,6 +29,9 @@
      rsvp      { label, href } or leave out
      audience  'members' | 'public'
      season    sun | autumn | spring | winter
+     register  true to take registrations on this site (see api/events.js)
+     capacity  optional number of people, guests included
+     tickets   true if members can use luncheon tickets for it
    ========================================================================== */
 
 import { readFileSync } from 'node:fs';

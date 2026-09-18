@@ -39,10 +39,19 @@
 
    IF IT IS EVER LOST
 
-   Nothing irreplaceable is in here. Members set a new password by email,
-   the same way they set the first one. That is worth knowing, because it
-   means this does not need backing up and does not carry the obligations
-   a real member database would.
+   Passwords are replaceable: members set a new one by email, the same way
+   they set the first one.
+
+   Since September 2026 it also holds three things that are not:
+
+     newsletter subscribers     nl:*
+     event registrations        rsvp:*
+     listing view counts        st:*
+
+   The admin can download the first two as spreadsheets, and should now
+   and then. The counts are nice to have and would simply start again.
+   None of them are in git on purpose: each would be a commit per click,
+   and a subscriber list does not belong in repository history.
    ========================================================================== */
 
 /* Upstash shows its credentials as ready-to-paste lines:
@@ -115,6 +124,34 @@ async function command(...parts) {
     throw Object.assign(new Error('The credential store returned an error.'), { status: 502, detail: out.error });
   }
   return out.result;
+}
+
+/* Anything else, for the few places that need a command not wrapped
+   below (hashes for event registrations and listing stats). */
+export const kv = (...parts) => command(...parts.map(String));
+
+/* Several commands in one round trip. Used where a page needs a dozen
+   small reads, like listing stats for every member in the quarterly
+   email. Returns the results in the same order. */
+export async function kvPipeline(cmds) {
+  if (!cmds.length) return [];
+  const { url, token } = conf();
+  const res = await fetch(url + '/pipeline', {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify(cmds.map(c => c.map(String)))
+  });
+  if (!res.ok) {
+    throw Object.assign(new Error('The credential store did not answer.'), { status: 502, detail: await res.text() });
+  }
+  return (await res.json()).map(r => (r.error ? null : r.result));
+}
+
+/* Upstash returns a hash as a flat list: field, value, field, value. */
+export function hashToObject(flat) {
+  const out = {};
+  for (let i = 0; flat && i < flat.length; i += 2) out[flat[i]] = flat[i + 1];
+  return out;
 }
 
 export const kvGet = key => command('GET', key);
