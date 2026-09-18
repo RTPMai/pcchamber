@@ -1720,14 +1720,16 @@ function membersPage() {
   var GROUPS=[
     { kinds:['count','dollars'], title:'Counted each year' },
     { kinds:['once'], title:'Once a year' },
-    { kinds:['open'], title:'Included, use as often as you like' }
+    { kinds:['tally'], title:'Referrals' },
+    { kinds:['open'], title:'Also included, use as often as you like' }
   ];
 
   function benefitRow(r){
     var li=make('li','ben' + (r.kind==='once' && r.used ? ' ben-done' : '') + (r.outside ? ' ben-outside' : ''));
     var top=make('div','ben-top');
     top.appendChild(make('span','ben-name', r.label));
-    top.appendChild(make('span','ben-says', r.says));
+    /* Open benefits have nothing to count, so no status beside them. */
+    if(r.kind!=='open') top.appendChild(make('span','ben-says', r.says));
     li.appendChild(top);
     if(r.allowed!=null && r.kind!=='once'){
       var bar=make('div','ben-bar');

@@ -349,6 +349,7 @@ export default async function handler(req, res) {
       const problem =
         !/^[a-z0-9-]{1,80}$/.test(String(u.member || '')) ? 'Pick a member.' :
         !b ? 'Pick which benefit they used.' :
+        b.kind === 'open' ? `${b.label} is included with no limit and is not logged.` :
         !/^\d{4}-\d{2}-\d{2}$/.test(String(u.date || '')) ? 'Put in the date it was used.' :
         (b.kind === 'dollars' && !(Number(u.amount) > 0)) ? 'Put in the dollar amount.' :
         null;
@@ -364,7 +365,7 @@ export default async function handler(req, res) {
         date: u.date,
         ...(b.kind === 'dollars'
           ? { amount: Math.round(Number(u.amount) * 100) / 100 }
-          : (b.kind === 'count' && Number(u.qty) > 1 ? { qty: Math.min(99, Math.floor(Number(u.qty))) } : {})),
+          : ((b.kind === 'count' || b.kind === 'tally') && Number(u.qty) > 1 ? { qty: Math.min(99, Math.floor(Number(u.qty))) } : {})),
         ...(String(u.note || '').trim() ? { note: String(u.note).replace(/\s+/g, ' ').trim().slice(0, 300) } : {}),
         by: who.slice(0, 80),
         at: new Date().toISOString()

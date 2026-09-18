@@ -19,8 +19,9 @@
      count     a number per year. Luncheon tickets, spotlights.
      dollars   a dollar amount per year. Sponsorship credit.
      once      done or not done this year. The plaque, the window cling.
-     open      included with no limit. Logged so the chamber can see it is
-               being used, not to stop anybody. Ribbon cuttings, notary.
+     tally     no limit, but worth counting. Referrals sent their way.
+     open      included, use as often as you like. Not logged at all. Shown
+               to the member as part of their level and nothing more.
 
    per says which levels get it and how many. For open benefits the number
    is just true.
@@ -94,12 +95,17 @@ export const BENEFITS = [
   { id: 'profile', label: 'Feature profile in the annual publication', kind: 'once', per: { champion: 1 } },
   { id: 'impact-live', label: 'In-person annual impact report', kind: 'once', per: { champion: 1 } },
 
+  /* ---------- tally ------------------------------------------------------ */
+
+  { id: 'referral', label: 'Referrals from the chamber', kind: 'tally', unit: 'referral',
+    per: from('basic') },
+  { id: 'growth-credit', label: 'Referral growth credits', kind: 'tally', unit: 'credit',
+    per: from('basic') },
+
   /* ---------- open ------------------------------------------------------- */
 
   { id: 'ribbon', label: 'Ribbon cuttings', kind: 'open', per: from('basic') },
   { id: 'calendar', label: 'Events calendar listings', kind: 'open', per: from('basic') },
-  { id: 'referral', label: 'Referrals sent their way', kind: 'open', per: from('basic') },
-  { id: 'growth-credit', label: 'Referral growth credit', kind: 'open', per: from('basic') },
   { id: 'coffee', label: 'Coffee and Connections', kind: 'open', per: from('basic') },
   { id: 'notary', label: 'Notary', kind: 'open', per: from('basic') },
   { id: 'events', label: 'Networking events and workshops', kind: 'open', per: { individual: true } },
@@ -143,7 +149,7 @@ export function summarize(tier, uses, year) {
   const rows = benefitsFor(tier).map(b => {
     const logged = mine.filter(u => u.benefit === b.id);
     const used = logged.reduce((n, u) => n + weight(b, u), 0);
-    const allowed = b.kind === 'open' ? null : b.per[tier];
+    const allowed = (b.kind === 'open' || b.kind === 'tally') ? null : b.per[tier];
     return {
       id: b.id, label: b.label, kind: b.kind, unit: b.unit || '', detail: b.detail || '',
       allowed, used,
@@ -169,8 +175,8 @@ export function summarize(tier, uses, year) {
 }
 
 /* One number for the overview: of the benefits that have a limit, how
-   much has been used, averaged. Open benefits are left out, because there
-   is no amount that counts as fully used. */
+   much has been used, averaged. Tally and open benefits are left out,
+   because there is no amount that counts as fully used. */
 export function uptake(rows) {
   const capped = rows.filter(r => r.allowed != null && !r.outside);
   if (!capped.length) return null;
@@ -182,7 +188,8 @@ export function uptake(rows) {
    same sentence. */
 export function describe(r) {
   const plural = (n, unit) => `${n} ${unit}${n === 1 ? '' : 's'}`;
-  if (r.kind === 'open') return r.used ? `Used ${r.used === 1 ? 'once' : r.used + ' times'}` : 'Not used yet';
+  if (r.kind === 'open') return 'Included';
+  if (r.kind === 'tally') return r.used ? plural(r.used, r.unit || 'use') + ' so far' : 'None yet';
   if (r.kind === 'once') return r.used ? 'Done' : 'Not yet';
   if (r.kind === 'dollars') return `$${r.used.toLocaleString('en-US')} of $${r.allowed.toLocaleString('en-US')} used`;
   if (r.outside) return plural(r.used, 'use');

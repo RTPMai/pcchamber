@@ -519,16 +519,54 @@ function drawBenefitsOverview() {
     return el('label', { class: 'mini' }, label, s);
   };
 
+  /* Search filters the rows already on screen rather than redrawing, so
+     the box keeps focus and the cursor while somebody is typing. */
+  const search = el('input', { type: 'search', class: 'bsearch', placeholder: 'Find a member', 'aria-label': 'Find a member' });
+  search.value = bens.q || '';
+  const none = el('li', { class: 'empty', hidden: true }, 'No member by that name.');
+
+  const rowsEl = list.map(r =>
+    el('li', { 'data-find': r.m.name.toLowerCase() },
+      el('button', { class: 'row-open', onclick: () => drawBenefitsMember(r.m.slug) },
+        el('strong', {}, r.m.name),
+        el('span', {}, [
+          tierName(r.m.tier),
+          r.pct == null ? null : `${r.pct}% of counted benefits used`,
+          r.last ? 'last logged ' + r.last : null
+        ].filter(Boolean).join(' \u00b7 ')),
+        r.pct != null && r.logged > 0 && el('span', { class: 'meter', 'aria-hidden': 'true' },
+          el('i', { style: `width:${r.pct}%` })),
+        !r.logged && el('em', { class: 'flag' }, 'Nothing used yet'))));
+
+  const applySearch = () => {
+    bens.q = search.value;
+    const q = search.value.trim().toLowerCase();
+    let shown = 0;
+    for (const li of rowsEl) {
+      const hit = !q || li.dataset.find.includes(q);
+      li.hidden = !hit;
+      if (hit) shown++;
+    }
+    none.hidden = !(q && !shown);
+  };
+  search.addEventListener('input', applySearch);
+  /* Enter opens the only match, so find-and-open is two keystrokes. */
+  search.addEventListener('keydown', e => {
+    if (e.key !== 'Enter') return;
+    const open = rowsEl.filter(li => !li.hidden);
+    if (open.length === 1) open[0].querySelector('button').click();
+  });
+
   render(
     el('div', {},
       el('button', { class: 'back', onclick: screenHome }, 'All sections'),
       el('h1', {}, 'Member benefits'),
       el('p', { class: 'note' },
-        'Log it when a member uses something: a luncheon ticket, a spotlight, a ribbon cutting. ',
-        'It saves straight away and they see it on their account page.'),
+        'Click Log when a member uses something. It saves with today\u2019s date and they see it on their account page straight away.'),
       tiersInUse.length === 1 && tiersInUse[0] === 'basic' && el('p', { class: 'note warn' },
         'Every member is still on Basic Business, so everybody shows the Basic allowances. ',
         'Set each member\u2019s level under Member directory first.'),
+      search,
       el('div', { class: 'filters' },
         pick('Year', bens.year, yearsAvailable().map(y => [y, String(y)]), v => { bens.year = Number(v); drawBenefitsOverview(); }),
         pick('Level', bens.tier, [['all', 'Every level']].concat(
@@ -539,91 +577,117 @@ function drawBenefitsOverview() {
         `${list.length} member${list.length === 1 ? '' : 's'}. `,
         idle ? el('strong', {}, `${idle} with nothing logged for ${bens.year}.`) : 'All have something logged.'),
       el('ul', { class: 'list' },
-        list.length ? list.map(r =>
-          el('li', {},
-            el('button', { class: 'row-open', onclick: () => drawBenefitsMember(r.m.slug) },
-              el('strong', {}, r.m.name),
-              el('span', {}, [
-                tierName(r.m.tier),
-                r.pct == null ? null : `${r.pct}% of counted benefits used`,
-                r.last ? 'last logged ' + r.last : null
-              ].filter(Boolean).join(' \u00b7 ')),
-              r.pct != null && r.logged > 0 && el('span', { class: 'meter', 'aria-hidden': 'true' },
-                el('i', { style: `width:${r.pct}%` })),
-              !r.logged && el('em', { class: 'flag' }, 'Nothing used yet'))))
-          : el('li', { class: 'empty' }, 'No members on that level.')),
+        list.length ? rowsEl.concat(none) : el('li', { class: 'empty' }, 'No members on that level.')),
       el('div', { class: 'row' },
         el('button', { class: 'btn', onclick: downloadSummary }, `Download ${bens.year} summary`),
         el('button', { class: 'btn', onclick: downloadLog }, `Download ${bens.year} log`)),
       el('p', { class: 'help' }, 'Both open in Excel. The summary is one line per member per benefit; the log is every entry.')
     ));
+
+  applySearch();
+  search.focus();
 }
 
-function drawBenefitsMember(slug, message) {
+/* One member. Every benefit that gets counted has two buttons:
+
+     Log     saves one use, dated today, straight away. The common case.
+     Note    opens a small form under the row for the uncommon one: a
+             different date, more than one at a time, or a note.
+
+   Sponsorship credit needs a dollar amount, so its Log opens the form. */
+function drawBenefitsMember(slug, flash) {
   const m = DIRECTORY.find(x => x.slug === slug);
   const mine = usesFor(slug).filter(u => yearOf(u.date) === bens.year);
-  const rows = summarize(m.tier, mine, bens.year);
-  const offered = benefitsFor(m.tier);
+  const rows = summarize(m.tier, mine, bens.year).filter(r => r.kind !== 'open');
 
-  /* The log form. */
-  const benefit = el('select', { id: 'b-benefit' },
-    el('option', { value: '' }, 'Pick one'),
-    offered.map(b => el('option', { value: b.id }, b.label)),
-    el('optgroup', { label: 'Not on their level' },
-      BENEFITS.filter(b => !offered.includes(b)).map(b => el('option', { value: b.id }, b.label))));
-  const date = el('input', { type: 'date', id: 'b-date', value: today() });
-  const qty = el('input', { type: 'number', id: 'b-qty', min: '1', max: '99', value: '1' });
-  const amount = el('input', { type: 'number', id: 'b-amount', min: '1', step: '1', placeholder: '250' });
-  const note = el('input', { type: 'text', id: 'b-note', maxlength: '300' });
-  const qtyRow = el('div', { class: 'field half' }, el('label', { for: 'b-qty' }, 'How many'), qty);
-  const amountRow = el('div', { class: 'field half' }, el('label', { for: 'b-amount' }, 'Dollar amount'), amount);
-  const msg = el('p', { class: 'msg', role: 'status' }, message || '');
-  if (message) msg.classList.add('ok');
+  const status = el('div', { class: 'flash', role: 'status' });
+  if (flash) {
+    status.append(el('span', {}, flash.text));
+    if (flash.undo) {
+      status.append(el('button', { class: 'linkbtn', onclick: () => removeUse(flash.undo, true) }, 'Undo'));
+    }
+  }
 
-  const showExtra = () => {
-    const b = BENEFITS.find(x => x.id === benefit.value);
-    qtyRow.hidden = !b || b.kind !== 'count';
-    amountRow.hidden = !b || b.kind !== 'dollars';
-  };
-  benefit.addEventListener('change', showExtra);
-  showExtra();
-
-  const logIt = async btn => {
-    btn.disabled = true;
-    msg.classList.remove('ok');
-    msg.textContent = 'Saving';
+  const save = async (use, btn) => {
+    if (btn) btn.disabled = true;
     try {
-      const out = await call({
-        action: 'loguse', who: state.who,
-        use: { member: slug, benefit: benefit.value, date: date.value, qty: qty.value, amount: amount.value, note: note.value }
-      });
+      const out = await call({ action: 'loguse', who: state.who, use: { member: slug, ...use } });
       bens.uses.push(out.entry);
-      bens.year = yearOf(out.entry.date);
-      drawBenefitsMember(slug, `Logged ${benefitLabel(out.entry.benefit).toLowerCase()}. ${m.name} can see it now.`);
+      const b = BENEFITS.find(x => x.id === out.entry.benefit);
+      const what = out.entry.amount
+        ? `$${out.entry.amount.toLocaleString('en-US')} of ${b.label.toLowerCase()}`
+        : (out.entry.qty ? `${out.entry.qty} \u00d7 ` : '') + b.label.toLowerCase();
+      drawBenefitsMember(slug, { text: `Logged ${what}, ${out.entry.date}.`, undo: out.entry });
     } catch (e) {
-      btn.disabled = false;
-      msg.textContent = e.message;
+      if (btn) btn.disabled = false;
+      status.replaceChildren(el('span', { class: 'err' }, e.message));
     }
   };
 
-  const removeUse = async u => {
-    if (!confirm(`Remove ${benefitLabel(u.benefit).toLowerCase()} on ${u.date}? It comes off their account page too.`)) return;
+  async function removeUse(u, quiet) {
+    if (!quiet && !confirm(`Remove ${benefitLabel(u.benefit).toLowerCase()} on ${u.date}? It comes off their account page too.`)) return;
     try {
       await call({ action: 'unloguse', who: state.who, id: u.id });
       bens.uses = bens.uses.filter(x => x.id !== u.id);
-      drawBenefitsMember(slug, 'Removed.');
+      drawBenefitsMember(slug, { text: quiet ? 'Undone.' : 'Removed.' });
     } catch (e) {
       alert(e.message);
     }
+  }
+
+  const detailForm = (r, li) => {
+    const date = el('input', { type: 'date', value: today(), 'aria-label': 'Date' });
+    const qty = el('input', { type: 'number', min: '1', max: '99', value: '1', 'aria-label': 'How many' });
+    const amount = el('input', { type: 'number', min: '1', step: '1', placeholder: 'Dollars', 'aria-label': 'Dollar amount' });
+    const note = el('input', { type: 'text', maxlength: '300', placeholder: 'Which event, which post', 'aria-label': 'Note' });
+    const go = el('button', { class: 'btn primary small' }, 'Log it');
+    go.addEventListener('click', () => save({
+      benefit: r.id, date: date.value, qty: qty.value, amount: amount.value, note: note.value
+    }, go));
+
+    const form = el('div', { class: 'bdetail' },
+      el('label', {}, 'Date', date),
+      (r.kind === 'count' || r.kind === 'tally') && el('label', { class: 'narrowin' }, 'How many', qty),
+      r.kind === 'dollars' && el('label', { class: 'narrowin' }, 'Amount', amount),
+      el('label', { class: 'grow' }, 'Note, the member sees this', note),
+      el('div', { class: 'bdetail-go' },
+        go,
+        el('button', { class: 'linkbtn', onclick: () => form.remove() }, 'Cancel')));
+
+    form.addEventListener('keydown', e => { if (e.key === 'Enter' && e.target.tagName === 'INPUT') go.click(); });
+    return { form, focus: () => (r.kind === 'dollars' ? amount : note).focus() };
   };
 
-  const logBtn = el('button', { class: 'btn primary' }, 'Log it');
-  logBtn.addEventListener('click', () => logIt(logBtn));
+  const openDetail = (r, li) => {
+    const shown = li.querySelector('.bdetail');
+    if (shown) { shown.remove(); return; }
+    document.querySelectorAll('.bdetail').forEach(f => f.remove());
+    const { form, focus } = detailForm(r, li);
+    li.append(form);
+    focus();
+  };
+
+  const rowFor = r => {
+    const li = el('li', { class: r.over ? 'over' : (r.kind === 'once' && r.used ? 'done' : '') },
+      el('span', { class: 'bname' }, r.label),
+      el('span', { class: 'bsays' }, describe(r),
+        r.over ? ' \u00b7 over the allowance' : '',
+        r.left > 0 && r.kind !== 'once' ? ` \u00b7 ${r.kind === 'dollars' ? '$' + r.left.toLocaleString('en-US') : r.left} left` : ''));
+
+    if (!r.outside) {
+      const log = el('button', { class: 'bquick primary' }, 'Log');
+      log.addEventListener('click', () =>
+        r.kind === 'dollars' ? openDetail(r, li) : save({ benefit: r.id, date: today() }, log));
+      const more = el('button', { class: 'bquick', onclick: () => openDetail(r, li) }, 'Note');
+      li.append(el('span', { class: 'bbtns' }, log, more));
+    }
+    return li;
+  };
 
   const groups = [
     ['Counted each year', r => (r.kind === 'count' || r.kind === 'dollars') && !r.outside],
     ['Once a year', r => r.kind === 'once' && !r.outside],
-    ['Included, no limit', r => r.kind === 'open' && !r.outside],
+    ['Referrals', r => r.kind === 'tally' && !r.outside],
     ['Not part of their level', r => r.outside]
   ];
 
@@ -632,40 +696,20 @@ function drawBenefitsMember(slug, message) {
       el('button', { class: 'back', onclick: drawBenefitsOverview }, 'Back to member benefits'),
       el('h1', {}, m.name),
       el('p', { class: 'lede' }, `${tierName(m.tier)}, membership year ${bens.year}.`),
-
-      el('div', { class: 'panel logform' },
-        el('h2', {}, 'Log a use'),
-        el('div', { class: 'field' }, el('label', { for: 'b-benefit' }, 'What did they use'), benefit),
-        el('div', { class: 'split' },
-          el('div', { class: 'field half' }, el('label', { for: 'b-date' }, 'When'), date),
-          qtyRow, amountRow),
-        el('div', { class: 'field' },
-          el('label', { for: 'b-note' }, 'Note'),
-          el('span', { class: 'help' }, 'Optional. Which event, which post. The member can see this, so write it for them.'),
-          note),
-        el('div', { class: 'row' }, logBtn),
-        msg),
+      status,
 
       groups.map(([title, test]) => {
         const these = rows.filter(test);
         if (!these.length) return null;
         return el('section', { class: 'bgroup' },
           el('h2', { class: 'bgroup-title' }, title),
-          el('ul', { class: 'blist' }, these.map(r =>
-            el('li', { class: r.over ? 'over' : (r.kind === 'once' && r.used ? 'done' : '') },
-              el('span', { class: 'bname' }, r.label),
-              el('span', { class: 'bsays' }, describe(r),
-                r.over ? ' \u00b7 over the allowance' : '',
-                r.left > 0 && r.kind !== 'once' ? ` \u00b7 ${r.kind === 'dollars' ? '$' + r.left.toLocaleString('en-US') : r.left} left` : ''),
-              el('button', { class: 'bquick', onclick: () => {
-                benefit.value = r.id; showExtra(); benefit.scrollIntoView({ behavior: 'smooth', block: 'center' }); date.focus();
-              } }, 'Log')))));
+          el('ul', { class: 'blist' }, these.map(rowFor)));
       }),
 
       el('section', { class: 'bgroup' },
         el('h2', { class: 'bgroup-title' }, `Logged in ${bens.year}`),
         mine.length
-          ? el('ul', { class: 'list' }, [...mine].sort((a, b) => b.date.localeCompare(a.date)).map(u =>
+          ? el('ul', { class: 'list' }, [...mine].sort((a, b) => b.date.localeCompare(a.date) || (b.at || '').localeCompare(a.at || '')).map(u =>
               el('li', {},
                 el('div', { class: 'row-open static' },
                   el('strong', {}, benefitLabel(u.benefit) +
