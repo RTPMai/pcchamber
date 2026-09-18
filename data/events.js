@@ -32,6 +32,8 @@
      register  true to take registrations on this site (see api/events.js)
      capacity  optional number of people, guests included
      tickets   true if members can use luncheon tickets for it
+     guestFee  dollars non-members pay before getting the rsvp link.
+               Members skip it. See api/_lib/guestfee.js
    ========================================================================== */
 
 import { readFileSync } from 'node:fs';

@@ -78,6 +78,8 @@ export const COLLECTIONS = [
         help: 'Adds a Register button that collects names here. Leave it off if people register somewhere else, like the club for the luncheon. Any event can still be checked in at the door.' },
       { id: 'capacity', label: 'How many people fit', type: 'text',
         help: 'Optional. Registration closes when it is full, counting guests. Leave empty for no limit.' },
+      { id: 'guestFee', label: 'Guest fee for non-members', type: 'text',
+        help: 'Dollars, for example 10. When this and the button link are both set, members go straight to the link and everyone else pays this first, online. The link is then never shown publicly. Leave empty for no fee.' },
       { id: 'tickets', label: 'Luncheon tickets can be used', type: 'check',
         help: 'Lets members bring someone on one of their luncheon tickets. Checking that person in logs the ticket in the benefits tracker.' },
       { id: 'season', label: 'Colour', type: 'select', options: ['sun', 'autumn', 'spring', 'winter'],

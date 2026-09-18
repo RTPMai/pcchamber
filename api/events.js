@@ -35,6 +35,7 @@ import { sendMail, mailMissing } from './_lib/mail.js';
 import { logUse, unlogUse } from './_lib/benefitlog.js';
 import { ghMissing } from './_lib/github.js';
 import { SITE } from '../data/site.js';
+import { isGated, stripeMissing, createCheckout, getSession, recordPaid } from './_lib/guestfee.js';
 
 const events = () =>
   JSON.parse(readFileSync(new URL('../content/events.json', import.meta.url), 'utf8')).calendar || [];
@@ -147,6 +148,74 @@ async function register(req, res, body) {
   res.status(200).json({ ok: true, message: `You are registered for ${e.title}. A confirmation is on its way to ${email}.` });
 }
 
+/* ---------- the luncheon guest fee (see api/_lib/guestfee.js) ------------- */
+
+const origin = req => `https://${req.headers['x-forwarded-host'] || req.headers.host || new URL(SITE.url).host}`;
+
+async function gate(req, res, body) {
+  const e = events().find(x => x.id === body.event);
+  if (!isGated(e) || e.date < today()) {
+    res.status(404).json({ error: 'no_event', message: 'Registration is not open for that event.' });
+    return;
+  }
+  const m = currentMember(req);
+
+  /* A member: straight to the venue's link, and onto the check-in list.
+     Clicking twice does not add them twice. */
+  if (body.action === 'memberlink') {
+    if (!m) { res.status(401).json({ error: 'signed_out', message: 'Sign in as a member first.' }); return; }
+    const field = 'mem-' + m.slug;
+    if (!(await kv('HGET', `rsvp:${e.id}`, field))) {
+      await put(e.id, {
+        id: field, name: m.name, email: '', business: m.name, guests: 0,
+        member: m.slug, ticket: false, via: 'member', at: new Date().toISOString(), checkedIn: null
+      });
+    }
+    res.status(200).json({ ok: true, href: e.rsvp.href });
+    return;
+  }
+
+  if (body.action === 'guestcheckout') {
+    if (stripeMissing().length) {
+      res.status(503).json({ error: 'not_configured',
+        message: `Online payment is not switched on yet. Email ${SITE.email} and the chamber will sort it out.` });
+      return;
+    }
+    if (await kvBump(`rl:gf:${visitorKey(req)}`, 3600) > 10) {
+      res.status(429).json({ error: 'slow_down', message: 'Too many tries from here. Email the chamber instead.' });
+      return;
+    }
+    const name = clean(body.name, 80);
+    const email = clean(body.email, 120).toLowerCase();
+    if (!name) { res.status(400).json({ error: 'no_name', message: 'Put in your name.' }); return; }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      res.status(400).json({ error: 'bad_email', message: 'That email address does not look right.' });
+      return;
+    }
+    const session = await createCheckout(e, { name, email, business: clean(body.business, 120) }, origin(req));
+    res.status(200).json({ ok: true, url: session.url });
+    return;
+  }
+
+  res.status(400).json({ error: 'unknown_action', message: 'That is not something this page does.' });
+}
+
+/* The page people land on after paying. Asks Stripe, not the browser,
+   whether it was paid. */
+async function guestConfirm(req, res, body) {
+  if (stripeMissing().length) { res.status(503).json({ error: 'not_configured', message: 'Online payment is not switched on.' }); return; }
+  const id = String(body.session || '');
+  if (!/^cs_[A-Za-z0-9_]+$/.test(id)) { res.status(400).json({ error: 'bad_session', message: 'That payment link is not right.' }); return; }
+  const session = await getSession(id);
+  if (session.payment_status !== 'paid') {
+    res.status(202).json({ pending: true, message: 'Stripe has not confirmed the payment yet. This page will check again.' });
+    return;
+  }
+  const e = await recordPaid(session);
+  if (!e) { res.status(404).json({ error: 'no_event', message: 'Paid, but that event is no longer on the calendar. Email the chamber.' }); return; }
+  res.status(200).json({ ok: true, href: e.rsvp.href, title: e.title, date: e.date, where: e.where, email: session.customer_details?.email || session.customer_email || '' });
+}
+
 /* ---------- the door ------------------------------------------------------ */
 
 async function admin(req, res, body) {
@@ -161,7 +230,7 @@ async function admin(req, res, body) {
       today: today(),
       events: list.map((x, i) => ({
         id: x.id, title: x.title, date: x.date, where: x.where,
-        register: Boolean(x.register), tickets: Boolean(x.tickets),
+        register: Boolean(x.register), tickets: Boolean(x.tickets), guestFee: Number(x.guestFee) || null,
         capacity: Number(x.capacity) || null, entries: Number(counts[i]) || 0
       }))
     });
@@ -173,7 +242,7 @@ async function admin(req, res, body) {
   if (body.action === 'attendees') {
     const list = await attendees(e.id);
     res.status(200).json({
-      event: { id: e.id, title: e.title, date: e.date, where: e.where, tickets: Boolean(e.tickets), capacity: Number(e.capacity) || null },
+      event: { id: e.id, title: e.title, date: e.date, where: e.where, tickets: Boolean(e.tickets), capacity: Number(e.capacity) || null, guestFee: Number(e.guestFee) || null },
       attendees: list.map(r => ({ ...r, memberName: r.member ? memberName(r.member) : null })),
       headcount: headcount(list),
       trackerReady: !ghMissing().length
@@ -252,6 +321,8 @@ export default async function handler(req, res) {
     }
     const body = await readBody(req);
     if (body.action === 'register') return await register(req, res, body);
+    if (body.action === 'memberlink' || body.action === 'guestcheckout') return await gate(req, res, body);
+    if (body.action === 'guestconfirm') return await guestConfirm(req, res, body);
     if (!isAdmin(req)) {
       res.status(401).json({ error: 'locked', message: 'Please sign in to the admin again.' });
       return;

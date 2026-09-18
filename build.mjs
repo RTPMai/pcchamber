@@ -162,6 +162,52 @@ function newcomersPage() {
   }, body);
 }
 
+/* Where Stripe sends a guest after paying. Asks the server, which asks
+   Stripe, and then shows the venue's link. */
+function paidPage() {
+  const body = `
+<div class="pagehead" data-season="sun">
+  <div class="wrap">
+    <h1 id="paidhead">Checking your payment</h1>
+    <p id="paidsub">One moment.</p>
+  </div>
+</div>
+<div class="wrap band"><div class="col">
+  <div id="paidok" hidden>
+    <p class="lede">Your guest fee is paid. One more step: register and pick your meal with the venue. Lunch is paid to them.</p>
+    <div class="btnrow"><a class="btn sun" id="paidgo" href="/events/">Register with the venue</a></div>
+    <p style="margin-top:22px;color:var(--navy-soft)" id="paidmail"></p>
+  </div>
+  <p class="lede" id="paidbad" hidden></p>
+  <p style="margin-top:26px"><a href="/events/">Back to events</a></p>
+</div></div>
+<script>
+(function(){
+  var s=(location.search.match(/[?&]s=([A-Za-z0-9_]+)/)||[])[1];
+  var head=document.getElementById('paidhead'), sub=document.getElementById('paidsub');
+  var tries=0;
+  function bad(text){ head.textContent='Something is not right'; sub.textContent=''; var p=document.getElementById('paidbad'); p.textContent=text; p.hidden=false; }
+  if(!s){ bad('This page needs the link Stripe sends you back with. If you paid, check your email for the registration link.'); return; }
+  function check(){
+    fetch('/api/events',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'guestconfirm',session:s})})
+      .then(function(r){ return r.json().then(function(b){ return {code:r.status, b:b}; }); })
+      .then(function(x){
+        if(x.code===202 && tries<6){ tries++; sub.textContent=x.b.message; setTimeout(check, 2500); return; }
+        if(x.code!==200){ bad((x.b && x.b.message) || 'We could not confirm the payment. If you were charged, email the chamber and we will sort it out.'); return; }
+        head.textContent='Paid. Thank you.';
+        sub.textContent=x.b.title + ', ' + x.b.date + ', ' + x.b.where + '.';
+        document.getElementById('paidgo').setAttribute('href', x.b.href);
+        document.getElementById('paidmail').textContent = x.b.email ? 'We also emailed the link to ' + x.b.email + ' in case you need it later.' : '';
+        document.getElementById('paidok').hidden=false;
+      })
+      .catch(function(){ bad('We could not reach the server. If you were charged, check your email for the link or email the chamber.'); });
+  }
+  check();
+})();
+</script>`;
+  return page({ title: 'Guest fee paid', description: 'Guest fee confirmation.', canonical: '/events/paid/', season: 'sun', noindex: true }, body);
+}
+
 function newsletterPage() {
   const body = `
 <div class="pagehead" data-season="winter">
@@ -451,7 +497,7 @@ function homePage() {
   <div class="wrap">
     <span class="when">Next up: ${esc(longDate(n.date))}</span>
     <span class="what">${esc(n.title)} at ${esc(n.where)}${n.time ? `, ${esc(n.time)}` : ''}</span>
-    ${n.rsvp ? `<a class="go" href="${esc(n.rsvp.href)}">${esc(n.rsvp.label)}</a>` : ''}
+    ${n.rsvp ? `<a class="go" href="${esc(publicHref(n))}">${esc(n.rsvp.label)}</a>` : ''}
   </div>
 </div>` : '';
 
@@ -782,6 +828,45 @@ function offsite(href) {
   } catch { return ''; }
 }
 
+/* Events where members go straight to the venue's registration and
+   everyone else pays a guest fee first. The venue's link is never written
+   into these pages; see api/_lib/guestfee.js. */
+const gated = e => Boolean(e && e.rsvp && e.rsvp.href && Number(e.guestFee) > 0);
+const nextGated = () => CALENDAR.filter(e => gated(e) && e.date >= todayISO()).sort((a, b) => a.date.localeCompare(b.date))[0];
+const publicHref = e => gated(e) ? `/events/#${e.id}` : e.rsvp.href;
+
+function rsvpBlock(e) {
+  if (!e.rsvp) return '';
+
+  /* A recurring item (the luncheon's standing entry) points at the next
+     dated one, which is where the member or guest choice happens. */
+  if (!e.id && Number(e.guestFee) > 0) {
+    const n = nextGated();
+    return n ? `<div class="btnrow"><a class="btn" href="#${esc(n.id)}">Register for the next one</a></div>` : '';
+  }
+
+  if (gated(e)) {
+    const fee = Number(e.guestFee);
+    return `<div class="gate" data-event="${esc(e.id)}" data-fee="${fee}">
+    <div class="gate-choices">
+      <div class="gate-choice">
+        <strong>Chamber member?</strong>
+        <p>No guest fee. Sign in and go straight to registration.</p>
+        <button type="button" class="btn sun gate-member">Register as a member</button>
+      </div>
+      <div class="gate-choice">
+        <strong>Not a member yet?</strong>
+        <p>Guests pay a $${fee} chamber guest fee, then register with the venue. <a href="/join/">Join</a> and you skip it.</p>
+        <button type="button" class="btn gate-guest">Pay $${fee} and register</button>
+      </div>
+    </div>
+    <p class="gate-note">${esc(e.cost ? `Lunch is ${e.cost}, paid to the venue when you register.` : 'Lunch is paid to the venue when you register.')}</p>
+  </div>`;
+  }
+
+  return `<div class="btnrow"><a class="btn" href="${esc(e.rsvp.href)}">${esc(e.rsvp.label)}</a>${offsite(e.rsvp.href)}</div>`;
+}
+
 function eventsPage() {
   const t = todayISO();
   const upcoming = CALENDAR.filter(e => e.date >= t).sort((a, b) => a.date.localeCompare(b.date));
@@ -798,7 +883,7 @@ function eventsPage() {
     location: { '@type': 'Place', name: e.where, address: { '@type': 'PostalAddress', addressLocality: 'Polk City', addressRegion: 'IA', addressCountry: 'US' } },
     description: e.summary,
     organizer: { '@type': 'Organization', name: SITE.name, url: SITE.url },
-    ...(e.rsvp ? { url: e.rsvp.href } : {})
+    ...(e.rsvp ? { url: gated(e) ? `${SITE.url}/events/#${e.id}` : e.rsvp.href } : {})
   }));
 
   const one = e => {
@@ -831,7 +916,7 @@ function eventsPage() {
   <p>${esc(e.summary)}</p>
   ${e.detail ? `<p>${esc(e.detail)}</p>` : ''}
   ${e.cost ? `<p class="cost">${esc(e.cost)}</p>` : ''}
-  ${e.rsvp ? `<div class="btnrow"><a class="btn" href="${esc(e.rsvp.href)}">${esc(e.rsvp.label)}</a>${offsite(e.rsvp.href)}</div>` : ''}
+  ${rsvpBlock(e)}
   ${reg}
   ${add}
 </article>`;
@@ -842,7 +927,7 @@ function eventsPage() {
   const calData = upcoming.filter(e => e.date).map(e => ({
     date: e.date, title: e.title, where: e.where,
     season: e.season || 'sun',
-    href: e.rsvp ? e.rsvp.href : '/events/'
+    href: e.rsvp ? publicHref(e) : '/events/'
   }));
 
   const body = `
@@ -1047,6 +1132,71 @@ ${eventLd.map(o => `<script type="application/ld+json">${JSON.stringify(o)}</scr
         .then(function(r){ return r.json().then(function(b){ if(!r.ok) throw new Error(b.message||'That did not work.'); return b; }); })
         .then(function(b){ form.replaceChildren(make('p',{'class':'reg-done'}, b.message)); })
         .catch(function(err){ go.disabled=false; msg.textContent=err.message; });
+    });
+  });
+})();
+</script>
+<script>
+(function(){
+  /* Member or guest, for events with a guest fee. Members are sent to the
+     venue's link, which only the server knows. Guests fill in three
+     fields and go to Stripe. */
+  function api(payload){
+    return fetch('/api/events',{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)})
+      .then(function(r){ return r.json().then(function(b){ if(!r.ok){ var e=new Error(b.message||'That did not work.'); e.status=r.status; throw e; } return b; }); });
+  }
+  function make(tag, attrs, text){
+    var n=document.createElement(tag);
+    for(var k in (attrs||{})) n.setAttribute(k, attrs[k]);
+    if(text!=null) n.textContent=text;
+    return n;
+  }
+  function say(gate, text){
+    var p=gate.querySelector('.gate-msg');
+    if(!p){ p=make('p',{'class':'gate-msg',role:'status'}); gate.appendChild(p); }
+    p.textContent=text;
+  }
+
+  document.addEventListener('click', function(e){
+    var mem=e.target.closest && e.target.closest('.gate-member');
+    var gst=e.target.closest && e.target.closest('.gate-guest');
+    if(!mem && !gst) return;
+    var gate=(mem||gst).closest('.gate'), id=gate.getAttribute('data-event');
+
+    if(mem){
+      mem.disabled=true; say(gate,'Checking your membership');
+      api({action:'memberlink', event:id})
+        .then(function(b){ say(gate,'Taking you to registration'); location.href=b.href; })
+        .catch(function(err){
+          mem.disabled=false;
+          if(err.status===401){ location.href='/members/?next=' + encodeURIComponent('/events/#' + id); return; }
+          say(gate, err.message);
+        });
+      return;
+    }
+
+    if(gate.querySelector('.gate-form')) return;
+    var fee=gate.getAttribute('data-fee');
+    var form=make('form',{'class':'reg-form gate-form'});
+    function field(label, input){ var w=make('label',{'class':'reg-field'}); w.appendChild(make('span',null,label)); w.appendChild(input); return w; }
+    var name=make('input',{type:'text',required:'',maxlength:'80',autocomplete:'name'});
+    var email=make('input',{type:'email',required:'',maxlength:'120',autocomplete:'email'});
+    var biz=make('input',{type:'text',maxlength:'120',autocomplete:'organization'});
+    form.appendChild(field('Your name', name));
+    form.appendChild(field('Email', email));
+    form.appendChild(field('Business (optional)', biz));
+    var go=make('button',{type:'submit','class':'btn sun'},'Continue to pay $' + fee);
+    form.appendChild(go);
+    form.appendChild(make('p',{'class':'reg-msg',role:'status'}));
+    gate.appendChild(form);
+    name.focus();
+
+    form.addEventListener('submit', function(ev){
+      ev.preventDefault();
+      go.disabled=true; form.querySelector('.reg-msg').textContent='Opening secure payment';
+      api({action:'guestcheckout', event:id, name:name.value, email:email.value, business:biz.value})
+        .then(function(b){ location.href=b.url; })
+        .catch(function(err){ go.disabled=false; form.querySelector('.reg-msg').textContent=err.message; });
     });
   });
 })();
@@ -2854,6 +3004,7 @@ async function main() {
   await put('about', aboutPage());
   await put('deals', dealsPage());
   await put('newsletter', newsletterPage());
+  await put(path.join('events', 'paid'), paidPage());
   await put('new-to-polk-city', newcomersPage());
   await put('get-involved', involvedPage());
   await put('privacy', privacyPage());

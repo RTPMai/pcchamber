@@ -818,7 +818,8 @@ async function screenEvents() {
         e.date, e.where,
         e.entries ? `${e.entries} on the list` : null,
         e.register ? 'registration on' : null,
-        e.tickets ? 'luncheon tickets' : null
+        e.tickets ? 'luncheon tickets' : null,
+        e.guestFee ? `$${e.guestFee} guest fee` : null
       ].filter(Boolean).join(' \u00b7 '))));
 
   render(el('div', {},
@@ -882,6 +883,8 @@ async function screenEvent(id, flash) {
         el('span', {}, [
           p.business, p.email,
           p.ticket && p.memberName ? `on ${p.memberName}\u2019s ticket` + (p.ticketUse ? ' (logged)' : '') : null,
+          p.paid ? `paid $${p.paid} guest fee` : null,
+          p.via === 'member' ? 'member, sent to the venue\u2019s registration' : null,
           p.walkin ? 'added at the door' : null,
           p.checkedIn ? 'checked in ' + new Date(p.checkedIn).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }) : null
         ].filter(Boolean).join(' \u00b7 '))),
@@ -899,8 +902,8 @@ async function screenEvent(id, flash) {
   });
 
   const exportCsv = () => download(`${ev.id}-attendees.csv`, csv([
-    ['Name', 'Business', 'Email', 'Guests', 'On a ticket of', 'Registered', 'Checked in'],
-    ...people.map(p => [p.name, p.business, p.email, p.guests || 0, p.ticket ? p.memberName : '', p.at.slice(0, 16).replace('T', ' '), p.checkedIn ? 'yes' : ''])
+    ['Name', 'Business', 'Email', 'Guests', 'Member', 'Guest fee paid', 'On a ticket of', 'Registered', 'Checked in'],
+    ...people.map(p => [p.name, p.business, p.email, p.guests || 0, p.member ? 'yes' : '', p.paid || '', p.ticket ? p.memberName : '', p.at.slice(0, 16).replace('T', ' '), p.checkedIn ? 'yes' : ''])
   ]));
 
   render(el('div', {},

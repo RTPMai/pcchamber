@@ -1070,3 +1070,12 @@ img.face{ display:block; }
 .stat strong{ display:block; font-family:'Fraunces',Georgia,serif; font-size:1.6rem; font-weight:600; line-height:1.1; font-variant-numeric:tabular-nums; }
 .stat span{ font-size:.85rem; color:var(--navy-soft); }
 .offsite{ align-self:center; font-size:.85rem; color:var(--navy-soft); }
+
+/* ---------- Member or guest, for events with a guest fee -------------- */
+.gate{ margin-top:14px; }
+.gate-choices{ display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:14px; }
+.gate-choice{ background:var(--paper-warm); border:1px solid var(--rule); border-radius:12px; padding:16px 18px; display:flex; flex-direction:column; gap:6px; align-items:flex-start; }
+.gate-choice p{ margin:0 0 6px; font-size:.95rem; }
+.gate-note{ font-size:.9rem; color:var(--navy-soft); margin:10px 0 0; }
+.gate-msg{ margin:10px 0 0; font-weight:600; }
+.gate-form{ margin-top:12px; }

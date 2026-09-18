@@ -24,3 +24,11 @@ Added September 2026. Each file has the full explanation at the top.
 - Subscribers and registrations live in Upstash, not git. Download both from the admin now and then.
 - 10 serverless functions now. Vercel Hobby allows 12.
 - The quarterly email covers the quarter before the current one. Sent by hand in September, it covers April to June.
+
+## Luncheon guest fee
+
+Members go straight to the club's registration. Non-members pay the guest fee through Stripe first. Set per event with "Guest fee for non-members" in the admin. Full notes at the top of `api/_lib/guestfee.js`.
+
+- `STRIPE_SECRET_KEY`: from Stripe. Until it is set, guests are told to email the chamber.
+- `STRIPE_WEBHOOK_SECRET`: add a webhook in Stripe for `checkout.session.completed` pointing at `/api/stripe`, and paste its signing secret. It covers guests who pay and close the tab.
+- 11 serverless functions now. Vercel Hobby allows 12.

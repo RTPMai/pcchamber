@@ -13,7 +13,8 @@
         "href": "https://tcofiowa.com/product/2026-chamber-of-commerce-meetings/"
       },
       "audience": "public",
-      "season": "sun"
+      "season": "sun",
+      "guestFee": "10"
     },
     {
       "title": "Coffee and Connections",
@@ -58,7 +59,7 @@
       "audience": "public",
       "season": "sun",
       "tickets": true,
-      "register": true
+      "guestFee": "10"
     },
     {
       "id": "coffee-2026-09-24",
@@ -70,7 +71,7 @@
       "address": "107 N 2nd St, Polk City, IA 50226",
       "summary": "Early networking before the day starts. Turn up, buy a coffee, talk to people.",
       "cost": "Free",
-      "audience": "members",
+      "audience": "public",
       "season": "winter"
     },
     {
@@ -90,7 +91,8 @@
       },
       "audience": "public",
       "season": "sun",
-      "tickets": true
+      "tickets": true,
+      "guestFee": "10"
     },
     {
       "id": "trunk-or-treat-2026-10-25",
