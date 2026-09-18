@@ -71,7 +71,8 @@
       "summary": "Early networking before the day starts. Turn up, buy a coffee, talk to people.",
       "cost": "Free",
       "audience": "public",
-      "season": "winter"
+      "season": "winter",
+      "register": true
     },
     {
       "id": "luncheon-2026-10-14",
