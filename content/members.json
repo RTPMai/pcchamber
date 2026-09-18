@@ -179,7 +179,7 @@
       "slug": "city-of-polk-city",
       "name": "City of Polk City",
       "category": "government",
-      "tier": "basic",
+      "tier": "sponsor",
       "city": "Polk City",
       "summary": "",
       "contact": {
@@ -261,7 +261,7 @@
       "slug": "grinnell-state-bank",
       "name": "Grinnell State Bank",
       "category": "finance",
-      "tier": "basic",
+      "tier": "investor",
       "city": "Polk City",
       "summary": "",
       "contact": {
@@ -288,7 +288,7 @@
       "slug": "home-state-bank",
       "name": "Home State Bank",
       "category": "finance",
-      "tier": "basic",
+      "tier": "investor",
       "city": "Polk City",
       "summary": "",
       "contact": {
@@ -354,7 +354,7 @@
       "slug": "knapp-properties",
       "name": "Knapp Properties, Inc.",
       "category": "realestate",
-      "tier": "basic",
+      "tier": "investor",
       "city": "West Des Moines",
       "summary": "",
       "contact": {
@@ -407,7 +407,7 @@
       "slug": "luana-savings-bank",
       "name": "Luana Savings Bank",
       "category": "finance",
-      "tier": "basic",
+      "tier": "investor",
       "city": "Polk City",
       "summary": "",
       "contact": {
@@ -513,7 +513,7 @@
       "slug": "nova-med-spa",
       "name": "Nova Med Spa",
       "category": "health",
-      "tier": "basic",
+      "tier": "investor",
       "city": "Polk City",
       "summary": "",
       "contact": {
@@ -663,7 +663,7 @@
       "slug": "polk-county-board-of-supervisors",
       "name": "Polk County Board of Supervisors",
       "category": "government",
-      "tier": "basic",
+      "tier": "sponsor",
       "city": "Des Moines",
       "summary": "",
       "contact": {
@@ -801,7 +801,7 @@
       "slug": "snyder-and-associates",
       "name": "Snyder & Associates Inc.",
       "category": "home",
-      "tier": "basic",
+      "tier": "partner",
       "city": "Ankeny",
       "summary": "",
       "contact": {
@@ -871,7 +871,7 @@
       "slug": "triplett-westendorf-financial-group",
       "name": "Triplett-Westendorf Financial Group LLC",
       "category": "insurance",
-      "tier": "basic",
+      "tier": "partner",
       "city": "Ankeny",
       "summary": "",
       "contact": {
@@ -897,7 +897,7 @@
       "slug": "whatcha-smokin-bbq-brew",
       "name": "Whatcha Smokin? BBQ + Brew",
       "category": "food",
-      "tier": "basic",
+      "tier": "partner",
       "city": "Luther",
       "summary": "",
       "contact": {
