@@ -120,6 +120,8 @@ export const COLLECTIONS = [
         help: 'One email address per line. Anybody listed can sign in as this business. Add each person who needs access, not just a shared inbox. Left empty, the contact email above is used.' },
       { id: 'logo', label: 'Logo file', type: 'text',
         help: 'Optional, for example /assets/members/their-slug.svg. Without one they get their initial.' },
+      { id: 'logoDark', label: 'Logo needs a dark background', type: 'check',
+        help: 'Tick this for a white or very light logo, which would disappear on the usual white plate.' },
       { id: 'slug', label: 'Web address', type: 'text', required: true, advanced: true,
         derive: m => slug(m.name || ''),
         help: 'Filled in from the business name. Their page is at /directory/this/. Do not change it once the site is live.' }

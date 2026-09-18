@@ -110,6 +110,17 @@ async function saveLogo(member, body, res) {
   const author = `${member.name} via member sign in`;
   let path = null;
 
+  /* Just the background behind the logo. No image involved. */
+  if (body.action === 'logobg') {
+    await updateContent('members.json', data => {
+      const rec = (data.members || []).find(x => x.slug === member.slug);
+      if (!rec) throw Object.assign(new Error('That listing is no longer in the directory.'), { status: 404 });
+      if (body.dark) rec.logoDark = true; else delete rec.logoDark;
+    }, `${member.name} changed their logo background`, author);
+    res.status(200).json({ ok: true, message: 'Saved. Your page updates in about a minute.' });
+    return;
+  }
+
   if (body.action === 'logo') {
     const m = /^data:image\/(png|webp);base64,([A-Za-z0-9+/=]+)$/.exec(String(body.image || ''));
     const buf = m ? Buffer.from(m[2], 'base64') : null;
@@ -133,6 +144,7 @@ async function saveLogo(member, body, res) {
     if (!rec) throw Object.assign(new Error('That listing is no longer in the directory.'), { status: 404 });
     before = rec.logo || null;
     if (path) rec.logo = '/' + path; else delete rec.logo;
+    if (path && body.dark) rec.logoDark = true; else delete rec.logoDark;
   }, path ? `${member.name} changed their logo` : `${member.name} removed their logo`, author);
 
   /* Only ever a file this member uploaded. A logo the chamber put in
@@ -174,7 +186,7 @@ export default async function handler(req, res) {
       return;
     }
 
-    if (body.action === 'logo' || body.action === 'removelogo') {
+    if (body.action === 'logo' || body.action === 'removelogo' || body.action === 'logobg') {
       await saveLogo(member, body, res);
       return;
     }

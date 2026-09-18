@@ -70,8 +70,11 @@ const timeRange = e => (e.start && e.end) ? `${clock(e.start)} to ${clock(e.end)
 /* Members can supply a logo. Until they do, the plate shows their initial
    in their category's season colour, which looks deliberate rather than
    like a missing image. */
+/* A white logo on a white plate is invisible, so a member whose logo is
+   light gets a navy plate instead. Set by the member when they upload, or
+   in the admin. */
 const logoPlate = (m, cls = 'logo') => m.logo
-  ? `<span class="${cls}"><img src="${esc(m.logo)}" alt="${esc(m.name)} logo" loading="lazy"></span>`
+  ? `<span class="${cls}${m.logoDark ? ' dark' : ''}"><img src="${esc(m.logo)}" alt="${esc(m.name)} logo" loading="lazy"></span>`
   : `<span class="${cls}"><span class="initial" aria-hidden="true">${esc(m.name.trim()[0] || '?')}</span></span>`;
 
 const catLabel = id => (CATEGORIES.find(c => c.id === id) || {}).label || 'Member';
@@ -2029,6 +2032,7 @@ function listingPage() {
             <div class="logobtns">
               <label class="btn ghost small" for="l-logo">Choose a file</label>
               <input type="file" id="l-logo" accept="image/png,image/jpeg,image/webp,image/svg+xml" class="visually-hidden">
+              <label class="logodark" id="logodarkwrap" hidden><input type="checkbox" id="l-logodark"> Dark background, for a white or light logo</label>
               <button type="button" class="linkish" id="logoremove" hidden>Remove logo</button>
             </div>
           </div>
@@ -2148,10 +2152,19 @@ function listingPage() {
       logoInit=document.getElementById('logoinit'),
       logoFile=document.getElementById('l-logo'),
       logoRemove=document.getElementById('logoremove'),
-      logoMsg=document.getElementById('logomsg');
+      logoMsg=document.getElementById('logomsg'),
+      logoDark=document.getElementById('l-logodark'),
+      logoDarkWrap=document.getElementById('logodarkwrap');
+
+  function setDark(on){
+    logoDark.checked=Boolean(on);
+    logoPrev.classList.toggle('dark', Boolean(on));
+  }
 
   function showLogo(src, name){
     logoPrev.replaceChildren();
+    logoDarkWrap.hidden=!src;
+    if(!src) setDark(false);
     if(src){
       var img=document.createElement('img'); img.src=src; img.alt='Your logo';
       logoPrev.appendChild(img);
@@ -2173,11 +2186,22 @@ function listingPage() {
         if(file.type==='image/svg+xml') scale=size/Math.max(w,h);
         var c=document.createElement('canvas');
         c.width=Math.max(1,Math.round(w*scale)); c.height=Math.max(1,Math.round(h*scale));
-        c.getContext('2d').drawImage(img,0,0,c.width,c.height);
+        var ctx=c.getContext('2d');
+        ctx.drawImage(img,0,0,c.width,c.height);
         URL.revokeObjectURL(url);
+
+        /* Is it mostly white? Average the brightness of the pixels that
+           are actually there, ignoring the see-through ones. */
+        var px=ctx.getImageData(0,0,c.width,c.height).data, sum=0, n=0;
+        for(var i=0;i<px.length;i+=16){
+          if(px[i+3]<40) continue;
+          sum+=(0.2126*px[i]+0.7152*px[i+1]+0.0722*px[i+2])/255; n++;
+        }
+        var light = n>0 && sum/n>0.86;
+
         var out=c.toDataURL('image/webp',0.9);
         if(out.indexOf('data:image/webp')!==0) out=c.toDataURL('image/png');
-        resolve(out);
+        resolve({ data:out, light:light });
       };
       img.onerror=function(){ URL.revokeObjectURL(url); reject(new Error('That file could not be opened as an image.')); };
       img.src=url;
@@ -2190,10 +2214,26 @@ function listingPage() {
     if(f.size>10*1024*1024){ logoMsg.textContent='That file is over 10 MB. Try a smaller copy of the logo.'; return; }
     logoMsg.textContent='Uploading';
     shrink(f,400)
-      .then(function(data){ return data.length>520000 ? shrink(f,240) : data; })
-      .then(function(data){ return post({action:'logo', image:data}).then(function(d){ showLogo(data); logoMsg.textContent=d.message; }); })
+      .then(function(r){ return r.data.length>520000 ? shrink(f,240) : r; })
+      .then(function(r){
+        return post({action:'logo', image:r.data, dark:r.light}).then(function(d){
+          showLogo(r.data); setDark(r.light);
+          logoMsg.textContent = r.light
+            ? 'That looks like a white logo, so it goes on a dark background. Untick the box if that is wrong. ' + d.message
+            : d.message;
+        });
+      })
       .catch(function(err){ logoMsg.textContent=err.message; })
       .then(function(){ logoFile.value=''; });
+  });
+
+  logoDark.addEventListener('change', function(){
+    var on=logoDark.checked;
+    setDark(on);
+    logoMsg.textContent='Saving';
+    post({action:'logobg', dark:on})
+      .then(function(d){ logoMsg.textContent=d.message; })
+      .catch(function(err){ setDark(!on); logoMsg.textContent=err.message; });
   });
 
   logoRemove.addEventListener('click', function(){
@@ -2207,6 +2247,7 @@ function listingPage() {
   post({action:'load'}).then(function(d){
     var m=d.member, c=m.contact||{};
     showLogo(m.logo, m.name);
+    setDark(m.logo && m.logoDark);
     el.name.value=m.name||'';
     el.summary.value=m.summary||'';
     el.about.value=m.about||'';

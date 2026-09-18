@@ -982,3 +982,10 @@ img.face{ display:block; }
   clip:rect(0 0 0 0); clip-path:inset(50%); white-space:nowrap;
 }
 .logobtns input:focus-visible + .linkish, .logobtns:focus-within label.btn{ outline:3px solid var(--sun); outline-offset:2px; }
+
+/* A white logo gets a navy plate, in the directory, on its own page, and
+   in the editor preview. */
+.listing .logo.dark, .memberhead .logo.dark, .logoprev.dark{ background:var(--navy); border-color:var(--navy); }
+.logodark{ display:flex; align-items:center; gap:8px; font-size:.9rem; font-weight:400 !important; cursor:pointer; margin:0 !important; }
+.logodark[hidden]{ display:none; }
+.logodark input{ width:18px; height:18px; margin:0; accent-color:var(--navy); }
