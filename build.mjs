@@ -765,9 +765,13 @@ function memberPage(m) {
 <div class="memberhead" data-season="${season}">
   <div class="wrap">
     <p class="crumb"><a href="/directory/">Member directory</a> / ${esc(catLabel(m.category))}</p>
-    ${logoPlate(m, 'logo')}
-    <h1>${esc(m.name)}</h1>
-    <p>${esc(m.summary || catLabel(m.category))}</p>
+    <div class="memberid">
+      ${logoPlate(m, 'logo')}
+      <div>
+        <h1>${esc(m.name)}</h1>
+        <p>${esc(m.summary || catLabel(m.category))}</p>
+      </div>
+    </div>
   </div>
 </div>
 <div class="wrap band" data-season="${season}">

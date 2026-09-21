@@ -371,31 +371,43 @@ a:hover{ color:var(--tint-ink); }
 .listing[hidden], .event[hidden]{ display:none; }
 .listing .body{ flex:1; min-width:0; }
 .listing .logo{
-  flex:0 0 auto; width:64px; height:64px; border-radius:9px;
-  background:var(--paper-warm); border:1px solid var(--rule);
+  flex:0 0 auto; width:150px; height:96px; border-radius:10px; padding:8px;
+  background:#fff; border:1px solid var(--rule);
   display:flex; align-items:center; justify-content:center;
   overflow:hidden; align-self:center;
 }
-.listing .logo img{ max-width:78%; max-height:78%; display:block; }
+/* The plates are wide rather than square, because most logos are wide.
+   The logo files have their extra white margin trimmed off, so the logo
+   itself fills the plate instead of a white square inside a white plate. */
+.listing .logo img, .memberhead .logo img, .logoprev img, .deal-who .logo img{
+  width:100%; height:100%; object-fit:contain; display:block;
+}
 /* No logo yet: the initial, set in the member's own season colour. */
 .listing .logo .initial{
   font-family:'Fraunces',Georgia,serif; font-size:1.5rem; font-weight:600;
   color:var(--tint-ink);
 }
 @media (max-width:520px){
-  .listing .logo{ width:48px; height:48px; }
+  .listing .logo{ width:104px; height:68px; padding:6px; }
   .listing .logo .initial{ font-size:1.2rem; }
 }
 
-/* Same plate, larger, on the member's own page. */
+/* Same plate, much larger, on the member's own page, sitting beside the
+   name. Stacks on phones. */
+.memberid{ display:flex; align-items:center; gap:32px; margin-top:18px; }
+.memberid > div{ min-width:0; }
 .memberhead .logo{
-  width:96px; height:96px; border-radius:12px; background:#fff;
+  flex:0 0 auto; width:300px; height:200px; border-radius:16px; background:#fff; padding:16px;
   border:1px solid var(--rule); display:flex; align-items:center;
-  justify-content:center; overflow:hidden; margin-bottom:18px;
+  justify-content:center; overflow:hidden;
+  box-shadow:0 2px 10px rgba(0,39,52,.08);
 }
-.memberhead .logo img{ max-width:78%; max-height:78%; display:block; }
+@media (max-width:640px){
+  .memberid{ flex-direction:column; align-items:flex-start; gap:18px; }
+  .memberhead .logo{ width:100%; max-width:280px; height:180px; }
+}
 .memberhead .logo .initial{
-  font-family:'Fraunces',Georgia,serif; font-size:2.4rem; font-weight:600;
+  font-family:'Fraunces',Georgia,serif; font-size:5rem; font-weight:600;
   color:var(--tint-ink);
 }
 .listing h3{ margin:0 0 3px; font-size:1.12rem; color:var(--navy); }
@@ -977,10 +989,9 @@ img.face{ display:block; }
 .field .lbl{ display:block; font-weight:600; font-size:.95rem; margin-bottom:5px; }
 .logoedit{ display:flex; align-items:center; gap:20px; margin-top:8px; }
 .logoprev{
-  flex:0 0 auto; width:96px; height:96px; border-radius:12px; background:#fff;
+  flex:0 0 auto; width:210px; height:140px; padding:12px; border-radius:12px; background:#fff;
   border:1px solid var(--rule); display:flex; align-items:center; justify-content:center; overflow:hidden;
 }
-.logoprev img{ max-width:78%; max-height:78%; display:block; }
 .logoprev .initial{ font-family:'Fraunces',Georgia,serif; font-size:2.4rem; font-weight:600; color:var(--tint-ink); }
 .logobtns{ display:flex; flex-direction:column; align-items:flex-start; gap:10px; }
 .field .logobtns label.btn{ display:inline-flex; margin:0; font-size:.93rem; cursor:pointer; }
@@ -1010,11 +1021,10 @@ img.face{ display:block; }
 .deal-who{ display:flex; align-items:center; gap:10px; text-decoration:none; color:var(--navy); font-weight:600; font-size:.95rem; margin-bottom:6px; }
 .deal-who:hover span{ text-decoration:underline; }
 .deal-who .logo{
-  width:40px; height:40px; border-radius:8px; background:#fff; border:1px solid var(--rule);
+  width:78px; height:52px; border-radius:9px; padding:4px; background:#fff; border:1px solid var(--rule);
   display:flex; align-items:center; justify-content:center; overflow:hidden; flex:0 0 auto;
 }
 .deal-who .logo.dark{ background:var(--navy); border-color:var(--navy); }
-.deal-who .logo img{ max-width:78%; max-height:78%; }
 .deal-who .logo .initial{ font-family:'Fraunces',Georgia,serif; font-weight:600; color:var(--tint-ink); }
 .deal-for{ font-size:.74rem; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--navy-soft); }
 .deal h3{ margin:2px 0 0; font-size:1.2rem; }
