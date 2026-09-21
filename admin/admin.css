@@ -5,9 +5,9 @@
 @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Public+Sans:wght@400;500;600;700&display=swap');
 
 :root{
-  --navy:#002734; --navy-mid:#28454F; --navy-soft:#526A73;
-  --sun:#F19C30; --sun-ink:#7A4A03; --sun-wash:#FDF1DF;
-  --autumn:#A36437; --spring:#838E52; --winter:#68A1B8;
+  --navy:#062734; --navy-mid:#28454F; --navy-soft:#526A73;
+  --sun:#F19D30; --sun-ink:#7A4A03; --sun-wash:#FDF1DF;
+  --autumn:#9F6338; --spring:#818B52; --winter:#67A1B9;
   --alert:#C8341F;
   --paper:#FFFFFF; --paper-warm:#FBFAF7; --rule:#E1DED7; --rule-soft:#EFEDE8;
   --radius:12px;

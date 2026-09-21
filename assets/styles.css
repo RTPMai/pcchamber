@@ -2,11 +2,11 @@
    Polk City Area Chamber, main website
 
    Colors are the chamber logo roundel, same as the Business Policy Center:
-     navy    #002734  outline and wordmark
-     sun     #F19C30  the summer wedge
-     autumn  #A36437  the fall leaf
-     spring  #838E52  the spring leaf
-     winter  #68A1B8  the winter wedge
+     navy    #062734  outline and wordmark
+     sun     #F19D30  the summer wedge
+     autumn  #9F6338  the fall leaf
+     spring  #818B52  the spring leaf
+     winter  #67A1B9  the winter wedge
 
    Each area of the site carries one season. Set --tint on any container
    and its children follow.
@@ -15,23 +15,23 @@
 @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Public+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap');
 
 :root{
-  --navy:#002734;
+  --navy:#062734;
   --navy-mid:#28454F;
   --navy-soft:#526A73;   /* clears 4.5:1 on every seasonal wash. #5A737C did not. */
 
-  --sun:#F19C30;
+  --sun:#F19D30;
   --sun-ink:#7A4A03;
   --sun-wash:#FDF1DF;
 
-  --autumn:#A36437;
+  --autumn:#9F6338;
   --autumn-ink:#6F401E;
   --autumn-wash:#F7EEE6;
 
-  --spring:#838E52;
+  --spring:#818B52;
   --spring-ink:#4E5629;
   --spring-wash:#F1F3E7;
 
-  --winter:#68A1B8;
+  --winter:#67A1B9;
   --winter-ink:#2E5B70;
   --winter-wash:#EAF2F6;
 
@@ -264,13 +264,27 @@ a:hover{ color:var(--tint-ink); }
 .next .wrap{
   display:flex; flex-wrap:wrap; align-items:baseline; gap:6px 18px;
   padding-top:18px; padding-bottom:18px;
+  position:relative;
 }
+/* The whole strip is the link. The ::after stretches the hit area across
+   the bar; the RSVP link sits above it so it still goes where it says. */
+.next .whole{
+  display:flex; flex-wrap:wrap; align-items:baseline; gap:6px 18px;
+  color:inherit; text-decoration:none;
+}
+.next .whole::after{ content:""; position:absolute; inset:0; }
+.next .whole:hover .what,
+.next .whole:focus-visible .what{ text-decoration:underline; text-underline-offset:3px; }
+.next .whole:focus-visible{ outline:none; }
+.next .wrap:has(.whole:focus-visible){ outline:2px solid var(--sun-ink); outline-offset:-2px; }
+.next:hover{ background:#FBE8CC; }
 .next .when{
   font-family:'Fraunces',Georgia,serif; font-weight:700;
   color:var(--sun-ink); font-size:1.05rem;
 }
 .next .what{ color:var(--navy-mid); font-size:.97rem; }
 .next .go{
+  position:relative; z-index:1;
   margin-left:auto; font-weight:600; color:var(--navy);
   font-size:.94rem;
 }
@@ -479,6 +493,8 @@ a:hover{ color:var(--tint-ink); }
 
 /* ---------- Events ------------------------------------------------------ */
 
+.event{ scroll-margin-top:96px; }
+.event:target{ box-shadow:0 0 0 3px var(--tint); border-radius:var(--radius); }
 .event{
   border:1px solid var(--rule); border-left:6px solid var(--tint);
   border-radius:var(--radius); padding:22px 26px; margin-bottom:14px;

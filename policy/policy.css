@@ -2,33 +2,33 @@
    Polk City Area Chamber, Business Policy Center
 
    Colors are taken directly from the chamber logo:
-     navy    #002734  the roundel outline and wordmark
-     sun     #F19C30  the summer wedge
-     autumn  #A36437  the fall leaf
-     spring  #838E52  the spring leaf
-     winter  #68A1B8  the winter wedge
+     navy    #062734  the roundel outline and wordmark
+     sun     #F19D30  the summer wedge
+     autumn  #9F6338  the fall leaf
+     spring  #818B52  the spring leaf
+     winter  #67A1B9  the winter wedge
 
    Each section of the site gets one season color.
    ========================================================================== */
 
 :root{
-  --navy:#002734;
+  --navy:#062734;
   --navy-mid:#28454F;
   --navy-soft:#5A737C;
 
-  --sun:#F19C30;
+  --sun:#F19D30;
   --sun-ink:#7A4A03;
   --sun-wash:#FDF1DF;
 
-  --autumn:#A36437;
+  --autumn:#9F6338;
   --autumn-ink:#6F401E;
   --autumn-wash:#F7EEE6;
 
-  --spring:#838E52;
+  --spring:#818B52;
   --spring-ink:#4E5629;
   --spring-wash:#F1F3E7;
 
-  --winter:#68A1B8;
+  --winter:#67A1B9;
   --winter-ink:#2E5B70;
   --winter-wash:#EAF2F6;
 

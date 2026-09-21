@@ -350,7 +350,7 @@ function head({ title, description, canonical, season = 'navy', noindex = false 
 <meta name="description" content="${esc(description)}">
 <link rel="canonical" href="${SITE.url}${canonical}">
 ${noindex ? '<meta name="robots" content="noindex, nofollow">' : ''}
-<meta name="theme-color" content="#002734">
+<meta name="theme-color" content="#062734">
 <meta property="og:type" content="website">
 <meta property="og:title" content="${esc(full)}">
 <meta property="og:description" content="${esc(description)}">
@@ -495,8 +495,10 @@ function homePage() {
   const n = nextEvent();
   const strip = n ? `<div class="next" data-season="${n.season}">
   <div class="wrap">
-    <span class="when">Next up: ${esc(longDate(n.date))}</span>
-    <span class="what">${esc(n.title)} at ${esc(n.where)}${n.time ? `, ${esc(n.time)}` : ''}</span>
+    <a class="whole" href="/events/${n.id ? `#${esc(n.id)}` : ''}">
+      <span class="when">Next up: ${esc(longDate(n.date))}</span>
+      <span class="what">${esc(n.title)} at ${esc(n.where)}${n.time ? `, ${esc(n.time)}` : ''}</span>
+    </a>
     ${n.rsvp ? `<a class="go" href="${esc(publicHref(n))}">${esc(n.rsvp.label)}</a>` : ''}
   </div>
 </div>` : '';
@@ -2074,7 +2076,7 @@ function adminPage() {
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Chamber admin</title>
 <meta name="robots" content="noindex, nofollow">
-<meta name="theme-color" content="#002734">
+<meta name="theme-color" content="#062734">
 <link rel="icon" href="/assets/favicon.ico" sizes="any">
 <link rel="stylesheet" href="/admin/admin.css">
 </head>

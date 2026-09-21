@@ -18,7 +18,7 @@
 
 import { escHtml as e } from './mail.js';
 
-const NAVY = '#002734', SOFT = '#526A73', SUN = '#F19C30', RULE = '#E4DED3', PAPER = '#FBFAF7';
+const NAVY = '#062734', SOFT = '#526A73', SUN = '#F19D30', RULE = '#E4DED3', PAPER = '#FBFAF7';
 
 function htmlBlock(b) {
   if (b.h) return `<h2 style="font-family:Georgia,serif;font-size:20px;color:${NAVY};margin:28px 0 10px">${e(b.h)}</h2>`;
