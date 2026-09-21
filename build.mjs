@@ -607,9 +607,11 @@ function directoryIndex() {
        paying Premier member could show nothing while a Basic member
        showed a badge. */
     /* Community Partner and up. Basic and Individual members carry no
-       badge, so a badge means somebody paid for visibility. */
+       badge, so a badge means somebody paid for visibility. The badge is
+       coloured by level (data-tier), never by the card's category season,
+       so every member on the same level looks the same. */
     const badge = (TIERS[m.tier]?.rank ?? 9) < TIERS.basic.rank
-      ? `<span class="badge">${esc(TIERS[m.tier].label)}</span>` : '';
+      ? `<span class="badge" data-tier="${m.tier}">${esc(TIERS[m.tier].label)}</span>` : '';
     const hay = [m.name, m.summary, m.about, catLabel(m.category), ...(m.serves || [])]
       .join(' ').toLowerCase();
     return `<a class="listing" href="/directory/${m.slug}/" data-season="${season}" data-cat="${m.category}" data-find="${esc(hay)}">

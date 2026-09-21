@@ -413,6 +413,14 @@ a:hover{ color:var(--tint-ink); }
   border:1px solid var(--tint);
 }
 
+/* Tier badges in the directory. Fixed colour per level, overriding the
+   card's category season, so two Investors never look different. Heavier
+   the higher the level. */
+.badge[data-tier="partner"] { background:var(--spring-wash); color:var(--spring-ink); border-color:var(--spring); }
+.badge[data-tier="investor"]{ background:var(--autumn-wash); color:var(--autumn-ink); border-color:var(--autumn); }
+.badge[data-tier="sponsor"] { background:var(--sun);         color:var(--navy);       border-color:var(--sun); }
+.badge[data-tier="champion"]{ background:var(--navy);        color:#fff;              border-color:var(--sun); }
+
 .empty{
   padding:44px 22px; text-align:center; color:var(--navy-mid);
   border:1px dashed var(--rule); border-radius:var(--radius);
