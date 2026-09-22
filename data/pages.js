@@ -122,7 +122,8 @@ export const RESOURCE_GROUPS = [
       { label: 'Add your event to the community calendar', href: '/events/add/', note: 'Open to anyone running something locally, member or not.' },
       { label: 'The member directory', href: '/directory/', note: 'Your listing is a real page that turns up in search. Keep your details current.' },
       { label: 'Catch Des Moines', href: 'https://www.catchdesmoines.com/', note: 'Regional tourism listings. Worth it if you get visitor traffic from Saylorville and Big Creek.' },
-      { label: 'Greater Des Moines Partnership', href: 'https://www.dsmpartnership.com/', note: 'Metro-wide business network. Basic Business membership includes reciprocal membership.' }
+      { label: 'Greater Des Moines Partnership', href: 'https://www.dsmpartnership.com/', note: 'Metro-wide business network. Basic Business membership includes reciprocal membership.' },
+      { label: 'North Polk Living', href: 'https://www.iowalivingmagazines.com/north-polk', note: 'The local monthly magazine. Openings, milestones, and events are free to send in. Press releases go to tammy@iowalivingmagazines.com.' }
     ]
   }
 ];
