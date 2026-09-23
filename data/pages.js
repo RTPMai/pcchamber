@@ -112,6 +112,22 @@ export const RESOURCE_GROUPS = [
     ]
   },
   {
+    slug: 'disaster-help',
+    season: 'autumn',
+    title: 'Storm and flood recovery',
+    blurb: 'What is still open after the July 2026 flooding, and what has already closed.',
+    intro: 'The July 2 to 4 flooding put Polk County under an SBA disaster declaration. The deadline to apply for damage to buildings, equipment and stock passed on September 21, 2026. Working capital loans are still open, and a business does not need to have had physical damage to apply for one. Nonprofits are covered by a second declaration with later deadlines.',
+    links: [
+      { label: 'Apply for an SBA disaster loan', href: 'https://lending.sba.gov/', note: 'Economic injury applications for businesses are open until April 23, 2027. Working capital for bills the flooding stopped you paying, up to $2 million at 4%.' },
+      { label: 'Nonprofits: apply by November 2', href: 'https://www.sba.gov/funding-programs/disaster-assistance', note: 'A separate declaration covers private nonprofits and faith-based organisations. Physical damage closes November 2, 2026, economic injury June 1, 2027, at 3.625%.' },
+      { label: 'SBA fact sheet for this disaster', href: '/assets/docs/sba-disaster-loan-fact-sheet.pdf', note: 'Declaration #21727 and #21728. Rates, terms, limits, and what is not eligible. PDF.' },
+      { label: 'The SBA news release', href: '/assets/docs/sba-disaster-loan-news-release.pdf', note: 'The original July 24 announcement, including the outreach centres that have since closed. PDF.' },
+      { label: 'SBA customer service', href: 'mailto:disastercustomerservice@sba.gov', note: 'Or 800-659-2955. They will tell you whether it is worth applying before you fill anything in.' },
+      { label: 'Help for households', href: 'https://homelandsecurity.iowa.gov/assistance', note: 'State grants and disaster case advocacy for residents. Grant applications run 45 days from the disaster, but a case advocate can help after that.' },
+      { label: 'Iowa disaster assistance flyer', href: '/assets/docs/iowa-disaster-assistance.pdf', note: 'Iowa HSEM, plain English. Also 515-675-1884 or disastercaseadvocacy@iowa.gov. PDF.' }
+    ]
+  },
+  {
     slug: 'growing',
     season: 'autumn',
     title: 'Growing and getting known',

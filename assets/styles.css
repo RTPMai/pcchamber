@@ -106,6 +106,24 @@ a:hover{ color:var(--tint-ink); }
 }
 .skip:focus{ left:8px; top:8px; }
 
+/* ---------- Alert bar -------------------------------------------------
+   Red, above everything, for anything with a deadline. Set in data/site.js. */
+
+.alertbar{
+  background:#8C2416;
+  color:#fff;
+  font-size:.86rem;
+  padding:10px 0;
+}
+.alertbar p{ margin:0; max-width:none; }
+.alertbar strong{ font-weight:700; }
+.alertbar a{
+  color:#fff; font-weight:700;
+  text-decoration:underline; text-underline-offset:3px;
+  white-space:nowrap;
+}
+.alertbar a:hover{ text-decoration:none; }
+
 /* ---------- Demo banner ---------------------------------------------- */
 
 .demo{

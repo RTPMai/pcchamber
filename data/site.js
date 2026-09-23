@@ -25,6 +25,27 @@ export const SITE = {
     tiktok: 'https://www.tiktok.com/@polkcitychamber'
   },
 
+  /* RED ALERT BAR
+     A red strip above the header on every page. For things with a
+     deadline: storm recovery, a programme closing, a road shut.
+
+     It switches itself off after the date in `until`, so a stale notice
+     cannot sit there for a year. Set `active: false` to pull it early.
+
+     title  the bold bit, a few words
+     text   one sentence
+     href   where it goes, usually a page on this site
+     label  the link text
+     until  YYYY-MM-DD. The last day it shows. */
+  alert: {
+    active: true,
+    title: 'Storm and flood recovery:',
+    text: 'SBA working capital loans are still open to Polk County businesses and nonprofits hit by the July flooding.',
+    href: '/resources/disaster-help/',
+    label: 'What is still open',
+    until: '2027-04-23'
+  },
+
   // Turn this off the day real member data replaces the samples.
   demoBanner: true,
   demoBannerText:

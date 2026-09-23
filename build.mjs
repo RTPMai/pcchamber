@@ -371,9 +371,21 @@ ${noindex ? '<meta name="robots" content="noindex, nofollow">' : ''}
 <a class="skip" href="#main">Skip to content</a>`;
 }
 
+function alertBar() {
+  /* Red strip above everything. Expires on its own after SITE.alert.until,
+     so an out of date notice cannot outlive the thing it is about. */
+  const a = SITE.alert;
+  if (!a || !a.active || !a.text) return '';
+  if (a.until && new Date().toISOString().slice(0, 10) > a.until) return '';
+  const link = a.href && a.label
+    ? ` <a href="${esc(a.href)}">${esc(a.label)}</a>`
+    : '';
+  return `<div class="alertbar"><div class="wrap"><p>${a.title ? `<strong>${esc(a.title)}</strong> ` : ''}${esc(a.text)}${link}</p></div></div>`;
+}
+
 function banner() {
-  if (!SITE.demoBanner) return '';
-  return `<div class="demo"><div class="wrap"><p><strong>${esc(SITE.demoBannerText)}</strong></p></div></div>`;
+  if (!SITE.demoBanner) return alertBar();
+  return `${alertBar()}<div class="demo"><div class="wrap"><p><strong>${esc(SITE.demoBannerText)}</strong></p></div></div>`;
 }
 
 function header(current) {
