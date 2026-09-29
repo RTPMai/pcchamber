@@ -251,6 +251,42 @@ function screenList() {
   const needing = c.flag ? items().filter(c.flag).length : 0;
   mark(addr(c.key));
 
+  /* Search filters the rows already on screen rather than redrawing, so
+     the box keeps focus while somebody types. It matches anything in the
+     entry: name, contact person, email, town, what they do. Kept per
+     section, so coming back from an entry keeps the search. */
+  state.q = state.q || {};
+  const search = el('input', { type: 'search', class: 'bsearch', placeholder: `Search ${c.title.toLowerCase()}`, 'aria-label': `Search ${c.title.toLowerCase()}` });
+  search.value = state.q[c.key] || '';
+  const none = el('li', { class: 'empty', hidden: true }, 'Nothing matches that.');
+
+  const rowsEl = list.map(({ item, i }) =>
+    el('li', { 'data-find': [c.label(item), c.sub ? c.sub(item) : '', JSON.stringify(item)].join(' ').toLowerCase(), 'data-i': i },
+      el('button', { class: 'row-open', onclick: () => openItem(i) },
+        el('strong', {}, c.label(item)),
+        el('span', {}, c.sub ? c.sub(item) : ''),
+        c.flag && c.flag(item) && el('em', { class: 'flag' }, c.flagNote)),
+      el('button', { class: 'row-del', title: 'Remove', onclick: () => removeItem(i) }, 'Remove')));
+
+  const applySearch = () => {
+    state.q[c.key] = search.value;
+    const q = search.value.trim().toLowerCase();
+    let shown = 0;
+    for (const li of rowsEl) {
+      const hit = !q || li.dataset.find.includes(q);
+      li.hidden = !hit;
+      if (hit) shown++;
+    }
+    none.hidden = !(q && !shown);
+  };
+  search.addEventListener('input', applySearch);
+  /* Enter opens the only match. */
+  search.addEventListener('keydown', e => {
+    if (e.key !== 'Enter') return;
+    const hits = rowsEl.filter(li => !li.hidden);
+    if (hits.length === 1) openItem(Number(hits[0].dataset.i));
+  });
+
   render(
     el('div', {},
       el('button', { class: 'back', onclick: leaveCollection }, 'All sections'),
@@ -263,16 +299,12 @@ function screenList() {
         c.key === 'members' && el('button', { class: 'btn', onclick: downloadChamberMaster }, 'Download for ChamberMaster'),
         state.dirty && el('button', { class: 'btn', onclick: save }, 'Save changes'),
         state.dirty && el('span', { class: 'unsaved' }, 'Not saved yet')),
+      list.length > 5 && search,
       el('ul', { class: 'list' },
-        list.length ? list.map(({ item, i }) =>
-          el('li', {},
-            el('button', { class: 'row-open', onclick: () => openItem(i) },
-              el('strong', {}, c.label(item)),
-              el('span', {}, c.sub ? c.sub(item) : ''),
-              c.flag && c.flag(item) && el('em', { class: 'flag' }, c.flagNote)),
-            el('button', { class: 'row-del', title: 'Remove', onclick: () => removeItem(i) }, 'Remove')))
-          : el('li', { class: 'empty' }, 'Nothing here yet.'))
+        list.length ? [...rowsEl, none] : el('li', { class: 'empty' }, 'Nothing here yet.'))
     ));
+  applySearch();
+  if (list.length > 5 && !matchMedia('(hover: none)').matches) search.focus();
 }
 
 function leaveCollection() {
