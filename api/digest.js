@@ -38,6 +38,7 @@ import { sendMail, sendMany, mailMissing } from './_lib/mail.js';
 import { readContent, ghMissing } from './_lib/github.js';
 import { statsFor, lastQuarter, statsLine } from './_lib/stats.js';
 import { renderEmail } from './_lib/emailhtml.js';
+import { runAudit, auditEmail, auditTo } from './_lib/audit.js';
 import { summarize, describe, thisYear, TIER_NAMES } from '../data/benefits.js';
 import { SITE } from '../data/site.js';
 
@@ -155,6 +156,23 @@ export default async function handler(req, res) {
         res.status(401).json({ error: 'locked' });
         return;
       }
+      /* The monthly content audit shares this function, and its schedule,
+         to stay inside the plan's limit on functions. See api/_lib/audit.js. */
+      if (req.query?.job === 'audit') {
+        if ((process.env.AUDIT_AUTO || '').trim().toLowerCase() !== 'on') {
+          res.status(200).json({ ok: true, skipped: 'AUDIT_AUTO is not on' });
+          return;
+        }
+        if (mailMissing().length || !auditTo().length) {
+          res.status(503).json({ error: 'not_configured', missing: [...mailMissing(), ...(auditTo().length ? [] : ['AUDIT_TO'])] });
+          return;
+        }
+        const findings = await runAudit();
+        const { subject, text } = auditEmail(findings);
+        await sendMail({ to: auditTo(), subject, text });
+        res.status(200).json({ ok: true, findings: findings.length });
+        return;
+      }
       if ((process.env.DIGEST_AUTO || '').trim().toLowerCase() !== 'on') {
         res.status(200).json({ ok: true, skipped: 'DIGEST_AUTO is not on' });
         return;
@@ -174,6 +192,12 @@ export default async function handler(req, res) {
     }
     const body = await readBody(req);
     const who = String(body.who || 'the chamber').slice(0, 80);
+
+    /* The same audit, for the admin home screen. */
+    if (body.action === 'audit') {
+      res.status(200).json({ findings: await runAudit(), auto: (process.env.AUDIT_AUTO || '').trim().toLowerCase() === 'on', to: auditTo() });
+      return;
+    }
 
     if (body.action === 'status') {
       const roster = read('members.json').members || [];

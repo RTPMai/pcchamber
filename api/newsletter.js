@@ -28,9 +28,23 @@
 
    Resend's free plan sends 100 emails a day. Past that, the paid plan, or
    the screen tells you to split it over two days.
+
+   MESSAGES TO MEMBERS
+
+   Separate from the newsletter. The admin's Message to members screen
+   writes to members themselves, all of them or only some categories and
+   levels: every restaurant about a street closure, every Sponsor about
+   golf sign-up. It goes to the same addresses the quarterly email uses
+   (a member's sign-in list, or their public email).
+
+   It is a message from the chamber to its own members, not marketing,
+   but it still carries a one-click opt-out. Somebody who opts out is left
+   off member messages from then on. It does not touch their sign-in, the
+   quarterly email, or dues invoices. The opt-out link is signed with
+   MEMBER_SECRET, so nobody can opt other people out.
    ========================================================================== */
 
-import { randomBytes } from 'node:crypto';
+import { randomBytes, createHmac } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { kv, kvBump, storeReady, storeMissing, hashToObject } from './_lib/store.js';
 import { isAdmin, readBody, visitorKey, fail } from './_lib/adminauth.js';
@@ -146,10 +160,132 @@ async function unsubscribe(req, res) {
   res.redirect(302, '/newsletter/?status=unsubscribed');
 }
 
+/* ---------- messages to members -------------------------------------------------- */
+
+const memberAddrs = m => {
+  const list = Array.isArray(m.access) && m.access.length ? m.access : (m.contact?.email ? [m.contact.email] : []);
+  return [...new Set(list.map(x => String(x).trim().toLowerCase()).filter(okEmail))];
+};
+
+const optSig = email => createHmac('sha256', (process.env.MEMBER_SECRET || process.env.ADMIN_PASSCODE || '').trim())
+  .update('pcc-member-optout:' + email).digest('hex').slice(0, 24);
+
+async function memberOptOut(req, res) {
+  const email = String(req.query.e || '').toLowerCase();
+  const sig = String(req.query.mout || '');
+  if (email && sig.length === 24 && sig === optSig(email)) {
+    await kv('HSET', 'nm:optout', email, new Date().toISOString());
+  }
+  if (req.method === 'POST') { res.status(200).json({ ok: true }); return; }
+  res.redirect(302, '/newsletter/?status=memberout');
+}
+
+/* Who a message goes to. Empty lists mean everybody. */
+function audience(cats, tiers, optedOut) {
+  const data = read('members.json');
+  const chosen = (data.members || []).filter(m =>
+    (!cats.length || cats.includes(m.category)) && (!tiers.length || tiers.includes(m.tier)));
+  const seen = new Set();
+  const to = [];
+  let noEmail = 0;
+  for (const m of chosen) {
+    const addrs = memberAddrs(m).filter(a => !optedOut.has(a) && !seen.has(a));
+    if (!memberAddrs(m).length) noEmail++;
+    for (const a of addrs) { seen.add(a); to.push({ email: a, member: m.name }); }
+  }
+  return { members: chosen.length, noEmail, to };
+}
+
+function memberMessage(base, body, email) {
+  const blocks = [
+    ...String(body.text || '').split(/\n\s*\n/).map(p => ({ p: p.trim() })).filter(b => b.p),
+    ...(body.buttonLabel && /^https?:\/\//.test(body.buttonHref || '')
+      ? [{ button: { label: String(body.buttonLabel).slice(0, 60), href: body.buttonHref } }] : [])
+  ];
+  const out = email ? `${base}/api/newsletter?mout=${optSig(email)}&e=${encodeURIComponent(email)}` : `${base}/newsletter/`;
+  return {
+    ...renderEmail({
+      site: SITE, preheader: String(body.subject || '').slice(0, 90), blocks,
+      footer: [{ note: `Sent to chamber members by ${SITE.name}. Reply to this email to reach the chamber. Stop member messages: ${out}` }]
+    }),
+    optOut: out
+  };
+}
+
+async function memberAdmin(req, res, body, base) {
+  const cats = Array.isArray(body.categories) ? body.categories.map(String) : [];
+  const tiers = Array.isArray(body.tiers) ? body.tiers.map(String) : [];
+  const optedOut = new Set(Object.keys(hashToObject(await kv('HGETALL', 'nm:optout'))));
+
+  if (body.action === 'm-status') {
+    const data = read('members.json');
+    const lastRaw = await kv('GET', 'nm:last');
+    res.status(200).json({
+      categories: (data.categories || []).map(c => ({ ...c, count: (data.members || []).filter(m => m.category === c.id).length })),
+      optedOut: optedOut.size, last: lastRaw ? JSON.parse(lastRaw) : null,
+      missing: mailMissing(), dailyLimit: DAILY_LIMIT
+    });
+    return;
+  }
+
+  const who = audience(cats, tiers, optedOut);
+  if (body.action === 'm-count') {
+    res.status(200).json({ members: who.members, addresses: who.to.length, noEmail: who.noEmail });
+    return;
+  }
+
+  const subject = String(body.subject || '').trim().slice(0, 150);
+  if (body.action === 'm-preview') {
+    res.status(200).json(memberMessage(base, body, null));
+    return;
+  }
+  if (mailMissing().length) {
+    res.status(503).json({ error: 'not_configured', message: `Email is not set up. Missing in Vercel: ${mailMissing().join(', ')}.` });
+    return;
+  }
+  if (!subject || !String(body.text || '').trim()) {
+    res.status(400).json({ error: 'empty', message: 'Write a subject and a message first.' });
+    return;
+  }
+  if (body.action === 'm-test') {
+    const to = String(body.to || '').trim();
+    if (!okEmail(to)) { res.status(400).json({ error: 'bad_email', message: 'Put in the address to send the test to.' }); return; }
+    const { html, text } = memberMessage(base, body, null);
+    await sendMail({ to, subject: '[Test] ' + subject, html, text, headers: { 'Reply-To': SITE.email } });
+    res.status(200).json({ ok: true, message: `Test sent to ${to}.` });
+    return;
+  }
+  if (body.action === 'm-send') {
+    if (Number(body.expect) !== who.to.length) {
+      res.status(409).json({ error: 'changed', message: 'Who this goes to changed. Check the number and press Send again.' });
+      return;
+    }
+    if (!who.to.length) {
+      res.status(400).json({ error: 'nobody', message: 'Nobody to send to.' });
+      return;
+    }
+    const messages = who.to.map(r => {
+      const m = memberMessage(base, body, r.email);
+      return {
+        to: r.email, subject, html: m.html, text: m.text,
+        headers: { 'List-Unsubscribe': `<${m.optOut}>`, 'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click', 'Reply-To': SITE.email }
+      };
+    });
+    const sent = await sendMany(messages);
+    const record = { at: new Date().toISOString(), subject, sent, categories: cats, tiers, by: String(body.who || '').slice(0, 80) };
+    await kv('SET', 'nm:last', JSON.stringify(record));
+    res.status(200).json({ ok: true, ...record, message: `Sent to ${sent} address${sent === 1 ? '' : 'es'} at ${who.members} member${who.members === 1 ? '' : 's'}.` });
+    return;
+  }
+  res.status(400).json({ error: 'unknown_action', message: 'That is not something this page does.' });
+}
+
 /* ---------- admin ---------------------------------------------------------------- */
 
 async function admin(req, res, body) {
   const base = SITE.url.includes(req.headers.host || '~') ? SITE.url : origin(req);
+  if (String(body.action || '').startsWith('m-')) return memberAdmin(req, res, body, base);
+
   const lastRaw = await kv('GET', 'nl:last');
   const last = lastRaw ? JSON.parse(lastRaw) : null;
 
@@ -232,6 +368,7 @@ export default async function handler(req, res) {
     }
     if (req.query?.confirm) return await confirm(req, res);
     if (req.query?.unsub) return await unsubscribe(req, res);
+    if (req.query?.mout) return await memberOptOut(req, res);
 
     const body = await readBody(req);
     if (body.action === 'subscribe') return await subscribe(req, res, body);

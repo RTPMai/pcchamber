@@ -233,6 +233,7 @@ function newsletterPage() {
   var s=(location.search.match(/status=([a-z]+)/)||[])[1];
   var say={ confirmed:'You are on the list. Thanks for signing up.',
             unsubscribed:'You are off the list. Sorry to see you go.',
+            memberout:'Done. You will not get member messages from the chamber any more. Your sign in, dues invoices and the quarterly email about your listing are not affected.',
             expired:'That confirmation link has expired or was already used. Sign up again below.' };
   if(s && say[s]){ var p=document.getElementById('nlstatus'); p.textContent=say[s]; p.hidden=false; }
 })();
@@ -3055,7 +3056,7 @@ async function main() {
   /* The benefits tracker counts in the browser with the same code the
      member account uses on the server. Both files are plain modules with
      nothing in them the public membership page does not already say. */
-  for (const f of ['benefits.js', 'membership.js']) {
+  for (const f of ['benefits.js', 'membership.js', 'dues.js']) {
     await cp(path.join('data', f), path.join(OUT, 'admin', f));
   }
 

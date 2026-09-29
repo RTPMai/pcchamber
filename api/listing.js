@@ -20,10 +20,11 @@
      slug     their web address. Changing it after search engines have
               found the page breaks every link to it.
      tier     what they pay. That is a billing decision, not a form field.
+     size, dues  the same, for the dues invoice. See data/dues.js.
      access   who can sign in as them. If this were editable, anybody who
               got into one account could add themselves permanently.
 
-   Those three are simply not read from the request. They are not hidden in
+   None of these are read from the request. They are not hidden in
    the interface and rejected later; they never leave the stored record.
 
    EDITS GO LIVE STRAIGHT AWAY

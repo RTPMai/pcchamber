@@ -14,6 +14,7 @@
 
 import { COLLECTIONS } from './schema.js';
 import { BENEFITS, TIER_NAMES, benefitsFor, summarize, uptake, describe, thisYear, yearOf } from './benefits.js';
+import { duesYear, money, duesFor, billTo } from './dues.js';
 
 const $ = sel => document.querySelector(sel);
 const el = (tag, attrs = {}, ...kids) => {
@@ -36,8 +37,36 @@ const state = {
   collection: null,
   file: null,     // { name, sha, data }
   index: null,    // which item is open
-  dirty: false
+  dirty: false,
+  itemDirty: false // typed into the open entry, not kept yet
 };
+
+/* ---------- the back button ------------------------------------------------
+   Every screen has its own address after the #, like #members or
+   #events/luncheon-oct. That is what makes the browser's back and forward
+   buttons move between screens instead of leaving the admin, and what
+   makes a reload land back on the same screen.
+
+   Screens call mark() with their address. The in-page back buttons call
+   up(), which uses the browser's own back when that is where they lead,
+   so back and forward stay in step with what is on screen.
+   ========================================================================== */
+
+let current = null;   // the address of what is on screen now
+
+const addr = (...parts) => parts.filter(p => p !== '' && p != null).map(p => encodeURIComponent(p)).join('/');
+
+function mark(route) {
+  const was = current;
+  current = route;
+  if (location.hash.slice(1) === route) return;
+  history.pushState({ prev: was }, '', route ? '#' + route : location.pathname + location.search);
+}
+
+function up(route, draw) {
+  if (history.state && history.state.prev === route) history.back();
+  else draw();
+}
 
 /* ---------- talking to the server ---------------------------------------- */
 
@@ -106,7 +135,7 @@ function screenSignIn(message) {
       state.who = who.value.trim();
       localStorage.setItem('pcc-admin-who', state.who);
       await loadDirectory();
-      screenHome();
+      route(location.hash.slice(1));
     } catch (e) { msg.textContent = e.message; }
   };
 
@@ -130,9 +159,13 @@ function screenSignIn(message) {
 }
 
 function screenHome() {
+  mark('');
+  const attention = el('div', { class: 'attention', 'aria-live': 'polite' });
+  loadAttention(attention);
   render(
     el('div', {},
       el('h1', {}, 'What would you like to change?'),
+      attention,
       el('div', { class: 'cards' },
         el('button', { class: 'card', 'data-season': 'autumn', onclick: () => screenBenefits() },
           el('strong', {}, 'Member benefits'),
@@ -143,6 +176,12 @@ function screenHome() {
         el('button', { class: 'card', 'data-season': 'winter', onclick: () => screenNewsletter() },
           el('strong', {}, 'Newsletter'),
           el('span', {}, 'Write a short opening. Events, news and deals fill in the rest.')),
+        el('button', { class: 'card', 'data-season': 'navy', onclick: () => screenDues() },
+          el('strong', {}, 'Membership dues'),
+          el('span', {}, 'Send each member their invoice through Stripe, and see who has paid.')),
+        el('button', { class: 'card', 'data-season': 'winter', onclick: () => screenMessage() },
+          el('strong', {}, 'Message to members'),
+          el('span', {}, 'Email every member, or only some: all the restaurants, all the Sponsors.')),
         el('button', { class: 'card', 'data-season': 'spring', onclick: () => screenDigest() },
           el('strong', {}, 'Quarterly member email'),
           el('span', {}, 'Each member\u2019s listing stats and unused benefits, once a quarter.')),
@@ -153,12 +192,37 @@ function screenHome() {
     ));
 }
 
-async function openCollection(c) {
+async function loadCollection(c) {
   state.collection = c;
+  state.file = await call({ action: 'load', file: c.file });
+  state.dirty = false;
+}
+
+/* The monthly content audit, live. Same checks as the email on the 1st,
+   so what the email asks for can be ticked off here and seen to clear. */
+async function loadAttention(box) {
+  let d;
+  try { d = await call({ action: 'audit' }, '/api/digest'); } catch { return; }
+  if (!d.findings.length) {
+    box.replaceChildren(el('p', { class: 'note' }, 'Nothing on the website looks out of date.'));
+    return;
+  }
+  const label = { high: 'Fix soon', medium: 'Worth doing', low: 'When you can' };
+  box.replaceChildren(el('details', { class: 'panel attention-list', open: d.findings.some(f => f.level === 'high') },
+    el('summary', {}, `Needs attention (${d.findings.length})`),
+    el('ul', {}, d.findings.map(f => el('li', { 'data-level': f.level },
+      el('span', { class: 'lvl' }, label[f.level]),
+      el('strong', {}, f.where), ' ', f.text))),
+    el('p', { class: 'help' }, d.auto
+      ? `This list is also emailed to ${d.to.join(', ')} on the 1st of each month.`
+      : 'Set AUDIT_AUTO to on in Vercel to have this list emailed on the 1st of each month.')));
+}
+
+async function openCollection(c) {
+  mark(addr(c.key));
   render(el('p', { class: 'loading' }, 'Loading ' + c.title.toLowerCase()));
   try {
-    state.file = await call({ action: 'load', file: c.file });
-    state.dirty = false;
+    await loadCollection(c);
     screenList();
   } catch (e) {
     render(el('div', { class: 'panel' },
@@ -185,6 +249,7 @@ function screenList() {
   const c = state.collection;
   const list = sorted();
   const needing = c.flag ? items().filter(c.flag).length : 0;
+  mark(addr(c.key));
 
   render(
     el('div', {},
@@ -195,6 +260,7 @@ function screenList() {
         `${needing} of ${items().length} still ${c.flagNote ? c.flagNote.toLowerCase() : 'need attention'}.`),
       el('div', { class: 'row' },
         el('button', { class: 'btn primary', onclick: () => openItem(-1) }, 'Add new'),
+        c.key === 'members' && el('button', { class: 'btn', onclick: downloadChamberMaster }, 'Download for ChamberMaster'),
         state.dirty && el('button', { class: 'btn', onclick: save }, 'Save changes'),
         state.dirty && el('span', { class: 'unsaved' }, 'Not saved yet')),
       el('ul', { class: 'list' },
@@ -212,7 +278,7 @@ function screenList() {
 function leaveCollection() {
   if (state.dirty && !confirm('You have changes that are not saved. Leave anyway?')) return;
   state.collection = null; state.file = null; state.dirty = false;
-  screenHome();
+  up('', screenHome);
 }
 
 function removeItem(i) {
@@ -333,8 +399,15 @@ function openItem(i) {
   const adding = i === -1;
   const item = adding ? {} : JSON.parse(JSON.stringify(items()[i]));
   state.index = i;
+  state.itemDirty = false;
+  mark(addr(c.key, adding ? 'new' : i));
 
-  const onchange = (path, v) => { set(item, path, v); };
+  const onchange = (path, v) => { set(item, path, v); state.itemDirty = true; };
+  const toList = () => { state.itemDirty = false; up(addr(c.key), screenList); };
+  const backToList = () => {
+    if (state.itemDirty && !confirm('Discard the changes to this entry?')) return;
+    toList();
+  };
 
   const body = el('div', {},
     c.fields.filter(f => !f.advanced).map(f => fieldRow(f, item, onchange)),
@@ -378,17 +451,17 @@ function openItem(i) {
     }
     if (adding) items().push(item); else items()[i] = item;
     state.dirty = true;
-    screenList();
+    toList();
   };
 
   render(
     el('div', {},
-      el('button', { class: 'back', onclick: screenList }, 'Back to ' + c.title.toLowerCase()),
+      el('button', { class: 'back', onclick: backToList }, 'Back to ' + c.title.toLowerCase()),
       el('h1', {}, adding ? 'Add to ' + c.title.toLowerCase() : c.label(item)),
       body,
       el('div', { class: 'row sticky' },
         el('button', { class: 'btn primary', onclick: keep }, adding ? 'Add it' : 'Keep changes'),
-        el('button', { class: 'btn', onclick: screenList }, 'Cancel'),
+        el('button', { class: 'btn', onclick: toList }, 'Cancel'),
         msg)
     ));
 }
@@ -440,7 +513,7 @@ async function save() {
         el('p', { class: 'help' }, 'If you reload the site straight away and do not see it, wait and reload again. It is not broken.'),
         el('div', { class: 'row' },
           el('button', { class: 'btn primary', onclick: () => openCollection(c) }, 'Back to ' + c.title.toLowerCase()),
-          el('button', { class: 'btn', onclick: screenHome }, 'All sections'))));
+          el('button', { class: 'btn', onclick: goHome }, 'All sections'))));
   } catch (e) {
     render(
       el('div', { class: 'panel narrow' },
@@ -497,14 +570,20 @@ function yearsAvailable() {
     .filter(Boolean).sort((a, b) => b - a);
 }
 
+async function loadBenefits() {
+  await loadDirectory();
+  await loadUses();
+  try {
+    bens.stats = (await call({ action: 'stats', year: bens.year, slugs: DIRECTORY.map(m => m.slug) })).stats || {};
+  } catch { bens.stats = {}; }
+  bens.loaded = true;
+}
+
 async function screenBenefits() {
+  mark('benefits');
   render(el('p', { class: 'loading' }, 'Loading benefits'));
   try {
-    await loadDirectory();
-    await loadUses();
-    try {
-      bens.stats = (await call({ action: 'stats', year: bens.year, slugs: DIRECTORY.map(m => m.slug) })).stats || {};
-    } catch { bens.stats = {}; }
+    await loadBenefits();
     drawBenefitsOverview();
   } catch (e) {
     render(el('div', { class: 'panel' },
@@ -529,6 +608,7 @@ function overviewRows() {
 }
 
 function drawBenefitsOverview() {
+  mark('benefits');
   const list = overviewRows();
   if (bens.sort === 'low') {
     list.sort((a, b) => (a.pct ?? -1) - (b.pct ?? -1) || a.logged - b.logged || a.m.name.localeCompare(b.m.name));
@@ -585,7 +665,7 @@ function drawBenefitsOverview() {
 
   render(
     el('div', {},
-      el('button', { class: 'back', onclick: screenHome }, 'All sections'),
+      el('button', { class: 'back', onclick: goHome }, 'All sections'),
       el('h1', {}, 'Member benefits'),
       el('p', { class: 'note' },
         'Click Log when a member uses something. It saves with today\u2019s date and they see it on their account page straight away.'),
@@ -623,6 +703,8 @@ function drawBenefitsOverview() {
    Sponsorship credit needs a dollar amount, so its Log opens the form. */
 function drawBenefitsMember(slug, flash) {
   const m = DIRECTORY.find(x => x.slug === slug);
+  if (!m) return drawBenefitsOverview();
+  mark(addr('benefits', slug));
   const mine = usesFor(slug).filter(u => yearOf(u.date) === bens.year);
   const rows = summarize(m.tier, mine, bens.year).filter(r => r.kind !== 'open');
 
@@ -719,7 +801,7 @@ function drawBenefitsMember(slug, flash) {
 
   render(
     el('div', {},
-      el('button', { class: 'back', onclick: drawBenefitsOverview }, 'Back to member benefits'),
+      el('button', { class: 'back', onclick: () => up('benefits', drawBenefitsOverview) }, 'Back to member benefits'),
       el('h1', {}, m.name),
       el('p', { class: 'lede' }, `${tierName(m.tier)}, membership year ${bens.year}.`,
         viewsText(slug) ? ` Their page: ${viewsText(slug)}${clicksText(slug)}.` : ''),
@@ -805,6 +887,7 @@ function failScreen(e, back) {
 }
 
 async function screenEvents() {
+  mark('events');
   render(el('p', { class: 'loading' }, 'Loading events'));
   let d;
   try { d = await call({ action: 'overview' }, EV); } catch (e) { return failScreen(e); }
@@ -823,7 +906,7 @@ async function screenEvents() {
       ].filter(Boolean).join(' \u00b7 '))));
 
   render(el('div', {},
-    el('button', { class: 'back', onclick: screenHome }, 'All sections'),
+    el('button', { class: 'back', onclick: goHome }, 'All sections'),
     el('h1', {}, 'Event check-in'),
     el('p', { class: 'note' }, 'Open an event on the day to check people in. To take registrations on the website, tick "Take registrations on this site" on the event under Events.'),
     el('h2', { class: 'bgroup-title' }, 'Coming up'),
@@ -833,6 +916,7 @@ async function screenEvents() {
 }
 
 async function screenEvent(id, flash) {
+  mark(addr('events', id));
   render(el('p', { class: 'loading' }, 'Loading the list'));
   let d;
   try {
@@ -907,7 +991,7 @@ async function screenEvent(id, flash) {
   ]));
 
   render(el('div', {},
-    el('button', { class: 'back', onclick: screenEvents }, 'All events'),
+    el('button', { class: 'back', onclick: () => up('events', screenEvents) }, 'All events'),
     el('h1', {}, ev.title),
     el('p', { class: 'lede' }, `${ev.date} \u00b7 ${ev.where}. ${d.headcount} on the list${ev.capacity ? ` of ${ev.capacity}` : ''}, ${inCount} checked in.`),
     ev.tickets && !d.trackerReady && el('p', { class: 'note warn' }, 'The benefits tracker is not connected, so tickets will not be logged. Check GITHUB_REPO and GITHUB_TOKEN.'),
@@ -929,6 +1013,7 @@ const NL = '/api/newsletter';
 const adminEmail = () => localStorage.getItem('pcc-admin-email') || '';
 
 async function screenNewsletter(flash) {
+  mark('newsletter');
   render(el('p', { class: 'loading' }, 'Loading the newsletter'));
   let st;
   try { st = await call({ action: 'status' }, NL); } catch (e) { return failScreen(e); }
@@ -970,7 +1055,7 @@ async function screenNewsletter(flash) {
 
   const c = st.counts;
   render(el('div', {},
-    el('button', { class: 'back', onclick: screenHome }, 'All sections'),
+    el('button', { class: 'back', onclick: goHome }, 'All sections'),
     el('h1', {}, 'Newsletter'),
     el('p', { class: 'lede' },
       `${st.subscribers} subscriber${st.subscribers === 1 ? '' : 's'}. `,
@@ -998,6 +1083,7 @@ async function screenNewsletter(flash) {
 const DG = '/api/digest';
 
 async function screenDigest() {
+  mark('digest');
   render(el('p', { class: 'loading' }, 'Loading'));
   let st;
   try {
@@ -1026,7 +1112,7 @@ async function screenDigest() {
 
   const l = st.last;
   render(el('div', {},
-    el('button', { class: 'back', onclick: screenHome }, 'All sections'),
+    el('button', { class: 'back', onclick: goHome }, 'All sections'),
     el('h1', {}, 'Quarterly member email'),
     el('p', { class: 'lede' }, `Covers ${st.quarter}. ${st.withEmail} members have an email on file.`),
     el('p', { class: 'note' }, st.auto
@@ -1049,6 +1135,302 @@ async function screenDigest() {
     frame));
 }
 
+/* ---------- ChamberMaster export ---------------------------------------------
+   The directory, laid out in GrowthZone's standard member import template
+   (std_import.xls), for whatever reporting still runs through
+   ChamberMaster. This site stays the one place members are edited; this
+   file is what gets handed over, so nobody keeps two lists by hand.
+
+   ChamberMaster cannot import a list itself. GrowthZone support does it
+   from this template, and on plans below Pro they charge for each import.
+   The template's column names and order must not change. If support sends
+   a newer template, change COLUMNS to match it and nothing else.
+   ========================================================================== */
+
+const CM_COLUMNS = [
+  'CompanyName', 'CompanyFileByName', 'Status', 'MemberType',
+  'Phone', 'AltPhone', 'TollFreePhone', 'Fax', 'Website',
+  'MailAddr1', 'MailAddr2', 'MailCity', 'MailState', 'MailZip',
+  'PhysAddr1', 'PhysAddr2', 'PhysCity', 'PhysState', 'PhysZip',
+  'BillContactFirstname', 'BillContactLastname', 'BillContactTitle',
+  'BillAddr1', 'BillAddr2', 'BillCity', 'BillState', 'BillZip',
+  'NumFullTimeEmployees', 'NumPartTimeEmployees', 'JoinDate', 'DropDate',
+  'BusinessDescription', 'InternalComments', 'RenewalMonth',
+  'DuesLevelName', 'AnnualDuesAmount', 'BillingFrequency',
+  'PrimaryBusinessCategory', 'SecondBusinessCategory', 'ThirdBusinessCategory',
+  'PrimaryContactFirstname', 'PrimaryContactLastName', 'PrimaryContactTitle', 'PrimaryContactEmail', 'PrimaryContactPhone',
+  ...[1, 2, 3, 4].flatMap(n => [`AdditionalContactFirstname${n}`, `AdditionalContactLastname${n}`, `AdditionalContactTitle${n}`, `AdditionalContactEmail${n}`, `AdditionalContactPhone${n}`]),
+  'MemberCustomField1', 'MemberCustomField2', 'MemberCustomField3'
+];
+
+/* "407 W Bridge Road, Suite 6, Polk City, IA, 50226" into its parts,
+   working from the end: zip, state, town, then the street, with anything
+   between the street and the town (a suite, a PO box) as the second line. */
+function splitAddress(a) {
+  const parts = String(a || '').split(',').map(x => x.trim()).filter(Boolean);
+  const out = { line: '', line2: '', city: '', state: '', zip: '' };
+  const lastIs = re => parts.length && re.test(parts[parts.length - 1]);
+  if (lastIs(/^\d{5}(-\d{4})?$/)) out.zip = parts.pop();
+  else if (lastIs(/^[A-Za-z]{2}\s+\d{5}(-\d{4})?$/)) { const [st, z] = parts.pop().split(/\s+/); out.state = st.toUpperCase(); out.zip = z; }
+  if (!out.state && lastIs(/^[A-Za-z]{2}$/)) out.state = parts.pop().toUpperCase();
+  if (parts.length) out.city = parts.pop();
+  out.line = parts.shift() || '';
+  out.line2 = parts.join(', ');
+  return out;
+}
+
+function splitName(n) {
+  const parts = String(n || '').trim().split(/\s+/).filter(Boolean);
+  return parts.length > 1 ? [parts.slice(0, -1).join(' '), parts[parts.length - 1]] : [parts[0] || '', ''];
+}
+
+function downloadChamberMaster() {
+  const cats = Object.fromEntries((state.file.data.categories || []).map(c => [c.id, c.label]));
+  const rows = (state.file.data.members || []).map(m => {
+    const c = m.contact || {};
+    const a = splitAddress(c.address);
+    const d = duesFor(m);
+    const [first, last] = splitName(c.person);
+    const primary = billTo(m);
+    const more = (Array.isArray(m.access) ? m.access : []).map(x => String(x).trim().toLowerCase()).filter(x => x && x !== primary).slice(0, 4);
+    const row = {
+      CompanyName: m.name, Status: 'Active', MemberType: TIER_NAMES[m.tier] || '',
+      Phone: String(c.phone || '').slice(0, 30), Website: c.web || '',
+      MailAddr1: a.line, MailAddr2: a.line2, MailCity: a.city || m.city || '', MailState: a.state || (a.city || m.city ? 'IA' : ''), MailZip: a.zip,
+      PhysAddr1: a.line, PhysAddr2: a.line2, PhysCity: a.city || m.city || '', PhysState: a.state || (a.city || m.city ? 'IA' : ''), PhysZip: a.zip,
+      BusinessDescription: m.summary || '', RenewalMonth: 1,
+      DuesLevelName: TIER_NAMES[m.tier] || '', AnnualDuesAmount: d.cents > 0 ? (d.cents / 100).toFixed(2) : '',
+      BillingFrequency: d.cents > 0 ? 1 : '',
+      PrimaryBusinessCategory: cats[m.category] || m.category || '',
+      PrimaryContactFirstname: first, PrimaryContactLastName: last, PrimaryContactEmail: primary,
+      PrimaryContactPhone: String(c.phone || '').slice(0, 30),
+      MemberCustomField1: m.slug
+    };
+    more.forEach((e, i) => { row[`AdditionalContactEmail${i + 1}`] = e; });
+    return CM_COLUMNS.map(k => row[k] ?? '');
+  });
+  download(`chambermaster-import-${today()}.csv`, csv([CM_COLUMNS, ...rows]));
+}
+
+/* ---------- message to members --------------------------------------------
+   An email to members themselves, picked by category and level. The
+   server works out the addresses so the count shown is the count sent.
+   Notes at the top of api/newsletter.js.
+   ========================================================================== */
+
+async function screenMessage(flash) {
+  mark('message');
+  render(el('p', { class: 'loading' }, 'Loading'));
+  let st;
+  try { st = await call({ action: 'm-status' }, NL); } catch (e) { return failScreen(e); }
+
+  const saved = (() => { try { return JSON.parse(sessionStorage.getItem('pcc-msg') || '{}'); } catch { return {}; } })();
+  const box = (name, value, label, on) => {
+    const i = el('input', { type: 'checkbox', name, value, checked: on });
+    return el('label', { class: 'check' }, i, ' ', label);
+  };
+  const catBoxes = el('div', { class: 'checks' },
+    st.categories.filter(c => c.count).map(c => box('cat', c.id, `${c.label} (${c.count})`, (saved.categories || []).includes(c.id))));
+  const tierBoxes = el('div', { class: 'checks' },
+    Object.entries(TIER_NAMES).map(([id, name]) => box('tier', id, name, (saved.tiers || []).includes(id))));
+
+  const subject = el('input', { type: 'text', maxlength: '150', value: saved.subject || '', placeholder: 'Main Street closed Saturday morning' });
+  const text = el('textarea', { rows: '8', placeholder: 'Write it the way you would say it. A blank line starts a new paragraph.' });
+  text.value = saved.text || '';
+  const buttonLabel = el('input', { type: 'text', maxlength: '60', value: saved.buttonLabel || '', placeholder: 'Sign up here' });
+  const buttonHref = el('input', { type: 'url', value: saved.buttonHref || '', placeholder: 'https://' });
+  const testTo = el('input', { type: 'email', value: adminEmail(), placeholder: 'you@example.com', 'aria-label': 'Send a test to' });
+  const count = el('p', { class: 'note' }, 'Counting');
+  const status = el('div', { class: 'flash', role: 'status' }, flash || '');
+  const frame = el('iframe', { class: 'mailpreview', title: 'Preview', hidden: true });
+  let expect = 0;
+
+  const picked = name => [...document.querySelectorAll(`input[name="${name}"]:checked`)].map(i => i.value);
+  const payload = () => ({
+    categories: picked('cat'), tiers: picked('tier'),
+    subject: subject.value, text: text.value, buttonLabel: buttonLabel.value, buttonHref: buttonHref.value
+  });
+  const keep = () => sessionStorage.setItem('pcc-msg', JSON.stringify(payload()));
+
+  const recount = async () => {
+    keep();
+    try {
+      const c = await call({ action: 'm-count', ...payload() }, NL);
+      expect = c.addresses;
+      const scope = picked('cat').length || picked('tier').length ? 'the members picked' : 'every member';
+      count.textContent = `Goes to ${c.addresses} address${c.addresses === 1 ? '' : 'es'} at ${c.members} member${c.members === 1 ? '' : 's'} (${scope}).` +
+        (c.noEmail ? ` ${c.noEmail} of them have no email on file and will not get it.` : '');
+    } catch (e) { count.textContent = e.message; }
+  };
+  catBoxes.addEventListener('change', recount);
+  tierBoxes.addEventListener('change', recount);
+  [subject, text, buttonLabel, buttonHref].forEach(i => i.addEventListener('input', keep));
+
+  const run = async (extra, then) => {
+    status.textContent = 'Working';
+    try {
+      const r = await call({ ...payload(), who: state.who, ...extra }, NL);
+      status.textContent = r.message || '';
+      if (then) then(r);
+    } catch (e) { status.replaceChildren(el('span', { class: 'err' }, e.message)); }
+  };
+  const preview = () => run({ action: 'm-preview' }, r => { frame.srcdoc = r.html; frame.hidden = false; status.textContent = ''; });
+  const test = () => { localStorage.setItem('pcc-admin-email', testTo.value.trim()); run({ action: 'm-test', to: testTo.value }); };
+  const send = () => {
+    if (!subject.value.trim() || !text.value.trim()) { status.textContent = 'Write a subject and a message first.'; return; }
+    if (!confirm(`Send "${subject.value}" to ${expect} address${expect === 1 ? '' : 'es'} now? This cannot be undone.`)) return;
+    run({ action: 'm-send', expect }, () => { sessionStorage.removeItem('pcc-msg'); setTimeout(() => screenMessage('Sent.'), 800); });
+  };
+
+  render(el('div', {},
+    el('button', { class: 'back', onclick: goHome }, 'All sections'),
+    el('h1', {}, 'Message to members'),
+    el('p', { class: 'lede' }, 'For members only, not the newsletter list. Tick nothing to write to every member.',
+      st.last ? ` Last one: \u201c${st.last.subject}\u201d, ${st.last.at.slice(0, 10)}.` : ''),
+    st.missing.length > 0 && el('p', { class: 'note warn' }, `Email is not set up. Missing in Vercel: ${st.missing.join(', ')}.`),
+    st.optedOut > 0 && el('p', { class: 'help' }, `${st.optedOut} address${st.optedOut === 1 ? ' has' : 'es have'} opted out of member messages and are left off.`),
+    el('div', { class: 'field' }, el('label', {}, 'Categories'), catBoxes),
+    el('div', { class: 'field' }, el('label', {}, 'Levels'), tierBoxes),
+    count,
+    el('div', { class: 'field' }, el('label', {}, 'Subject'), subject),
+    el('div', { class: 'field' }, el('label', {}, 'Message'), text),
+    el('details', { class: 'advanced' },
+      el('summary', {}, 'Add a button'),
+      el('div', { class: 'field' }, el('label', {}, 'Button text'), buttonLabel),
+      el('div', { class: 'field' }, el('label', {}, 'Where it goes'), buttonHref)),
+    el('div', { class: 'row' },
+      el('button', { class: 'btn', onclick: preview }, 'Preview'),
+      testTo,
+      el('button', { class: 'btn', onclick: test }, 'Send me a test'),
+      el('button', { class: 'btn primary', disabled: st.missing.length > 0, onclick: send }, 'Send to members')),
+    status,
+    frame));
+  recount();
+}
+
+/* ---------- membership dues ------------------------------------------------
+   Stripe sends the invoices and takes the money. This screen decides who
+   gets one, sends them a few at a time, and shows who has paid. The
+   amounts come from data/dues.js, which reads the same prices as the
+   membership page. Full notes at the top of api/_lib/dues.js.
+   ========================================================================== */
+
+const ST = '/api/stripe';
+const dues = { year: duesYear(), show: 'all' };
+const OPEN_DUES = ['sent', 'paid'];
+
+function duesState(m) {
+  const r = m.record;
+  if (r && r.status === 'paid') return 'paid';
+  if (r && r.status === 'sent') return 'sent';
+  if (m.problem) return 'fix';
+  if (m.cents === 0) return 'free';
+  return 'ready';
+}
+
+async function screenDues(flash) {
+  mark('dues');
+  render(el('p', { class: 'loading' }, 'Loading dues'));
+  let d;
+  try { d = await call({ action: 'status', year: dues.year }, ST); } catch (e) { return failScreen(e); }
+
+  const ms = d.members.map((m, i) => ({ ...m, i, state: duesState(m) }));
+  const by = st => ms.filter(m => m.state === st);
+  const sum = list => list.reduce((t, m) => t + (m.record ? m.record.cents : m.cents || 0), 0);
+  const ready = by('ready'), sent = by('sent'), paid = by('paid'), fix = by('fix');
+  const status = el('div', { class: 'flash', role: 'status' }, flash || '');
+
+  const sendThese = async (slugs, label) => {
+    if (!slugs.length) return;
+    const total = sum(ms.filter(m => slugs.includes(m.slug)));
+    if (!confirm(`Send ${label} for ${dues.year}, ${money(total)} in all? Stripe emails ${slugs.length === 1 ? 'it' : 'each one'} straight away.`)) return;
+    document.querySelectorAll('#admin button').forEach(b => { b.disabled = true; });
+    let done = 0, sentN = 0;
+    const problems = [];
+    try {
+      for (let i = 0; i < slugs.length; i += 5) {
+        status.textContent = `Sending ${Math.min(i + 5, slugs.length)} of ${slugs.length}`;
+        const out = await call({ action: 'send', year: dues.year, slugs: slugs.slice(i, i + 5), who: state.who }, ST);
+        for (const r of out.results) {
+          done++;
+          if (r.sent) sentN++;
+          else problems.push(`${(ms.find(m => m.slug === r.slug) || {}).name || r.slug}: ${r.error || r.skipped}`);
+        }
+      }
+    } catch (e) {
+      problems.push(e.message);
+    }
+    screenDues(`Sent ${sentN} of ${slugs.length}.` + (problems.length ? ` Not sent: ${problems.join('; ')}.` : ''));
+  };
+
+  const refresh = async () => {
+    status.textContent = 'Asking Stripe';
+    try {
+      const out = await call({ action: 'refresh', year: dues.year }, ST);
+      screenDues(out.changed
+        ? `${out.changed} updated from Stripe.${out.more ? ' Press again for the rest.' : ''}`
+        : `Checked ${out.checked}. Nothing new from Stripe.`);
+    } catch (e) { status.textContent = e.message; }
+  };
+
+  const downloadDues = () => download(`dues-${dues.year}.csv`, csv([
+    ['Member', 'Level', 'Amount', 'Invoice to', 'Status', 'Invoice number', 'Sent', 'Due', 'Paid', 'Problem'],
+    ...ms.map(m => [m.name, m.label || m.tierName, m.record ? (m.record.cents / 100) : (m.cents == null ? '' : m.cents / 100),
+      m.record ? m.record.email : m.email, m.state, m.record ? m.record.number : '', m.record ? m.record.sentAt.slice(0, 10) : '',
+      m.record ? m.record.due : '', m.record && m.record.paidAt ? m.record.paidAt.slice(0, 10) : '', m.problem || ''])
+  ]));
+
+  const WORDS = { paid: 'Paid', sent: 'Invoiced, not paid', fix: 'Needs fixing', free: 'Not billed', ready: 'Ready to invoice' };
+  const shown = dues.show === 'all' ? ms : ms.filter(m => m.state === dues.show);
+
+  const row = m => {
+    const r = m.record;
+    const bits = [
+      m.label || m.tierName,
+      r ? money(r.cents) : (m.cents ? money(m.cents) : null),
+      m.state === 'paid' ? `paid ${(r.paidAt || '').slice(0, 10)}` : null,
+      m.state === 'sent' ? `sent ${r.sentAt.slice(0, 10)}, due ${r.due}` : null,
+      r && ['void', 'uncollectible'].includes(r.status) ? `last invoice ${r.status}` : null,
+      m.problem || null
+    ].filter(Boolean).join(' \u00b7 ');
+    return el('li', { 'data-state': m.state },
+      el('div', { class: 'row-open static' }, el('strong', {}, m.name), el('span', {}, bits)),
+      el('div', { class: 'row-actions' },
+        m.state === 'ready' && d.ready && el('button', { class: 'btn', onclick: () => sendThese([m.slug], `an invoice to ${m.name}`) }, 'Send'),
+        m.state === 'fix' && el('a', { class: 'btn', href: '#' + addr('members', m.i) }, 'Fix'),
+        r && r.url && OPEN_DUES.includes(r.status) && el('a', { class: 'btn', href: r.url, target: '_blank', rel: 'noopener' }, 'Invoice')));
+  };
+
+  const years = [duesYear() - 1, duesYear(), duesYear() + 1];
+  const pick = el('select', { 'aria-label': 'Membership year' }, years.map(y => el('option', { value: y, selected: y === dues.year }, String(y))));
+  pick.addEventListener('change', () => { dues.year = Number(pick.value); screenDues(); });
+  const filter = el('select', { 'aria-label': 'Show' },
+    [['all', 'Everyone'], ...Object.entries(WORDS)].map(([v, t]) => el('option', { value: v, selected: v === dues.show }, t)));
+  filter.addEventListener('change', () => { dues.show = filter.value; screenDues(); });
+
+  render(el('div', {},
+    el('button', { class: 'back', onclick: goHome }, 'All sections'),
+    el('h1', {}, 'Membership dues'),
+    el('p', { class: 'lede' },
+      `${dues.year}: ${paid.length} paid (${money(sum(paid))}), ${sent.length} invoiced and waiting (${money(sum(sent))}), ${ready.length} ready to invoice (${money(sum(ready))}).`),
+    !d.ready && el('p', { class: 'note warn' }, 'Stripe is not connected. Set STRIPE_SECRET_KEY in Vercel to send invoices.'),
+    d.ready && d.test && el('p', { class: 'note' }, 'Stripe is in test mode. Nothing real is charged, and Stripe does not email test invoices to members. Open an invoice here to see what they would see.'),
+    fix.length > 0 && el('p', { class: 'note warn' },
+      `${fix.length} member${fix.length === 1 ? '' : 's'} cannot be invoiced yet. Usually a Basic Business member without a size set, or no email on file. Show "Needs fixing" to work through them.`),
+    el('p', { class: 'help' }, `Invoices are due ${d.days} days after sending. Stripe emails the member a link to pay by card or bank, sends reminders, and records the payment. To cancel one, void it in Stripe, then press Check Stripe.`),
+    el('div', { class: 'row' },
+      el('label', {}, 'Year '), pick,
+      el('label', {}, ' Show '), filter),
+    el('div', { class: 'row' },
+      el('button', { class: 'btn primary', disabled: !d.ready || !ready.length,
+        onclick: () => sendThese(ready.map(m => m.slug), `${ready.length} invoice${ready.length === 1 ? '' : 's'}`) },
+        ready.length ? `Send ${ready.length} invoice${ready.length === 1 ? '' : 's'}` : 'Nobody left to invoice'),
+      el('button', { class: 'btn', disabled: !d.ready || !sent.length, onclick: refresh }, 'Check Stripe'),
+      el('button', { class: 'btn', onclick: downloadDues }, 'Download the list')),
+    status,
+    shown.length ? el('ul', { class: 'list dues-list' }, shown.map(row)) : el('p', { class: 'help' }, 'Nobody in this group.')));
+}
+
 /* ---------- shell --------------------------------------------------------- */
 
 function render(node, chrome = true) {
@@ -1069,12 +1451,85 @@ $('#signout').addEventListener('click', async () => {
   screenSignIn('Signed out.');
 });
 
-/* Already signed in from earlier today? Skip the form. */
+/* ---------- following an address -----------------------------------------
+   Used on load, after sign-in, and when back or forward is pressed. */
+
+function goHome() { up('', screenHome); }
+
+/* Put the address back when somebody chooses to stay after a warning. */
+function stay() {
+  history.pushState({ prev: null }, '', current ? '#' + current : location.pathname + location.search);
+}
+
+/* Swap the address for a sensible one without adding a history step,
+   for an address that points at something no longer there. */
+function fix(route) {
+  history.replaceState(history.state, '', route ? '#' + route : location.pathname + location.search);
+}
+
+async function route(hash) {
+  const [head = '', sub] = hash.split('/').map(p => { try { return decodeURIComponent(p); } catch { return p; } });
+  const c = COLLECTIONS.find(x => x.key === head);
+
+  /* Leaving an entry with edits typed in but not kept. */
+  if (state.itemDirty && hash !== current) {
+    if (!confirm('Discard the changes to this entry?')) return stay();
+    state.itemDirty = false;
+  }
+  /* Leaving a section with changes not saved. */
+  if (state.collection && c !== state.collection) {
+    if (state.dirty && !confirm('You have changes that are not saved. Leave anyway?')) return stay();
+    state.collection = null; state.file = null; state.dirty = false;
+  }
+
+  if (c) {
+    if (state.collection !== c || !state.file) {
+      render(el('p', { class: 'loading' }, 'Loading ' + c.title.toLowerCase()));
+      try { await loadCollection(c); } catch (e) { current = hash; return failScreen(e); }
+    }
+    if (sub == null) return screenList();
+    if (sub === 'new') return openItem(-1);
+    const i = Number(sub);
+    if (Number.isInteger(i) && i >= 0 && i < items().length) return openItem(i);
+    fix(addr(c.key));
+    return screenList();
+  }
+
+  switch (head) {
+    case 'benefits':
+      if (!sub) return screenBenefits();
+      mark(hash);
+      if (!bens.loaded) {
+        render(el('p', { class: 'loading' }, 'Loading benefits'));
+        try { await loadBenefits(); } catch (e) { return failScreen(e); }
+      }
+      if (!DIRECTORY.some(m => m.slug === sub)) fix('benefits');
+      return drawBenefitsMember(sub);
+    case 'events':
+      return sub ? screenEvent(sub) : screenEvents();
+    case 'newsletter':
+      return screenNewsletter();
+    case 'digest':
+      return screenDigest();
+    case 'dues':
+      return screenDues();
+    case 'message':
+      return screenMessage();
+    default:
+      if (head) fix('');
+      return screenHome();
+  }
+}
+
+window.addEventListener('popstate', () => { route(location.hash.slice(1)); });
+
+/* Already signed in from earlier today? Skip the form and go straight to
+   the screen in the address, if there is one. */
 (async () => {
   try {
     await loadDirectory();
-    screenHome();
   } catch {
-    screenSignIn();
+    return screenSignIn();
   }
+  route(location.hash.slice(1));
 })();

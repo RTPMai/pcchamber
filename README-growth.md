@@ -32,3 +32,24 @@ Members go straight to the club's registration. Non-members pay the guest fee th
 - `STRIPE_SECRET_KEY`: from Stripe. Until it is set, guests are told to email the chamber.
 - `STRIPE_WEBHOOK_SECRET`: add a webhook in Stripe for `checkout.session.completed` pointing at `/api/stripe`, and paste its signing secret. It covers guests who pay and close the tab.
 - 11 serverless functions now. Vercel Hobby allows 12.
+
+## Added September 29
+
+| What | Where | Code |
+|---|---|---|
+| Back button works in the admin | Every admin screen has its own address after the # | `admin/app.js` |
+| Monthly content audit | Emailed on the 1st, and live as "Needs attention" on the admin home | `api/_lib/audit.js`, runs inside `api/digest.js` |
+| Membership dues through Stripe invoices | Admin, Membership dues | `api/_lib/dues.js`, `data/dues.js`, runs inside `api/stripe.js` |
+| Message to members by category or level | Admin, Message to members | `api/newsletter.js` |
+| ChamberMaster export | Admin, Member directory, "Download for ChamberMaster" | `admin/app.js` |
+
+Still 11 serverless functions. Everything new runs inside ones that already existed.
+
+New in Vercel:
+
+- `AUDIT_AUTO=on` and `AUDIT_TO` (addresses, comma separated) for the monthly email
+- The Stripe webhook also needs `invoice.paid`, `invoice.voided` and `invoice.marked_uncollectible` added to its events
+
+New member fields, set in the admin: **Size, for dues** (Basic Business only) and **Dues override** (under settings). Members cannot change either from their own listing.
+
+`LAUNCH.md` has the dated checklist to the October 29 mixer.

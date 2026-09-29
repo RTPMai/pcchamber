@@ -249,3 +249,30 @@ main{ padding:32px 0 80px; }
 .mailpreview{ width:100%; height:720px; border:1px solid var(--rule); border-radius:12px; margin-top:16px; background:#fff; }
 .bgroup-title{ font-family:'Fraunces',Georgia,serif; font-weight:600; font-size:1.25rem; margin:24px 0 12px; }
 details summary{ cursor:pointer; font-weight:600; margin-top:10px; }
+
+/* ---------- needs attention (the monthly content audit, live) ---------- */
+.attention{ margin:0 0 22px; }
+.attention-list{ padding:14px 18px; }
+.attention-list summary{ cursor:pointer; font-weight:600; }
+.attention-list ul{ list-style:none; margin:12px 0 4px; padding:0; display:grid; gap:8px; }
+.attention-list li{ padding:8px 10px; border-left:4px solid var(--winter); background:rgba(103,161,185,.08); border-radius:0 6px 6px 0; }
+.attention-list li[data-level="high"]{ border-left-color:var(--alert); background:#FDF0EE; }
+.attention-list li[data-level="medium"]{ border-left-color:var(--sun); background:var(--sun-wash); }
+.attention-list .lvl{ display:block; font-size:.78rem; text-transform:uppercase; letter-spacing:.06em; opacity:.75; margin-bottom:2px; }
+
+/* ---------- membership dues ---------- */
+[data-season="navy"]{ --tint:var(--navy); }
+.row-actions{ display:flex; gap:6px; align-items:center; flex-shrink:0; }
+.row-actions .btn{ text-decoration:none; }
+.dues-list li[data-state="paid"] .row-open{ border-left:4px solid var(--spring); }
+.dues-list li[data-state="sent"] .row-open{ border-left:4px solid var(--sun); }
+.dues-list li[data-state="fix"] .row-open{ border-left:4px solid var(--alert); }
+.dues-list li[data-state="free"] .row-open{ opacity:.7; }
+@media (max-width:600px){ .dues-list li{ flex-direction:column; } }
+
+/* ---------- message to members ---------- */
+.checks{ display:flex; flex-wrap:wrap; gap:8px 10px; }
+.field .checks label.check{ display:inline-flex; align-items:center; gap:6px; margin:0; font-weight:500;
+  padding:6px 10px; border:1px solid var(--rule); border-radius:999px; background:var(--paper); cursor:pointer; }
+.field .checks label.check input{ width:18px; height:18px; margin:0; flex:0 0 auto; }
+.field .checks label.check:has(input:checked){ border-color:var(--navy); background:var(--sun-wash); }
