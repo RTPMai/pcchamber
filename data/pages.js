@@ -77,6 +77,11 @@ export const RESOURCE_GROUPS = [
       { label: 'IowaGrants.gov', href: 'https://www.iowagrants.gov/', note: 'Where state grant applications are actually filed. Register before a deadline, not on the day.' },
       { label: 'Iowa SBDC', href: 'https://www.iowasbdc.org/', note: 'Free one-to-one business advising. Genuinely free, not a sales funnel.' },
       { label: 'SBA Iowa District Office', href: 'https://www.sba.gov/district/iowa', note: 'SBA loan programmes and lender matching.' },
+      { label: 'SCORE Des Moines', href: 'https://www.score.org/desmoines', note: 'Free, confidential mentoring from people who have run businesses. Phone, video, email, or in person, for as long as you want it.' },
+      { label: 'Targeted Small Business certification', href: 'https://opportunityiowa.gov/business/small-business-entrepreneurs/small-business-resources/targeted-small-business-program', note: 'For Iowa businesses under $4 million average gross income that are at least 51% owned and run by a woman, a minority, a service-disabled veteran, or a person with a disability. See state buying needs 48 hours early, skip competitive bidding on state purchases under $25,000, and apply for loans up to $50,000.' },
+      { label: 'Iowa Center for Economic Success', href: 'https://theiowacenter.org/', note: 'Coaching, classes, and business loans up to $50,000. Home of the SBA Women\'s Business Center for Iowa. 515-283-0940.' },
+      { label: 'Iowa MicroLoan', href: 'https://www.iowamicroloan.org/', note: '$5,000 to $50,000 on a six-year term to start, expand, or refinance. You generally need a bank to have turned you down first.' },
+      { label: 'One Economy Financial Development Corp', href: 'https://oefdc.org/businesses', note: 'Loans up to $5,000 to start or grow a business, decided on more than your credit score. Meeting with them is free and involves no credit check.' },
       { label: 'Choose Iowa grants', href: 'https://www.chooseiowa.com/grants', note: 'Food and farm programmes. Check the exclusions: meat and dairy processing are handled separately.' },
       { label: 'Grants.gov', href: 'https://www.grants.gov/', note: 'Federal grants. Large, slow, and worth it for a few.' },
       { label: 'Polk County news and announcements', href: 'https://www.polkcountyiowa.gov/news-and-announcements/', note: 'Where county grant rounds get announced, including CDBG.' }
@@ -108,6 +113,7 @@ export const RESOURCE_GROUPS = [
       { label: 'Iowa Workforce Development', href: 'https://www.iowaworkforcedevelopment.gov/', note: 'Unemployment insurance, wage rules, and the posters you are required to display.' },
       { label: 'Workforce and training grants', href: 'https://workforce.iowa.gov/opportunities/grants', note: 'Money towards training existing staff.' },
       { label: 'DMACC business and industry training', href: 'https://www.dmacc.edu/business-and-industry/', note: 'Customised training, sometimes with the cost partly reimbursed.' },
+      { label: 'Evelyn K. Davis Center', href: 'https://lsiowa.org/evelyn-k-davis-center/', note: 'Workforce training, job search help, and small business coaching in Des Moines. Now run by Lutheran Services in Iowa.' },
       { label: 'The chamber job board', href: '/jobs/', note: 'Free for members. Openings at member businesses, seen by people who already live here.' }
     ]
   },
@@ -139,7 +145,10 @@ export const RESOURCE_GROUPS = [
       { label: 'The member directory', href: '/directory/', note: 'Your listing is a real page that turns up in search. Keep your details current.' },
       { label: 'Catch Des Moines', href: 'https://www.catchdesmoines.com/', note: 'Regional tourism listings. Worth it if you get visitor traffic from Saylorville and Big Creek.' },
       { label: 'Greater Des Moines Partnership', href: 'https://www.dsmpartnership.com/', note: 'Metro-wide business network. Basic Business membership includes reciprocal membership.' },
-      { label: 'North Polk Living', href: 'https://www.iowalivingmagazines.com/north-polk', note: 'The local monthly magazine. Openings, milestones, and events are free to send in. Press releases go to tammy@iowalivingmagazines.com.' }
+      { label: 'North Polk Living', href: 'https://www.iowalivingmagazines.com/north-polk', note: 'The local monthly magazine. Openings, milestones, and events are free to send in. Press releases go to tammy@iowalivingmagazines.com.' },
+      { label: 'Goldman Sachs 10,000 Small Businesses', href: 'https://www.iowa10ksb.com/', note: 'A no-cost growth programme for established businesses, run through DMACC and the other Iowa community colleges. Offices on the Ankeny campus. Take the eligibility quiz before you apply.' },
+      { label: 'Iowa APEX Accelerator', href: 'https://www.ciras.iastate.edu/government-contracting/', note: 'Free help selling to federal, state, and local government: registration, bids, and certifications. Run by Iowa State\'s CIRAS.' },
+      { label: 'IASourceLink', href: 'https://www.iasourcelink.com/', note: 'Searchable directory of 360+ nonprofit business resources across Iowa. Start here when nothing above fits.' }
     ]
   }
 ];
