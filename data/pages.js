@@ -73,7 +73,7 @@ export const RESOURCE_GROUPS = [
     blurb: 'Grants, loans, and free advice, with straight talk about who actually qualifies.',
     intro: 'Most of these programmes are open to businesses here and most local owners never apply. The eligibility rules are the part that catches people out, so read those before the dollar figures.',
     links: [
-      { label: 'Iowa Economic Development Authority', href: 'https://www.iowaeda.com/', note: 'State programmes for expansion, equipment, and workforce training.' },
+      { label: 'Iowa Economic Development & Finance Authority', href: 'https://opportunityiowa.gov/business/financial-assistance', note: 'State programmes for expansion, equipment, and workforce training. This is the old IEDA, now merged with the Iowa Finance Authority.' },
       { label: 'IowaGrants.gov', href: 'https://www.iowagrants.gov/', note: 'Where state grant applications are actually filed. Register before a deadline, not on the day.' },
       { label: 'Iowa SBDC', href: 'https://www.iowasbdc.org/', note: 'Free one-to-one business advising. Genuinely free, not a sales funnel.' },
       { label: 'SBA Iowa District Office', href: 'https://www.sba.gov/district/iowa', note: 'SBA loan programmes and lender matching.' },
@@ -82,7 +82,7 @@ export const RESOURCE_GROUPS = [
       { label: 'Iowa Center for Economic Success', href: 'https://theiowacenter.org/', note: 'Coaching, classes, and business loans up to $50,000. Home of the SBA Women\'s Business Center for Iowa. 515-283-0940.' },
       { label: 'Iowa MicroLoan', href: 'https://www.iowamicroloan.org/', note: '$5,000 to $50,000 on a six-year term to start, expand, or refinance. You generally need a bank to have turned you down first.' },
       { label: 'One Economy Financial Development Corp', href: 'https://oefdc.org/businesses', note: 'Loans up to $5,000 to start or grow a business, decided on more than your credit score. Meeting with them is free and involves no credit check.' },
-      { label: 'Choose Iowa grants', href: 'https://www.chooseiowa.com/grants', note: 'Food and farm programmes. Check the exclusions: meat and dairy processing are handled separately.' },
+      { label: 'Choose Iowa grants', href: 'https://www.chooseiowa.com/grants', note: 'Value-added food and farm grants. Meat and dairy processing are excluded here and go through separate Butchery and Dairy Innovation grants instead.' },
       { label: 'Grants.gov', href: 'https://www.grants.gov/', note: 'Federal grants. Large, slow, and worth it for a few.' },
       { label: 'Polk County news and announcements', href: 'https://www.polkcountyiowa.gov/news-and-announcements/', note: 'Where county grant rounds get announced, including CDBG.' }
     ]
@@ -95,9 +95,9 @@ export const RESOURCE_GROUPS = [
     intro: 'Nothing here is interesting and all of it is compulsory. The city page is the one most often needed and least often found.',
     links: [
       { label: 'City of Polk City', href: 'https://www.polkcityia.gov/', note: 'Permits, zoning, signage, and council agendas. The chamber is not the city.' },
-      { label: 'Polk City municipal code', href: 'https://www.polkcityia.gov/businesses/pages/municipal-code', note: 'The actual rules, including what you can put on your building.' },
-      { label: 'Iowa Secretary of State, business filings', href: 'https://sos.iowa.gov/business/', note: 'Register an entity, file a biennial report.' },
-      { label: 'Iowa Department of Revenue', href: 'https://revenue.iowa.gov/taxes/file-my-taxes/business-taxes', note: 'Sales tax permits and withholding.' },
+      { label: 'Polk City municipal code', href: 'https://codelibrary.amlegal.com/codes/polkcityia/latest/overview', note: 'The actual rules, including what you can put on your building.' },
+      { label: 'Iowa Secretary of State, business filings', href: 'https://sos.iowa.gov/business-services', note: 'Register an entity and file your biennial report. LLCs file in odd years, corporations in even years.' },
+      { label: 'Iowa Department of Revenue', href: 'https://revenue.iowa.gov/permits-licensing/business-permit-registration', note: 'Sales tax permits and withholding.' },
       { label: 'IRS Small Business Center', href: 'https://www.irs.gov/businesses/small-businesses-self-employed', note: 'Federal taxes. When the IRS and a firm blog disagree, the IRS is right.' },
       { label: 'Polk County Assessor, appealing an assessment', href: 'https://www.polkcountyiowa.gov/county-assessor/appealing-your-assessment/', note: 'Protest deadlines live here and they are not generous.' }
     ]
@@ -110,9 +110,9 @@ export const RESOURCE_GROUPS = [
     intro: 'Two of these cost nothing and are underused. Posting a job on IowaWORKS is free, and DMACC will sometimes cover part of the cost of training you were going to pay for anyway.',
     links: [
       { label: 'IowaWORKS', href: 'https://www.iowaworks.gov/', note: 'Post jobs at no cost and connect to hiring events.' },
-      { label: 'Iowa Workforce Development', href: 'https://www.iowaworkforcedevelopment.gov/', note: 'Unemployment insurance, wage rules, and the posters you are required to display.' },
+      { label: 'Iowa Workforce Development', href: 'https://workforce.iowa.gov/', note: 'Unemployment insurance, wage rules, and the posters you are required to display.' },
       { label: 'Workforce and training grants', href: 'https://workforce.iowa.gov/opportunities/grants', note: 'Money towards training existing staff.' },
-      { label: 'DMACC business and industry training', href: 'https://www.dmacc.edu/business-and-industry/', note: 'Customised training, sometimes with the cost partly reimbursed.' },
+      { label: 'DMACC business and industry training', href: 'https://www.dmacc.edu/dbr/skills-training.html', note: 'Customised training for your staff. The state 260E and 260F programmes can reimburse part of the cost.' },
       { label: 'Evelyn K. Davis Center', href: 'https://lsiowa.org/evelyn-k-davis-center/', note: 'Workforce training, job search help, and small business coaching in Des Moines. Now run by Lutheran Services in Iowa.' },
       { label: 'The chamber job board', href: '/jobs/', note: 'Free for members. Openings at member businesses, seen by people who already live here.' }
     ]
@@ -122,14 +122,14 @@ export const RESOURCE_GROUPS = [
     season: 'autumn',
     title: 'Storm and flood recovery',
     blurb: 'What is still open after the July 2026 flooding, and what has already closed.',
-    intro: 'The July 2 to 4 flooding put Polk County under an SBA disaster declaration. The deadline to apply for damage to buildings, equipment and stock passed on September 21, 2026. Working capital loans are still open, and a business does not need to have had physical damage to apply for one. Nonprofits are covered by a second declaration with later deadlines.',
+    intro: 'The July 2 to 4 flooding put Polk County under an SBA disaster declaration. The deadline to apply for damage to buildings, equipment and stock was extended to November 20, 2026. Working capital loans are open until April 23, 2027, and a business does not need to have had physical damage to apply for one. Nonprofits are covered by a second declaration with later deadlines.',
     links: [
-      { label: 'Apply for an SBA disaster loan', href: 'https://lending.sba.gov/', note: 'Economic injury applications for businesses are open until April 23, 2027. Working capital for bills the flooding stopped you paying, up to $2 million at 4%.' },
+      { label: 'Apply for an SBA disaster loan', href: 'https://lending.sba.gov/', note: 'Physical damage applications reopened under a grace period and close November 20, 2026. Economic injury applications are open until April 23, 2027: working capital for bills the flooding stopped you paying, up to $2 million at 4%.' },
       { label: 'Nonprofits: apply by November 2', href: 'https://www.sba.gov/funding-programs/disaster-assistance', note: 'A separate declaration covers private nonprofits and faith-based organisations. Physical damage closes November 2, 2026, economic injury June 1, 2027, at 3.625%.' },
       { label: 'SBA fact sheet for this disaster', href: '/assets/docs/sba-disaster-loan-fact-sheet.pdf', note: 'Declaration #21727 and #21728. Rates, terms, limits, and what is not eligible. PDF.' },
       { label: 'The SBA news release', href: '/assets/docs/sba-disaster-loan-news-release.pdf', note: 'The original July 24 announcement, including the outreach centres that have since closed. PDF.' },
       { label: 'SBA customer service', href: 'mailto:disastercustomerservice@sba.gov', note: 'Or 800-659-2955. They will tell you whether it is worth applying before you fill anything in.' },
-      { label: 'Help for households', href: 'https://homelandsecurity.iowa.gov/assistance', note: 'State grants and disaster case advocacy for residents. Grant applications run 45 days from the disaster, but a case advocate can help after that.' },
+      { label: 'Help for households', href: 'https://homelandsecurity.iowa.gov/assistance', note: 'State grants of up to $7,000 and disaster case advocacy for residents. Grant applications are due 45 days after the governor\'s proclamation. Case advocates can help for up to 180 days after the declaration.' },
       { label: 'Iowa disaster assistance flyer', href: '/assets/docs/iowa-disaster-assistance.pdf', note: 'Iowa HSEM, plain English. Also 515-675-1884 or disastercaseadvocacy@iowa.gov. PDF.' }
     ]
   },

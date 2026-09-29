@@ -40,7 +40,7 @@ export const SITE = {
   alert: {
     active: true,
     title: 'Storm and flood recovery:',
-    text: 'SBA working capital loans are still open to Polk County businesses and nonprofits hit by the July flooding.',
+    text: 'SBA damage loans for the July flooding reopened until November 20, and working capital loans stay open into 2027.',
     href: '/resources/disaster-help/',
     label: 'What is still open',
     until: '2027-04-23'
