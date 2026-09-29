@@ -1348,7 +1348,7 @@ async function screenMessage(flash) {
    ========================================================================== */
 
 const ST = '/api/stripe';
-const dues = { year: duesYear(), show: 'all' };
+const dues = { year: duesYear(), show: 'all', picked: new Set(), q: '' };
 const OPEN_DUES = ['sent', 'paid'];
 
 function duesState(m) {
@@ -1425,13 +1425,52 @@ async function screenDues(flash) {
       r && ['void', 'uncollectible'].includes(r.status) ? `last invoice ${r.status}` : null,
       m.problem || null
     ].filter(Boolean).join(' \u00b7 ');
-    return el('li', { 'data-state': m.state },
-      el('div', { class: 'row-open static' }, el('strong', {}, m.name), el('span', {}, bits)),
+    const tick = m.state === 'ready' && d.ready && el('input', {
+      type: 'checkbox', class: 'pick', 'aria-label': `Select ${m.name}`, checked: dues.picked.has(m.slug),
+      onchange: e => { e.target.checked ? dues.picked.add(m.slug) : dues.picked.delete(m.slug); updatePicked(); }
+    });
+    return el('li', { 'data-state': m.state, 'data-find': [m.name, m.email, m.label, m.tierName].join(' ').toLowerCase() },
+      el('label', { class: 'row-open static' + (tick ? ' pickable' : '') },
+        tick || null,
+        el('span', { class: 'who' }, el('strong', {}, m.name), el('span', {}, bits))),
       el('div', { class: 'row-actions' },
         m.state === 'ready' && d.ready && el('button', { class: 'btn', onclick: () => sendThese([m.slug], `an invoice to ${m.name}`) }, 'Send'),
         m.state === 'fix' && el('a', { class: 'btn', href: '#' + addr('members', m.i) }, 'Fix'),
         r && r.url && OPEN_DUES.includes(r.status) && el('a', { class: 'btn', href: r.url, target: '_blank', rel: 'noopener' }, 'Invoice')));
   };
+
+  /* Picking: tick any ready rows, then Send selected. Ticks survive
+     changing the filter or searching, and are cleared after sending. */
+  for (const slug of [...dues.picked]) if (!ready.some(m => m.slug === slug)) dues.picked.delete(slug);
+  const sendPicked = el('button', { class: 'btn primary', onclick: () => {
+    const slugs = ready.filter(m => dues.picked.has(m.slug)).map(m => m.slug);
+    sendThese(slugs, slugs.length === 1 ? `an invoice to ${ms.find(m => m.slug === slugs[0]).name}` : `${slugs.length} invoices`);
+  } });
+  const updatePicked = () => {
+    const n = dues.picked.size;
+    const total = sum(ready.filter(m => dues.picked.has(m.slug)));
+    sendPicked.textContent = n ? `Send ${n} selected (${money(total)})` : 'Send selected';
+    sendPicked.disabled = !d.ready || !n;
+  };
+  const selectShown = () => {
+    listEl.querySelectorAll('li:not([hidden]) input.pick').forEach(i => { i.checked = true; dues.picked.add(i.closest('li').dataset.slug); });
+    updatePicked();
+  };
+  const clearPicked = () => {
+    dues.picked.clear();
+    listEl.querySelectorAll('input.pick').forEach(i => { i.checked = false; });
+    updatePicked();
+  };
+
+  const search = el('input', { type: 'search', class: 'bsearch', placeholder: 'Find a member', 'aria-label': 'Find a member' });
+  search.value = dues.q;
+  const listEl = el('ul', { class: 'list dues-list' }, shown.map(m => { const li = row(m); li.dataset.slug = m.slug; return li; }));
+  const applySearch = () => {
+    dues.q = search.value;
+    const q = search.value.trim().toLowerCase();
+    listEl.querySelectorAll('li').forEach(li => { li.hidden = Boolean(q) && !li.dataset.find.includes(q); });
+  };
+  search.addEventListener('input', applySearch);
 
   const years = [duesYear() - 1, duesYear(), duesYear() + 1];
   const pick = el('select', { 'aria-label': 'Membership year' }, years.map(y => el('option', { value: y, selected: y === dues.year }, String(y))));
@@ -1454,13 +1493,20 @@ async function screenDues(flash) {
       el('label', {}, 'Year '), pick,
       el('label', {}, ' Show '), filter),
     el('div', { class: 'row' },
-      el('button', { class: 'btn primary', disabled: !d.ready || !ready.length,
-        onclick: () => sendThese(ready.map(m => m.slug), `${ready.length} invoice${ready.length === 1 ? '' : 's'}`) },
-        ready.length ? `Send ${ready.length} invoice${ready.length === 1 ? '' : 's'}` : 'Nobody left to invoice'),
+      sendPicked,
+      el('button', { class: 'btn', disabled: !d.ready || !ready.length,
+        onclick: () => sendThese(ready.map(m => m.slug), `all ${ready.length} invoice${ready.length === 1 ? '' : 's'}`) },
+        ready.length ? `Send all ${ready.length} ready (${money(sum(ready))})` : 'Nobody left to invoice'),
       el('button', { class: 'btn', disabled: !d.ready || !sent.length, onclick: refresh }, 'Check Stripe'),
       el('button', { class: 'btn', onclick: downloadDues }, 'Download the list')),
+    d.ready && ready.length > 0 && el('div', { class: 'row pickrow' },
+      el('button', { class: 'linkish', onclick: selectShown }, 'Tick every ready member shown'),
+      el('button', { class: 'linkish', onclick: clearPicked }, 'Clear ticks')),
+    search,
     status,
-    shown.length ? el('ul', { class: 'list dues-list' }, shown.map(row)) : el('p', { class: 'help' }, 'Nobody in this group.')));
+    shown.length ? listEl : el('p', { class: 'help' }, 'Nobody in this group.')));
+  updatePicked();
+  applySearch();
 }
 
 /* ---------- shell --------------------------------------------------------- */

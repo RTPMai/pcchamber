@@ -276,3 +276,11 @@ details summary{ cursor:pointer; font-weight:600; margin-top:10px; }
   padding:6px 10px; border:1px solid var(--rule); border-radius:999px; background:var(--paper); cursor:pointer; }
 .field .checks label.check input{ width:18px; height:18px; margin:0; flex:0 0 auto; }
 .field .checks label.check:has(input:checked){ border-color:var(--navy); background:var(--sun-wash); }
+.dues-list .pickable{ display:flex; gap:12px; align-items:center; cursor:pointer; }
+.dues-list .pickable:hover{ background:var(--paper-warm); }
+.dues-list input.pick{ width:22px; height:22px; flex:0 0 auto; margin:0; }
+.dues-list .who{ display:block; }
+.dues-list li[hidden]{ display:none; }
+.pickrow{ margin-top:-4px; }
+.linkish{ background:none; border:0; padding:4px 0; font:inherit; color:var(--navy); text-decoration:underline; cursor:pointer; }
+.btn:disabled, .btn[disabled]{ opacity:.45; cursor:not-allowed; }
