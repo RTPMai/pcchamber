@@ -39,6 +39,26 @@
    With no access list, the public contact address is accepted, so this
    works before anything has been filled in.
 
+   THE OWNER, AND ADDING PEOPLE
+
+   The first address on the list is the owner. The owner can add and remove
+   the others from their account page, without asking the chamber. Everybody
+   else on the list can see who has access but cannot change it. The admin
+   can still edit the list directly, and reordering it changes the owner.
+
+   Each change is a commit to content/members.json with the business name
+   on it, the same audit trail as listing edits. The new person gets an
+   invite link that lasts seven days rather than thirty minutes, because an
+   invite sits in an inbox until somebody gets round to it.
+
+   One address belongs to one business. Adding an address that already
+   signs in somewhere else is refused, because sign in has to know which
+   business an address means.
+
+   Removing somebody deletes their password, so they cannot sign in again,
+   and ends any session they have open within a few minutes of the site
+   rebuilding.
+
    THE TEST SIGN IN
 
    Setting DEMO_MEMBER lets one made-up sign in work without Upstash, without
@@ -78,7 +98,8 @@ import { fileURLToPath } from 'node:url';
 
 import { kvGet, kvSet, kvDel, kvBump, storeReady, storeMissing } from './_lib/store.js';
 import { hash, matches, checkStrength, wasteTime, MIN_LENGTH } from './_lib/passwords.js';
-import { readContent, ghMissing } from './_lib/github.js';
+import { readContent, updateContent, ghMissing } from './_lib/github.js';
+import { sendMail, mailMissing } from './_lib/mail.js';
 import { BENEFITS, TIER_NAMES, summarize, describe, thisYear, yearOf } from '../data/benefits.js';
 import { statsFor } from './_lib/stats.js';
 
@@ -88,6 +109,13 @@ const SESSION_DAYS = 30;
 const LINK_MINUTES = 30;
 const MAX_TRIES = 5;
 const LOCK_MINUTES = 15;
+const INVITE_DAYS = 7;
+const MAX_PEOPLE = 10;          // per business, owner included
+const INVITES_PER_DAY = 20;     // per business, so the form cannot be used to spam
+/* A session for an address the deployed roster does not know yet is
+   allowed this long. Covers the minute or two between somebody being
+   invited and the site rebuilding with them on it. */
+const GRACE_MINUTES = 15;
 
 /* ---------- the roster ---------------------------------------------------- */
 
@@ -181,9 +209,24 @@ function readCookie(req, name) {
 }
 
 export function currentMember(req) {
+  return (currentSession(req) || {}).member || null;
+}
+
+/* The member and the address that signed in. A session whose address has
+   been taken off the business stops working once the site has rebuilt
+   without it, rather than running on for the rest of its 30 days. */
+function currentSession(req) {
   const payload = verify(readCookie(req, COOKIE));
   if (!payload || payload.kind !== 'session') return null;
-  return members().find(m => m.slug === payload.slug) || null;
+  const member = members().find(m => m.slug === payload.slug);
+  if (!member) return null;
+
+  if (!payload.demo) {
+    const issued = payload.iat || (payload.exp - SESSION_DAYS * 24 * 60 * 60 * 1000);
+    const fresh = Date.now() - issued < GRACE_MINUTES * 60 * 1000;
+    if (!fresh && !addressesFor(member).includes(tidy(payload.email))) return null;
+  }
+  return { member, email: tidy(payload.email), demo: Boolean(payload.demo) };
 }
 
 function setSession(res, member, email) {
@@ -191,6 +234,7 @@ function setSession(res, member, email) {
     kind: 'session',
     slug: member.slug,
     email: tidy(email),
+    iat: Date.now(),
     exp: Date.now() + SESSION_DAYS * 24 * 60 * 60 * 1000
   });
   res.setHeader('Set-Cookie',
@@ -245,6 +289,92 @@ async function readBody(req) {
 }
 
 const origin = req => `https://${req.headers['x-forwarded-host'] || req.headers.host}`;
+
+/* ---------- the team ------------------------------------------------------ */
+
+const looksLikeEmail = e => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e) && e.length <= 120;
+
+/* The live roster, straight from GitHub, so a change shows up the moment it
+   is saved rather than after the rebuild. Falls back to the deployed copy
+   when GitHub is not connected. */
+async function liveMembers() {
+  if (ghMissing().length) return members();
+  const { data } = await readContent('members.json');
+  return data.members || [];
+}
+
+async function stillHasAccess(slug, email) {
+  const wanted = tidy(email);
+  const deployed = members().find(m => m.slug === slug);
+  if (deployed && addressesFor(deployed).includes(wanted)) return true;
+  if (ghMissing().length) return false;
+  const live = (await liveMembers()).find(m => m.slug === slug);
+  return Boolean(live && addressesFor(live).includes(wanted));
+}
+
+function inviteLink(req, member, email) {
+  return `${origin(req)}/api/member?token=${encodeURIComponent(sign({
+    kind: 'setup',
+    slug: member.slug,
+    email: tidy(email),
+    exp: Date.now() + INVITE_DAYS * 24 * 60 * 60 * 1000,
+    n: randomBytes(6).toString('hex')
+  }))}`;
+}
+
+async function sendInvite(req, member, email, from) {
+  const used = await kvBump(`invites:${member.slug}`, 24 * 60 * 60);
+  if (used > INVITES_PER_DAY) {
+    throw Object.assign(new Error('That is a lot of invites for one day. Try again tomorrow.'), { status: 429 });
+  }
+  await sendMail({
+    to: email,
+    subject: `You have been added to ${member.name} on the Polk City Area Chamber site`,
+    text: [
+      `${from} added you to the chamber member account for ${member.name}.`,
+      '',
+      'Use this link to choose a password:',
+      '',
+      inviteLink(req, member, email),
+      '',
+      `It works for the next ${INVITE_DAYS} days. After that, go to the member sign in page and ask for a new link with this address.`,
+      '',
+      'Once you are in you can edit the business listing, post deals, see member benefits, and use the Business Policy Center.',
+      '',
+      'Nobody at the chamber can see your password, now or later.',
+      '',
+      'Polk City Area Chamber of Commerce'
+    ].join('\n')
+  });
+}
+
+/* list can be passed in right after a save, because GitHub can hand back
+   the previous version of the file for a few seconds afterwards. */
+async function teamFor(member, me, list) {
+  if (!list) {
+    const live = (await liveMembers()).find(m => m.slug === member.slug) || member;
+    list = addressesFor(live);
+  }
+  const owner = list[0] || null;
+  const people = await Promise.all(list.map(async email => ({
+    email,
+    owner: email === owner,
+    you: email === me,
+    active: Boolean(await kvGet(pwKey(email)))
+  })));
+  return { owner, canManage: Boolean(me && me === owner), people, max: MAX_PEOPLE };
+}
+
+/* Only the owner, checked against the live file, so an owner change made
+   in the admin takes effect straight away. */
+async function requireOwner(session) {
+  const live = (await liveMembers()).find(m => m.slug === session.member.slug);
+  if (!live) throw Object.assign(new Error('That listing is no longer in the directory.'), { status: 404 });
+  if (addressesFor(live)[0] !== session.email) {
+    throw Object.assign(new Error('Only the account owner can change who has access.'), { status: 403 });
+  }
+  return live;
+}
 
 /* ---------- handler ------------------------------------------------------- */
 
@@ -336,7 +466,7 @@ export default async function handler(req, res) {
           }
 
           const token = sign({
-            kind: 'session', slug: member.slug, email: email || 'demo',
+            kind: 'session', slug: member.slug, email: email || 'demo', demo: true,
             exp: Date.now() + DEMO_DAYS * 24 * 60 * 60 * 1000
           });
           res.setHeader('Set-Cookie',
@@ -442,6 +572,18 @@ export default async function handler(req, res) {
           return;
         }
 
+        /* An invite can be up to a week old, so check the address is still
+           on the business. The deployed roster first; if it is not there,
+           the live file, because somebody invited a minute ago is not in
+           the deployed copy yet. */
+        if (!(await stillHasAccess(member.slug, payload.email))) {
+          res.status(403).json({
+            error: 'removed',
+            message: 'That address no longer has access to this business. Ask whoever manages your chamber sign in.'
+          });
+          return;
+        }
+
         const problem = checkStrength(body.password, member.name);
         if (problem) {
           res.status(400).json({ error: 'weak', message: problem });
@@ -505,6 +647,138 @@ export default async function handler(req, res) {
               amount: u.amount || null,
               note: u.note || ''
             }))
+        });
+        return;
+      }
+
+      /* Who can sign in for this business. Everybody on it can see the
+         list; only the owner can change it. */
+      case 'team':
+      case 'invite':
+      case 'resend':
+      case 'remove': {
+        const session = currentSession(req);
+        if (!session) {
+          res.status(401).json({ error: 'signed_out', message: 'Please sign in again.' });
+          return;
+        }
+        if (session.demo && body.action !== 'team') {
+          res.status(403).json({ error: 'demo', message: 'The test sign in cannot change who has access.' });
+          return;
+        }
+
+        if (body.action === 'team') {
+          res.status(200).json(await teamFor(session.member, session.email));
+          return;
+        }
+
+        const missing = [...ghMissing(), ...mailMissing()];
+        if (missing.length) {
+          res.status(503).json({
+            error: 'not_configured',
+            message: `Adding people is not set up yet. Missing in the Vercel project settings: ${missing.join(', ')}.`
+          });
+          return;
+        }
+
+        const target = tidy(body.email);
+        if (!looksLikeEmail(target)) {
+          res.status(400).json({ error: 'bad_email', message: 'That email address does not look right.' });
+          return;
+        }
+
+        const live = await requireOwner(session);
+        const name = live.name || session.member.name;
+
+        if (body.action === 'resend') {
+          if (!addressesFor(live).includes(target)) {
+            res.status(404).json({ error: 'not_on_team', message: 'That address is not on this business.' });
+            return;
+          }
+          if (await kvGet(pwKey(target))) {
+            res.status(400).json({ error: 'active', message: 'They have already set a password. If they forgot it, they can reset it from the sign in page.' });
+            return;
+          }
+          await sendInvite(req, live, target, session.email);
+          res.status(200).json({ ok: true, message: `Invite sent again to ${target}.`, ...(await teamFor(live, session.email)) });
+          return;
+        }
+
+        let saved = null;
+
+        if (body.action === 'invite') {
+          const out = await updateContent('members.json', data => {
+            const list = data.members || [];
+            const i = list.findIndex(m => m.slug === live.slug);
+            if (i === -1) throw Object.assign(new Error('That listing is no longer in the directory.'), { status: 404 });
+
+            const current = addressesFor(list[i]);
+            if (current[0] !== session.email) {
+              throw Object.assign(new Error('Only the account owner can change who has access.'), { status: 403 });
+            }
+            if (current.includes(target)) {
+              throw Object.assign(new Error('That address already has access.'), { status: 400 });
+            }
+            if (list.some((m, j) => j !== i && addressesFor(m).includes(target))) {
+              throw Object.assign(new Error('That address already signs in for another business, and one address can only belong to one. Use a different address, or ask the chamber.'), { status: 409 });
+            }
+            if (current.length >= MAX_PEOPLE) {
+              throw Object.assign(new Error(`A business can have up to ${MAX_PEOPLE} people. Remove somebody first.`), { status: 400 });
+            }
+            /* With no list yet, the contact address has been the sign in.
+               Writing it down first keeps it there, as the owner. */
+            list[i].access = saved = [...current, target];
+          }, `${name}: ${session.email} gave ${target} sign in access`, `${name} via member sign in`);
+
+          try {
+            await sendInvite(req, live, target, session.email);
+          } catch (err) {
+            /* The access is saved either way. Say so, so they can resend
+               rather than adding them twice. */
+            res.status(err.status || 502).json({
+              error: 'invite_failed',
+              message: `${target} was added, but the invite email did not send. ${err.message} Use Resend invite to try again.`,
+              ...(await teamFor(live, session.email, saved))
+            });
+            return;
+          }
+
+          res.status(200).json({
+            ok: true,
+            commit: out.commit,
+            message: `Added ${target} and sent them an invite. It works for ${INVITE_DAYS} days.`,
+            ...(await teamFor(live, session.email, saved))
+          });
+          return;
+        }
+
+        /* remove */
+        if (target === session.email) {
+          res.status(400).json({ error: 'owner', message: 'The owner cannot remove themselves. Ask the chamber to make somebody else the owner first.' });
+          return;
+        }
+        const out = await updateContent('members.json', data => {
+          const list = data.members || [];
+          const i = list.findIndex(m => m.slug === live.slug);
+          if (i === -1) throw Object.assign(new Error('That listing is no longer in the directory.'), { status: 404 });
+          const current = addressesFor(list[i]);
+          if (current[0] !== session.email) {
+            throw Object.assign(new Error('Only the account owner can change who has access.'), { status: 403 });
+          }
+          if (!current.includes(target)) {
+            throw Object.assign(new Error('That address is not on this business.'), { status: 404 });
+          }
+          list[i].access = saved = current.filter(e => e !== target);
+        }, `${name}: ${session.email} removed sign in access for ${target}`, `${name} via member sign in`);
+
+        await kvDel(pwKey(target));
+        await kvDel(tryKey(target));
+
+        res.status(200).json({
+          ok: true,
+          commit: out.commit,
+          message: `Removed ${target}. They cannot sign in any more.`,
+          ...(await teamFor(live, session.email, saved))
         });
         return;
       }

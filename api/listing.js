@@ -257,6 +257,15 @@ export default async function handler(req, res) {
       if (!list[i].summary) delete list[i].summary;
       if (!list[i].about) delete list[i].about;
       if (!list[i].city) delete list[i].city;
+
+      /* With no access list, the contact email is the sign in. Changing it
+         here would lock out whoever is signed in right now. So the old
+         address is written down as the sign in before it changes, and the
+         new contact email is just a contact email. */
+      const hadList = Array.isArray(before.access) && before.access.length;
+      const oldEmail = String((before.contact && before.contact.email) || '').trim().toLowerCase();
+      const newEmail = String(contact.email || '').trim().toLowerCase();
+      if (!hadList && oldEmail && oldEmail !== newEmail) list[i].access = [oldEmail];
     };
 
     const out = await updateContent(

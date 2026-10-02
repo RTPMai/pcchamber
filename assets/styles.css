@@ -1009,6 +1009,18 @@ img.face{ display:block; }
 .log-note{ grid-column:2; color:var(--navy-soft); font-size:.88rem; }
 .bens-foot{ font-size:.92rem; color:var(--navy-soft); margin-top:22px; }
 
+/* Who can sign in, on the account page */
+.team{ margin-top:40px; }
+.team-list{ list-style:none; margin:14px 0 22px; padding:0; }
+.team-row{
+  display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:6px 18px;
+  padding:11px 0; border-bottom:1px solid var(--rule-soft);
+}
+.team-who{ display:flex; flex-direction:column; min-width:0; }
+.team-email{ font-weight:600; overflow-wrap:anywhere; }
+.team-tags{ font-size:.85rem; color:var(--navy-soft); }
+.team-acts{ display:flex; gap:16px; }
+
 @media (max-width:560px){
   .ben-top{ flex-direction:column; gap:2px; }
   .ben-says{ text-align:left; white-space:normal; }

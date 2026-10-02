@@ -129,7 +129,7 @@ export const COLLECTIONS = [
       { id: 'serves', label: 'What they offer', type: 'list',
         help: 'One per line. Shows as tags on their page. Optional.' },
       { id: 'access', label: 'Who can sign in as this member', type: 'list',
-        help: 'One email address per line. Anybody listed can sign in as this business. Add each person who needs access, not just a shared inbox. Left empty, the contact email above is used.' },
+        help: 'One email address per line. Anybody listed can sign in as this business. The first address is the owner, who can add and remove the others from their own account page. Move a different address to the top to change the owner. Left empty, the contact email above is used.' },
       { id: 'logo', label: 'Logo file', type: 'text',
         help: 'Optional, for example /assets/members/their-slug.svg. Without one they get their initial.' },
       { id: 'logoDark', label: 'Logo needs a dark background', type: 'check',

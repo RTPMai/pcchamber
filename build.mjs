@@ -2186,6 +2186,21 @@ function membersPage() {
         </section>
         <p class="help" id="bensmsg" role="status"></p>
 
+        <section class="team" id="team" hidden aria-labelledby="teamhead">
+          <h2 id="teamhead">Who can sign in</h2>
+          <p class="bens-sub" id="teamsub"></p>
+          <ul class="team-list" id="teamlist"></ul>
+          <form class="form team-add" id="teamform" hidden style="max-width:24rem">
+            <div class="field">
+              <label for="teamemail">Add a person</label>
+              <span class="help">Their own work email, not a shared inbox. They get a link to set their own password.</span>
+              <input type="email" id="teamemail" autocomplete="off" required>
+            </div>
+            <div class="btnrow"><button type="submit" class="btn">Add and send invite</button></div>
+          </form>
+          <p class="help" id="teammsg" role="status" aria-live="polite"></p>
+        </section>
+
         <p style="margin-top:26px"><button class="linkish" id="signoutbtn">Sign out</button></p>
       </div>
     </div>
@@ -2227,7 +2242,73 @@ function membersPage() {
     var mine=document.getElementById('mylisting');
     if(mine) mine.setAttribute('href','/directory/'+d.slug+'/');
     loadBenefits();
+    loadTeam();
   }
+
+  /* Who can sign in. Same rule as benefits: textContent only. */
+  var teamBox=document.getElementById('team'),
+      teamList=document.getElementById('teamlist'),
+      teamForm=document.getElementById('teamform'),
+      teamMsg=document.getElementById('teammsg');
+
+  function drawTeam(d){
+    teamList.replaceChildren();
+    document.getElementById('teamsub').textContent = d.canManage
+      ? 'You are the owner, so you can add and remove people. Up to ' + d.max + '.'
+      : 'Only the owner can add or remove people. Ask them, or the chamber.';
+    d.people.forEach(function(p){
+      var li=make('li','team-row');
+      var who=make('div','team-who');
+      who.appendChild(make('span','team-email', p.email));
+      var tags=[];
+      if(p.owner) tags.push('Owner');
+      if(p.you) tags.push('You');
+      tags.push(p.active ? 'Active' : 'Invited, no password yet');
+      who.appendChild(make('span','team-tags', tags.join(' · ')));
+      li.appendChild(who);
+      if(d.canManage && !p.owner){
+        var acts=make('div','team-acts');
+        if(!p.active){
+          var again=make('button','linkish','Resend invite'); again.type='button';
+          again.addEventListener('click', function(){ teamAction('resend', p.email, again); });
+          acts.appendChild(again);
+        }
+        var rm=make('button','linkish','Remove'); rm.type='button';
+        rm.addEventListener('click', function(){
+          if(!confirm('Remove ' + p.email + '? They will not be able to sign in.')) return;
+          teamAction('remove', p.email, rm);
+        });
+        acts.appendChild(rm);
+        li.appendChild(acts);
+      }
+      teamList.appendChild(li);
+    });
+    teamForm.hidden = !(d.canManage && d.people.length < d.max);
+    teamBox.hidden=false;
+  }
+
+  function teamAction(action, email, btn){
+    if(btn) btn.disabled=true;
+    teamMsg.textContent = action==='remove' ? 'Removing' : 'Sending';
+    return post({action:action, email:email})
+      .then(function(d){ teamMsg.textContent=d.message||''; drawTeam(d); return true; })
+      .catch(function(err){ if(btn) btn.disabled=false; teamMsg.textContent=err.message; loadTeamQuiet(); return false; });
+  }
+
+  /* After a failure the save may still have happened (an invite that
+     saved but did not send), so redraw without touching the message. */
+  function loadTeamQuiet(){ post({action:'team'}).then(drawTeam).catch(function(){}); }
+
+  function loadTeam(){
+    post({action:'team'}).then(drawTeam)
+      .catch(function(err){ teamMsg.textContent='Could not load who has access. ' + err.message; });
+  }
+
+  teamForm.addEventListener('submit', function(e){
+    e.preventDefault();
+    var input=document.getElementById('teamemail'), btn=teamForm.querySelector('button');
+    teamAction('invite', input.value, btn).then(function(ok){ btn.disabled=false; if(ok) input.value=''; });
+  });
 
   /* Your benefits. Built with createElement and textContent, never
      innerHTML, because the notes are typed by a person. */
@@ -2423,7 +2504,7 @@ function passwordPage() {
     </div>
     <aside class="card">
       <h4>If this page says the link expired</h4>
-      <p style="font-size:.95rem;margin:0">Links last 30 minutes, so an old email will not work. Go back to <a href="/members/">member sign in</a> and ask for another.</p>
+      <p style="font-size:.95rem;margin:0">Password reset links last 30 minutes and invites last 7 days, so an old email will not work. Go back to <a href="/members/">member sign in</a> and ask for another.</p>
     </aside>
   </div>
 </div>
