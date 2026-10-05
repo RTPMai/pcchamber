@@ -28,6 +28,7 @@ import { REFERRALS } from './data/referrals.js';
 import { DEALS } from './data/deals.js';
 import { NEWCOMERS } from './data/newcomers.js';
 import { JOIN_FORM, EVENT_FORM } from './data/forms.js';
+import { SIZES } from './data/dues.js';
 import { scopeCss } from './tools/scope-policy-css.mjs';
 import { externalLinks } from './tools/external-links.mjs';
 
@@ -2916,6 +2917,11 @@ function myDealsPage() {
 
 function listingPage() {
   const cats = CATEGORIES.map(c => `<option value="${esc(c.id)}">${esc(c.label)}</option>`).join('');
+  const basic = TIER_LIST.find(t => t.id === 'basic') || {};
+  const sizeOpts = SIZES.map((z, i) => {
+    const row = (basic.scale || []).find(r => r.label === z.label) || (basic.scale || [])[i];
+    return `<option value="${esc(z.id)}">${esc(z.label)}${row && row.price ? `, ${esc(row.price)} a year` : ''}</option>`;
+  }).join('');
 
   const body = `
 <div class="pagehead" data-season="spring">
@@ -2971,6 +2977,13 @@ function listingPage() {
           <label for="l-category">Category</label>
           <span class="help">Which part of the directory you appear under.</span>
           <select id="l-category">${cats}</select>
+        </div>
+
+        <div class="field" id="sizefield" hidden>
+          <label for="l-size">Business size</label>
+          <span class="help">Basic Business dues go by size. Pick the one that fits and the chamber confirms it before your next invoice.</span>
+          <select id="l-size"><option value="">Choose one</option>${sizeOpts}</select>
+          <span class="help" id="sizenote"></span>
         </div>
 
         <div class="field">
@@ -3171,6 +3184,16 @@ function listingPage() {
     el.person.value=c.person||''; el.phone.value=c.phone||'';
     el.email.value=c.email||''; el.web.value=c.web||'';
     el.address.value=c.address||''; el.city.value=m.city||'';
+    if(m.tier==='basic'){
+      var sz=document.getElementById('l-size'), note=document.getElementById('sizenote');
+      var pending=m.sizeRequested&&m.sizeRequested.size;
+      sz.value=pending||m.size||'';
+      var label=function(id){ var o=sz.querySelector('option[value="'+id+'"]'); return o?o.textContent:id; };
+      note.textContent = pending
+        ? 'Waiting for the chamber to confirm' + (m.size ? ' (currently ' + label(m.size) + ').' : '.')
+        : (m.size ? 'Confirmed by the chamber.' : 'Not set yet. You need one before the chamber can send your dues invoice.');
+      document.getElementById('sizefield').hidden=false;
+    }
     var v=document.getElementById('viewpage');
     if(v) v.setAttribute('href','/directory/'+m.slug+'/');
     form.hidden=false; tally();
@@ -3186,7 +3209,8 @@ function listingPage() {
       category:el.category.value,
       serves:el.serves.value.split(NEWLINE).map(function(s){return s.trim();}).filter(Boolean),
       person:el.person.value, phone:el.phone.value, email:el.email.value,
-      web:el.web.value, address:el.address.value, city:el.city.value
+      web:el.web.value, address:el.address.value, city:el.city.value,
+      size: document.getElementById('sizefield').hidden ? undefined : document.getElementById('l-size').value
     }).then(function(){ form.hidden=true; done.hidden=false; })
       .catch(function(err){ btn.disabled=false; msg.textContent=err.message; });
   });
