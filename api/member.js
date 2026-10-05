@@ -83,6 +83,23 @@
 
    Delete DEMO_MEMBER when you are done. That is the whole cleanup.
 
+   STARTER PASSWORDS
+
+   For the first rollout, when the setup emails cannot go out yet, the
+   chamber can hand each person a random starter password instead. They
+   are loaded with scripts/seed-starters.mjs, hashed the same way as real
+   passwords, under starter:<email>, and expire on their own after
+   STARTER_DAYS.
+
+   A starter never opens a session. Signing in with one hands back a
+   30 minute set-password token and the page sends them to
+   /members/password/. Nothing else on the site, the Policy Center
+   included, treats them as signed in until they have chosen their own.
+   The token works once, because choosing a password deletes the starter.
+
+   Once somebody has a real password the starter is ignored, so seeding
+   twice cannot lock anybody out of an account they already set up.
+
    LOCKOUT
 
    Five wrong passwords for one address and it stops accepting them for
@@ -116,6 +133,7 @@ const INVITES_PER_DAY = 20;     // per business, so the form cannot be used to s
    allowed this long. Covers the minute or two between somebody being
    invited and the site rebuilding with them on it. */
 const GRACE_MINUTES = 15;
+export const STARTER_DAYS = 14;
 
 /* ---------- the roster ---------------------------------------------------- */
 
@@ -156,6 +174,7 @@ const findByEmail = email => {
    same business do not share one and cannot lock each other out. */
 const pwKey = email => `pw:${tidy(email)}`;
 const tryKey = email => `try:${tidy(email)}`;
+export const starterKey = email => `starter:${tidy(email)}`;
 
 /* ---------- the test sign in ---------------------------------------------- */
 
@@ -360,7 +379,8 @@ async function teamFor(member, me, list) {
     email,
     owner: email === owner,
     you: email === me,
-    active: Boolean(await kvGet(pwKey(email)))
+    active: Boolean(await kvGet(pwKey(email))),
+    starter: Boolean(await kvGet(starterKey(email)))
   })));
   return { owner, canManage: Boolean(me && me === owner), people, max: MAX_PEOPLE };
 }
@@ -486,10 +506,11 @@ export default async function handler(req, res) {
 
         const member = findByEmail(email);
         const stored = member ? await kvGet(pwKey(email)) : null;
+        const starter = member && !stored ? await kvGet(starterKey(email)) : null;
 
         /* The same work happens whether or not the address exists, so the
            response time does not reveal which addresses are on the roster. */
-        if (!member || !stored) {
+        if (!member || (!stored && !starter)) {
           await wasteTime();
           await kvBump(tryKey(email), LOCK_MINUTES * 60);
           res.status(401).json({
@@ -499,7 +520,7 @@ export default async function handler(req, res) {
           return;
         }
 
-        if (!(await matches(password, stored))) {
+        if (!(await matches(password, stored || starter))) {
           const n = await kvBump(tryKey(email), LOCK_MINUTES * 60);
           res.status(401).json({
             error: 'no',
@@ -511,6 +532,26 @@ export default async function handler(req, res) {
         }
 
         await kvDel(tryKey(email));
+
+        /* A starter password. No session, just a short set-password token,
+           so they cannot do anything until they have chosen their own. */
+        if (!stored) {
+          res.status(200).json({
+            ok: true,
+            mustChange: true,
+            name: member.name,
+            token: sign({
+              kind: 'setup',
+              starter: true,
+              slug: member.slug,
+              email,
+              exp: Date.now() + LINK_MINUTES * 60 * 1000,
+              n: randomBytes(6).toString('hex')
+            })
+          });
+          return;
+        }
+
         setSession(res, member, email);
         res.status(200).json({ ok: true, name: member.name, slug: member.slug });
         return;
@@ -590,7 +631,25 @@ export default async function handler(req, res) {
           return;
         }
 
+        /* A token from a starter sign in works once. If the starter is gone,
+           the password has already been changed, or the starter expired. */
+        if (payload.starter) {
+          const starter = await kvGet(starterKey(payload.email));
+          if (!starter) {
+            res.status(401).json({
+              error: 'expired',
+              message: 'Your starter password has already been used or has expired. Sign in with your own password, or ask for a reset link.'
+            });
+            return;
+          }
+          if (await matches(body.password, starter)) {
+            res.status(400).json({ error: 'same', message: 'That is the starter password. Please pick one of your own.' });
+            return;
+          }
+        }
+
         await kvSet(pwKey(payload.email), await hash(body.password));
+        await kvDel(starterKey(payload.email));
         await kvDel(tryKey(payload.email));
 
         setSession(res, member, payload.email);
@@ -772,6 +831,7 @@ export default async function handler(req, res) {
         }, `${name}: ${session.email} removed sign in access for ${target}`, `${name} via member sign in`);
 
         await kvDel(pwKey(target));
+        await kvDel(starterKey(target));
         await kvDel(tryKey(target));
 
         res.status(200).json({

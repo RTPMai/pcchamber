@@ -93,7 +93,10 @@
         "web": "https://www.allseasonsveterinarycare.com",
         "address": "755 W Bridge Rd., Polk City, IA, 50226"
       },
-      "logo": "/assets/members/all-seasons-veterinary-care.webp"
+      "logo": "/assets/members/all-seasons-veterinary-care.webp",
+      "access": [
+        "info@allseasonsveterinarycare.com"
+      ]
     },
     {
       "slug": "american-legion-post-232",
@@ -107,7 +110,11 @@
         "email": "post232treasurer@gmail.com",
         "address": "114 W Broadway St., Polk City, IA, 50226"
       },
-      "logo": "/assets/members/american-legion-post-232.webp"
+      "logo": "/assets/members/american-legion-post-232.webp",
+      "access": [
+        "post232treasurer@gmail.com",
+        "barmanager232@gmail.com"
+      ]
     },
     {
       "slug": "anytime-fitness-polk-city",
@@ -121,7 +128,11 @@
         "email": "polkcityia@anytimefitness.com",
         "address": "407 W Bridge Road, Suite 6, Polk City, IA, 50226"
       },
-      "logo": "/assets/members/anytime-fitness-polk-city.webp"
+      "logo": "/assets/members/anytime-fitness-polk-city.webp",
+      "access": [
+        "polkcityia@anytimefitness.com",
+        "ringo.kienitz@anytimefitness.com"
+      ]
     },
     {
       "slug": "arcadia",
@@ -136,7 +147,11 @@
         "web": "https://www.arcadiapolkcity.com",
         "address": "1010 Tyler St. #4, Polk City, IA, 50226"
       },
-      "logo": "/assets/members/arcadia.webp"
+      "logo": "/assets/members/arcadia.webp",
+      "access": [
+        "mikel@arcadiapolkcity.com",
+        "info@arcadiapolkcity.com"
+      ]
     },
     {
       "slug": "big-creek-growth",
@@ -151,7 +166,10 @@
         "web": "https://www.bigcreekgrowth.com",
         "address": "Polk City, IA"
       },
-      "logo": "/assets/members/big-creek-growth.webp"
+      "logo": "/assets/members/big-creek-growth.webp",
+      "access": [
+        "adam@vietenterprises.com"
+      ]
     },
     {
       "slug": "big-creek-historical-society",
@@ -164,7 +182,11 @@
         "email": "info@polkcityhistory.org",
         "address": "116 S. 3rd Street, Polk City, IA, 50226"
       },
-      "logo": "/assets/members/big-creek-historical-society.webp"
+      "logo": "/assets/members/big-creek-historical-society.webp",
+      "access": [
+        "info@polkcityhistory.org",
+        "mail2grams@yahoo.com"
+      ]
     },
     {
       "slug": "big-green-umbrella-media",
@@ -180,7 +202,10 @@
         "web": "https://www.biggreenumbrellamedia.com",
         "address": "8101 Birchwood Ct, Unit D, Johnston, IA, 50131"
       },
-      "logo": "/assets/members/big-green-umbrella-media.webp"
+      "logo": "/assets/members/big-green-umbrella-media.webp",
+      "access": [
+        "aaron@dmcityview.com"
+      ]
     },
     {
       "slug": "city-of-polk-city",
@@ -195,7 +220,12 @@
         "web": "https://www.polkcityia.gov",
         "address": "200 S. 4th Street, PO Box 426, Polk City, IA, 50226"
       },
-      "logo": "/assets/members/city-of-polk-city.webp"
+      "logo": "/assets/members/city-of-polk-city.webp",
+      "access": [
+        "chuisman@polkcityia.gov",
+        "jthraen@polkcityia.gov",
+        "skarsjen@polkcityia.gov"
+      ]
     },
     {
       "slug": "corey-hoodjer-farm-bureau-financial-services",
@@ -210,7 +240,11 @@
         "email": "corey.hoodjer@fbfs.com",
         "address": "212 W Van Dorn St., Suite B, Polk City, IA, 50226"
       },
-      "logo": "/assets/members/corey-hoodjer-farm-bureau-financial-services.webp"
+      "logo": "/assets/members/corey-hoodjer-farm-bureau-financial-services.webp",
+      "access": [
+        "corey.hoodjer@fbfs.com",
+        "alysia.olson@fbfs.com"
+      ]
     },
     {
       "slug": "cullen-and-associates-insurance-services",
@@ -224,7 +258,11 @@
         "web": "https://www.cullenins.com",
         "address": "905 W Bridge Rd., Polk City, IA, 50226"
       },
-      "logo": "/assets/members/cullen-and-associates-insurance-services.webp"
+      "logo": "/assets/members/cullen-and-associates-insurance-services.webp",
+      "access": [
+        "chris@cullenins.com",
+        "jamie@cullenins.com"
+      ]
     },
     {
       "slug": "cupp-insurance",
@@ -239,7 +277,10 @@
         "email": "rob@cuppinsurance.com",
         "address": "213 W Broadway, PO Box 37, Polk City, IA, 50226"
       },
-      "logo": "/assets/members/cupp-insurance.webp"
+      "logo": "/assets/members/cupp-insurance.webp",
+      "access": [
+        "rob@cuppinsurance.com"
+      ]
     },
     {
       "slug": "fareway-polk-city",
@@ -253,7 +294,10 @@
         "web": "https://www.fareway.com",
         "address": "1101 S 5th St., Polk City, IA, 50226"
       },
-      "logo": "/assets/members/fareway-polk-city.webp"
+      "logo": "/assets/members/fareway-polk-city.webp",
+      "access": [
+        "u1371@farewaystores.com"
+      ]
     },
     {
       "slug": "galaxy-cleaning-services",
@@ -268,7 +312,10 @@
         "web": "https://www.galaxy-cleaning-services.com",
         "address": "North Liberty, IA"
       },
-      "logo": "/assets/members/galaxy-cleaning-services.webp"
+      "logo": "/assets/members/galaxy-cleaning-services.webp",
+      "access": [
+        "info@galaxy-cleaning-services.com"
+      ]
     },
     {
       "slug": "grinnell-state-bank",
@@ -282,7 +329,11 @@
         "web": "https://www.grinnell.bank",
         "address": "205 E Broadway St., Polk City, IA, 50226"
       },
-      "logo": "/assets/members/grinnell-state-bank.webp"
+      "logo": "/assets/members/grinnell-state-bank.webp",
+      "access": [
+        "reyna.myott@grinnellbank.com",
+        "bethany.salyer@grinnellbank.com"
+      ]
     },
     {
       "slug": "hbu-development",
@@ -297,7 +348,10 @@
         "email": "alex@hbu-dev.com",
         "address": "540 Creekview Avenue, Polk City, IA, 50226"
       },
-      "logo": "/assets/members/hbu-development.webp"
+      "logo": "/assets/members/hbu-development.webp",
+      "access": [
+        "alex@hbu-dev.com"
+      ]
     },
     {
       "slug": "home-state-bank",
@@ -311,7 +365,12 @@
         "web": "https://www.hsbankiowa.com",
         "address": "101 E Bridge Road, Polk City, IA, 50226"
       },
-      "logo": "/assets/members/home-state-bank.webp"
+      "logo": "/assets/members/home-state-bank.webp",
+      "access": [
+        "cnielsen@hsbank.net",
+        "jkerndt@hsbank.net",
+        "jcunningham@hsbank.net"
+      ]
     },
     {
       "slug": "honeydo-2-honeydone",
@@ -325,7 +384,11 @@
         "email": "steve@honeydo2honeydone.com",
         "web": "https://www.honeydo2honeydone.com"
       },
-      "logo": "/assets/members/honeydo-2-honeydone.webp"
+      "logo": "/assets/members/honeydo-2-honeydone.webp",
+      "access": [
+        "steve@honeydo2honeydone.com",
+        "jdrp1313@gmail.com"
+      ]
     },
     {
       "slug": "hr-approach",
@@ -340,7 +403,10 @@
         "email": "tammy.verbrugge@hrapproach.com",
         "address": "P.O. Box 513, Polk City, IA, 50226"
       },
-      "logo": "/assets/members/hr-approach.webp"
+      "logo": "/assets/members/hr-approach.webp",
+      "access": [
+        "tammy.verbrugge@hrapproach.com"
+      ]
     },
     {
       "slug": "jacquelyn-duke-realty-one-group-impact",
@@ -355,7 +421,10 @@
         "email": "jacquelyn@sellingcentraliowa.com",
         "address": "617 SW 3rd St #101, Ankeny, IA, 50023"
       },
-      "logo": "/assets/members/jacquelyn-duke-realty-one-group-impact.webp"
+      "logo": "/assets/members/jacquelyn-duke-realty-one-group-impact.webp",
+      "access": [
+        "jacquelyn@sellingcentraliowa.com"
+      ]
     },
     {
       "slug": "kiwanis-club-of-polk-city",
@@ -368,7 +437,10 @@
         "email": "pckiwanis1@gmail.com",
         "address": "Polk City, IA"
       },
-      "logo": "/assets/members/kiwanis-club-of-polk-city.webp"
+      "logo": "/assets/members/kiwanis-club-of-polk-city.webp",
+      "access": [
+        "pckiwanis1@gmail.com"
+      ]
     },
     {
       "slug": "knapp-properties",
@@ -381,7 +453,10 @@
         "web": "https://www.knappproperties.com",
         "address": "5000 Westown Parkway, Suite 400, West Des Moines, IA, 50266"
       },
-      "logo": "/assets/members/knapp-properties.webp"
+      "logo": "/assets/members/knapp-properties.webp",
+      "access": [
+        "jake@knapplc.com"
+      ]
     },
     {
       "slug": "knockerball-118",
@@ -396,7 +471,10 @@
         "web": "https://www.knockerball118.com",
         "address": "Ankeny, IA"
       },
-      "logo": "/assets/members/knockerball-118.webp"
+      "logo": "/assets/members/knockerball-118.webp",
+      "access": [
+        "knockerball118@gmail.com"
+      ]
     },
     {
       "slug": "kyle-matzen-edward-jones",
@@ -411,7 +489,10 @@
         "email": "kyle.matzen@edwardjones.com",
         "address": "407 West Bridge Road, Suite 7, Polk City, IA, 50226"
       },
-      "logo": "/assets/members/kyle-matzen-edward-jones.webp"
+      "logo": "/assets/members/kyle-matzen-edward-jones.webp",
+      "access": [
+        "kyle.matzen@edwardjones.com"
+      ]
     },
     {
       "slug": "lakeside-fellowship",
@@ -425,7 +506,10 @@
         "email": "office@lakesidefellowship.com",
         "address": "1121 W Bridge Rd., Polk City, IA, 50226"
       },
-      "logo": "/assets/members/lakeside-fellowship.webp"
+      "logo": "/assets/members/lakeside-fellowship.webp",
+      "access": [
+        "office@lakesidefellowship.com"
+      ]
     },
     {
       "slug": "luana-savings-bank",
@@ -439,7 +523,10 @@
         "web": "https://www.luanasavingsbank.com",
         "address": "855 W Bridge Rd, PO Box 200, Polk City, IA, 50226"
       },
-      "logo": "/assets/members/luana-savings-bank.webp"
+      "logo": "/assets/members/luana-savings-bank.webp",
+      "access": [
+        "bconverse@luanasavingsbank.com"
+      ]
     },
     {
       "slug": "lucky-wife-wine-slushies",
@@ -453,7 +540,10 @@
         "web": "https://www.luckywifewineslushies.com",
         "address": "Indian Creek, IA"
       },
-      "logo": "/assets/members/lucky-wife-wine-slushies.webp"
+      "logo": "/assets/members/lucky-wife-wine-slushies.webp",
+      "access": [
+        "luckywifewineslushies4@gmail.com"
+      ]
     },
     {
       "slug": "lush-aesthetics-and-wellness",
@@ -468,7 +558,10 @@
         "web": "https://www.lushwellnessco.com",
         "address": "109 S 2nd St., Polk City, IA, 50226"
       },
-      "logo": "/assets/members/lush-aesthetics-and-wellness.webp"
+      "logo": "/assets/members/lush-aesthetics-and-wellness.webp",
+      "access": [
+        "info@lushwellnessco.com"
+      ]
     },
     {
       "slug": "michelles-school-of-dance",
@@ -483,7 +576,10 @@
         "web": "https://michellesschoolofdance.com",
         "address": "110 Van Dorn St., Polk City, IA, 50226"
       },
-      "logo": "/assets/members/michelles-school-of-dance.webp"
+      "logo": "/assets/members/michelles-school-of-dance.webp",
+      "access": [
+        "discoverydancers@yahoo.com"
+      ]
     },
     {
       "slug": "midland-power-cooperative",
@@ -497,7 +593,10 @@
         "web": "https://www.midlandpower.coop",
         "address": "2005 S Story Street, Boone, IA, 50036"
       },
-      "logo": "/assets/members/midland-power-cooperative.webp"
+      "logo": "/assets/members/midland-power-cooperative.webp",
+      "access": [
+        "dspeed@midlandpower.coop"
+      ]
     },
     {
       "slug": "natalie-st-john-the-downhome-co-remax-precision",
@@ -512,7 +611,10 @@
         "email": "natalie@thedownhomeco.com",
         "address": "Polk City, IA"
       },
-      "logo": "/assets/members/natalie-st-john-the-downhome-co-remax-precision.webp"
+      "logo": "/assets/members/natalie-st-john-the-downhome-co-remax-precision.webp",
+      "access": [
+        "natalie@thedownhomeco.com"
+      ]
     },
     {
       "slug": "north-polk-community-school-district",
@@ -525,7 +627,11 @@
         "phone": "515-984-3400",
         "address": "13930 NE 6th St., Alleman, IA, 50007"
       },
-      "logo": "/assets/members/north-polk-community-school-district.webp"
+      "logo": "/assets/members/north-polk-community-school-district.webp",
+      "access": [
+        "accounts.payable@northpolk.org",
+        "michael.kline@northpolk.org"
+      ]
     },
     {
       "slug": "north-polk-family-medicine",
@@ -539,7 +645,10 @@
         "email": "laytonda@gmail.com",
         "address": "1010 S 3rd St., Polk City, IA, 50226"
       },
-      "logo": "/assets/members/north-polk-family-medicine.webp"
+      "logo": "/assets/members/north-polk-family-medicine.webp",
+      "access": [
+        "laytonda@gmail.com"
+      ]
     },
     {
       "slug": "nova-med-spa",
@@ -553,7 +662,12 @@
         "web": "https://www.novamedspa.org",
         "address": "1010 Tyler St. Suite 3, Polk City, IA, 50226"
       },
-      "logo": "/assets/members/nova-med-spa.webp"
+      "logo": "/assets/members/nova-med-spa.webp",
+      "access": [
+        "s.novamedspa@gmail.com",
+        "ec.novamedspa@gmail.com",
+        "bc.novamedspa@gmail.com"
+      ]
     },
     {
       "slug": "oak-and-berk",
@@ -568,7 +682,10 @@
         "web": "https://www.oakandberk.com",
         "address": "109 W Van Dorn Street, PO Box 33, Polk City, IA, 50226"
       },
-      "logo": "/assets/members/oak-and-berk.webp"
+      "logo": "/assets/members/oak-and-berk.webp",
+      "access": [
+        "ashley@oakandberk.com"
+      ]
     },
     {
       "slug": "on-with-life",
@@ -583,7 +700,11 @@
         "email": "madison.rollefson@onwithlife.org",
         "address": "715 SW Ankeny Rd., Ankeny, IA, 50023"
       },
-      "logo": "/assets/members/on-with-life.webp"
+      "logo": "/assets/members/on-with-life.webp",
+      "access": [
+        "madison.rollefson@onwithlife.org",
+        "lindsay.drake@onwithlife.org"
+      ]
     },
     {
       "slug": "p-and-m-apparel",
@@ -628,7 +749,10 @@
         "email": "shawn@papas-pizzeria.com",
         "address": "214 W Van Dorn St., Polk City, IA, 50226"
       },
-      "logo": "/assets/members/papas-pizzeria.webp"
+      "logo": "/assets/members/papas-pizzeria.webp",
+      "access": [
+        "0011comer@gmail.com"
+      ]
     },
     {
       "slug": "pedal-pushers-vintage-shop",
@@ -642,7 +766,10 @@
         "email": "flower514446@gmail.com",
         "address": "113 West Broadway St. Suite 3, Polk City, IA, 50226"
       },
-      "logo": "/assets/members/pedal-pushers-vintage-shop.webp"
+      "logo": "/assets/members/pedal-pushers-vintage-shop.webp",
+      "access": [
+        "flower514446@gmail.com"
+      ]
     },
     {
       "slug": "polk-city-ace-hardware",
@@ -657,7 +784,11 @@
         "email": "stacyboyer4@gmail.com",
         "address": "945 South 3rd Street, Polk City, IA, 50226"
       },
-      "logo": "/assets/members/polk-city-ace-hardware.webp"
+      "logo": "/assets/members/polk-city-ace-hardware.webp",
+      "access": [
+        "stacyboyer4@gmail.com",
+        "polkcityacehardware@gmail.com"
+      ]
     },
     {
       "slug": "polk-city-chiropractic",
@@ -671,7 +802,10 @@
         "email": "polkcitychiro@gmail.com",
         "address": "201 N 3rd St Suite J, Polk City, IA, 50226"
       },
-      "logo": "/assets/members/polk-city-chiropractic.webp"
+      "logo": "/assets/members/polk-city-chiropractic.webp",
+      "access": [
+        "polkcitychiro@gmail.com"
+      ]
     },
     {
       "slug": "polk-city-police-officers-association",
@@ -685,7 +819,11 @@
         "email": "adelaney@polkcityia.gov",
         "address": "309 W Van Dorn St., PO Box 381, Polk City, IA, 50226"
       },
-      "logo": "/assets/members/polk-city-police-officers-association.webp"
+      "logo": "/assets/members/polk-city-police-officers-association.webp",
+      "access": [
+        "adelaney@polkcityia.gov",
+        "jsiepker@polkcityia.gov"
+      ]
     },
     {
       "slug": "polk-city-united-methodist-church",
@@ -699,7 +837,10 @@
         "email": "office@polkcityumc.org",
         "address": "1421 W Broadway, Polk City, IA"
       },
-      "logo": "/assets/members/polk-city-united-methodist-church.webp"
+      "logo": "/assets/members/polk-city-united-methodist-church.webp",
+      "access": [
+        "office@polkcityumc.org"
+      ]
     },
     {
       "slug": "polk-county-board-of-supervisors",
@@ -712,7 +853,11 @@
         "web": "https://www.polkcountyiowa.gov",
         "address": "111 Court Ave, Suite 300, Des Moines, IA, 50309"
       },
-      "logo": "/assets/members/polk-county-board-of-supervisors.webp"
+      "logo": "/assets/members/polk-county-board-of-supervisors.webp",
+      "access": [
+        "mandi.nelsen@polkcountyiowa.gov",
+        "jill.altringer@polkcountyiowa.gov"
+      ]
     },
     {
       "slug": "prudent-produce",
@@ -727,7 +872,10 @@
         "email": "tony@prudentproduce.net",
         "address": "12850 NE 64th Street, Elkhart, IA, 50073"
       },
-      "logo": "/assets/members/prudent-produce.webp"
+      "logo": "/assets/members/prudent-produce.webp",
+      "access": [
+        "tony@prudentproduce.net"
+      ]
     },
     {
       "slug": "qube-hotel",
@@ -742,7 +890,11 @@
         "email": "dipak.qubehotel@gmail.com",
         "address": "300 Boulder Pointe, Polk City, IA, 50226"
       },
-      "logo": "/assets/members/qube-hotel.webp"
+      "logo": "/assets/members/qube-hotel.webp",
+      "access": [
+        "mbqubehotel@gmail.com",
+        "dipak.qubehotel@gmail.com"
+      ]
     },
     {
       "slug": "raising-readers-in-the-heartland",
@@ -756,7 +908,10 @@
         "web": "https://www.rrith.org",
         "address": "5820 NW 142nd Avenue, Polk City, IA, 50226"
       },
-      "logo": "/assets/members/raising-readers-in-the-heartland.webp"
+      "logo": "/assets/members/raising-readers-in-the-heartland.webp",
+      "access": [
+        "jillfriestadtate@rrith.org"
+      ]
     },
     {
       "slug": "restoration1-of-des-moines",
@@ -772,7 +927,10 @@
         "web": "https://restoration1.com/des-moines",
         "address": "200 SE 37th St, Suite 280, Grimes, IA, 50111"
       },
-      "logo": "/assets/members/restoration1-of-des-moines.webp"
+      "logo": "/assets/members/restoration1-of-des-moines.webp",
+      "access": [
+        "claire@restoration1.com"
+      ]
     },
     {
       "slug": "roof-iowa",
@@ -788,7 +946,10 @@
         "web": "https://www.roofiowa.com",
         "address": "PO Box 1345, Ankeny, IA, 50021"
       },
-      "logo": "/assets/members/roof-iowa.webp"
+      "logo": "/assets/members/roof-iowa.webp",
+      "access": [
+        "emily@roofiowa.com"
+      ]
     },
     {
       "slug": "rush-rolloffs",
@@ -803,7 +964,10 @@
         "web": "https://rushrolloffs.com",
         "address": "8805 Chambery Blvd, Suite 300 PMB 21, Johnston, IA, 50131"
       },
-      "logo": "/assets/members/rush-rolloffs.webp"
+      "logo": "/assets/members/rush-rolloffs.webp",
+      "access": [
+        "info@rushrolloffs.com"
+      ]
     },
     {
       "slug": "shane-torres-remax-concepts-vantage-team",
@@ -818,7 +982,10 @@
         "email": "shanetorres@remax.net",
         "address": "905 W Bridge Road, Polk City, IA, 50226"
       },
-      "logo": "/assets/members/shane-torres-remax-concepts-vantage-team.webp"
+      "logo": "/assets/members/shane-torres-remax-concepts-vantage-team.webp",
+      "access": [
+        "shanetorres@remax.net"
+      ]
     },
     {
       "slug": "sherwin-williams-paint-store",
@@ -832,7 +999,11 @@
         "web": "https://www.sherwinwilliams.com",
         "address": "817 E 1st Street, Ankeny, IA, 50021"
       },
-      "logo": "/assets/members/sherwin-williams-paint-store.webp"
+      "logo": "/assets/members/sherwin-williams-paint-store.webp",
+      "access": [
+        "joan.m.schrum@sherwin.com",
+        "sw721386@sherwin.com"
+      ]
     },
     {
       "slug": "snaadt-media-group",
@@ -847,7 +1018,10 @@
         "email": "ryan@snaadtmedia.com",
         "address": "203 N. 3rd St. Suite H, Polk City, IA, 50226"
       },
-      "logo": "/assets/members/snaadt-media-group.webp"
+      "logo": "/assets/members/snaadt-media-group.webp",
+      "access": [
+        "ryan@snaadtmedia.com"
+      ]
     },
     {
       "slug": "snyder-and-associates",
@@ -861,7 +1035,11 @@
         "web": "https://www.snyder-associates.com",
         "address": "2727 SW Snyder Blvd., Ankeny, IA, 50023"
       },
-      "logo": "/assets/members/snyder-and-associates.webp"
+      "logo": "/assets/members/snyder-and-associates.webp",
+      "access": [
+        "tthornburgh@snyder-associates.com",
+        "saamarketing@snyder-associates.com"
+      ]
     },
     {
       "slug": "susie-sheldahl-realty-one-group-impact",
@@ -876,7 +1054,10 @@
         "email": "susie@susiesheldahl.com",
         "address": "113 W Broadway, Polk City, IA, 50226"
       },
-      "logo": "/assets/members/susie-sheldahl-realty-one-group-impact.webp"
+      "logo": "/assets/members/susie-sheldahl-realty-one-group-impact.webp",
+      "access": [
+        "susie@susiesheldahl.com"
+      ]
     },
     {
       "slug": "teresa-harold-good-trip-travel",
@@ -892,7 +1073,10 @@
         "web": "https://www.goodtrip.biz/teresa",
         "address": "Slater, IA"
       },
-      "logo": "/assets/members/teresa-harold-good-trip-travel.webp"
+      "logo": "/assets/members/teresa-harold-good-trip-travel.webp",
+      "access": [
+        "teresa@goodtrip.biz"
+      ]
     },
     {
       "slug": "that-concierge-girl",
@@ -907,7 +1091,10 @@
         "web": "https://www.thatconciergegirl.com",
         "address": "Ankeny, IA"
       },
-      "logo": "/assets/members/that-concierge-girl.webp"
+      "logo": "/assets/members/that-concierge-girl.webp",
+      "access": [
+        "service@thatconciergegirl.com"
+      ]
     },
     {
       "slug": "tournament-club-of-iowa",
@@ -922,7 +1109,11 @@
         "web": "https://tcofiowa.com",
         "address": "1000 Tradition Dr., Polk City, IA, 50226"
       },
-      "logo": "/assets/members/tournament-club-of-iowa.webp"
+      "logo": "/assets/members/tournament-club-of-iowa.webp",
+      "access": [
+        "info@tcofiowa.com",
+        "skahler@tcofiowa.com"
+      ]
     },
     {
       "slug": "triplett-westendorf-financial-group",
@@ -936,7 +1127,11 @@
         "web": "https://www.triplett-westendorf.com",
         "address": "7040 NE 14th Street, Suite 103, Ankeny, IA, 50023"
       },
-      "logo": "/assets/members/triplett-westendorf-financial-group.webp"
+      "logo": "/assets/members/triplett-westendorf-financial-group.webp",
+      "access": [
+        "troy@triplett-westendorf.com",
+        "info@triplett-westendorf.com"
+      ]
     },
     {
       "slug": "wellform-md",
@@ -950,7 +1145,11 @@
         "web": "https://www.wellformmd.com",
         "address": "2675 N Ankeny Blvd, Suite 113, Ankeny, IA, 50023"
       },
-      "logo": "/assets/members/wellform-md.webp"
+      "logo": "/assets/members/wellform-md.webp",
+      "access": [
+        "patrick.oben@wellformmd.com",
+        "reach@wellformmd.com"
+      ]
     },
     {
       "slug": "whatcha-smokin-bbq-brew",
@@ -963,7 +1162,11 @@
         "email": "whatchasmokin21@gmail.com",
         "address": "403 Iowa Avenue, Luther, IA, 50152"
       },
-      "logo": "/assets/members/whatcha-smokin-bbq-brew.webp"
+      "logo": "/assets/members/whatcha-smokin-bbq-brew.webp",
+      "access": [
+        "whatchasmokinluther@whatchasmokinbbq.com",
+        "marketing@whatchasmokinbbq.com"
+      ]
     },
     {
       "slug": "yellow-brick-road-early-childhood-development-center",
@@ -977,7 +1180,11 @@
         "web": "https://www.ybrecdc.org",
         "address": "415 W Bridge Rd., Polk City, IA, 50226"
       },
-      "logo": "/assets/members/yellow-brick-road-early-childhood-development-center.webp"
+      "logo": "/assets/members/yellow-brick-road-early-childhood-development-center.webp",
+      "access": [
+        "kristin.byers@ybrecdc.org",
+        "bobbi.cowden@ybrecdc.org"
+      ]
     }
   ]
 }

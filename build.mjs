@@ -2263,7 +2263,7 @@ function membersPage() {
       var tags=[];
       if(p.owner) tags.push('Owner');
       if(p.you) tags.push('You');
-      tags.push(p.active ? 'Active' : 'Invited, no password yet');
+      tags.push(p.active ? 'Active' : (p.starter ? 'Starter password, not changed yet' : 'Invited, no password yet'));
       who.appendChild(make('span','team-tags', tags.join(' · ')));
       li.appendChild(who);
       if(d.canManage && !p.owner){
@@ -2439,8 +2439,14 @@ function membersPage() {
           email:document.getElementById('email').value,
           password:document.getElementById('password').value})
       .then(function(d){
+        if(d && d.mustChange){
+          var go='/members/password/?first=1&token='+encodeURIComponent(d.token);
+          var after=params.get('next');
+          if(after && after.charAt(0)==='/' && after.charAt(1)!=='/') go+='&next='+encodeURIComponent(after);
+          location.href=go; return;
+        }
         var next=params.get('next');
-        if(next && next.charAt(0)==='/') location.href=next; else showSignedIn(d);
+        if(next && next.charAt(0)==='/' && next.charAt(1)!=='/') location.href=next; else showSignedIn(d);
       })
       .catch(function(err){ btn.disabled=false; signinMsg.textContent=err.message; });
   });
@@ -2474,8 +2480,8 @@ function passwordPage() {
   const body = `
 <div class="pagehead" data-season="spring">
   <div class="wrap">
-    <h1>Choose your password</h1>
-    <p>This sets the password for your chamber sign in. Nobody at the chamber can see it.</p>
+    <h1 id="pwtitle">Choose your password</h1>
+    <p id="pwlede">This sets the password for your chamber sign in. Nobody at the chamber can see it.</p>
   </div>
 </div>
 <div class="wrap band" data-season="spring">
@@ -2510,10 +2516,20 @@ function passwordPage() {
 </div>
 <script>
 (function(){
-  var token=new URLSearchParams(location.search).get('token');
+  var q=new URLSearchParams(location.search);
+  var token=q.get('token');
   var form=document.getElementById('pwform'),
       msg=document.getElementById('pwmsg'),
       done=document.getElementById('pwdone');
+
+  /* Arrived from signing in with a starter password. Same form, different
+     words, and nothing else on the site works until this is done. */
+  if(q.get('first')==='1'){
+    document.getElementById('pwtitle').textContent='Pick your own password';
+    document.getElementById('pwlede').textContent='You signed in with the starter password the chamber gave you. Before you go any further, swap it for one of your own. Nobody at the chamber will be able to see it.';
+    document.title='Pick your own password';
+  }
+  var next=q.get('next');
 
   if(!token){
     form.hidden=true;
@@ -2535,7 +2551,10 @@ function passwordPage() {
         if(!r.ok) throw new Error((j&&j.message)||'Something went wrong.');
         return j;
       });})
-      .then(function(){ form.hidden=true; done.hidden=false; msg.textContent=''; })
+      .then(function(){
+        if(next && next.charAt(0)==='/' && next.charAt(1)!=='/'){ location.href=next; return; }
+        form.hidden=true; done.hidden=false; msg.textContent='';
+      })
       .catch(function(err){ btn.disabled=false; msg.textContent=err.message; });
   });
 })();
