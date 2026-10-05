@@ -73,6 +73,9 @@
   "functions": {
     "api/policy.js": {
       "includeFiles": "api/_policy/**"
+    },
+    "api/admin.js": {
+      "maxDuration": 60
     }
   },
   "headers": [

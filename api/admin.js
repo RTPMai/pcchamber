@@ -44,6 +44,9 @@ import { createHash, randomBytes } from 'node:crypto';
 import { updateContent } from './_lib/github.js';
 import { BENEFITS } from '../data/benefits.js';
 import { statsFor } from './_lib/stats.js';
+import { readContent } from './_lib/github.js';
+import { storeReady, storeMissing } from './_lib/store.js';
+import { parseStarters, loadStarters, STARTER_DAYS } from './_lib/starters.js';
 
 const COOKIE = 'pcc_admin';
 const MAX_AGE = 60 * 60 * 8;   // a working day, then sign in again
@@ -340,6 +343,21 @@ export default async function handler(req, res) {
        people logging at once then both land, instead of the second being
        told to reload and do it again. */
     /* Listing stats for every member, for the benefits screens. */
+    /* Starter passwords, from /admin/starters/. Checked against the live
+       roster on GitHub, so access lists saved a minute ago count. Dry run
+       unless write is true. */
+    if (action === 'starters') {
+      if (!storeReady()) {
+        res.status(503).json({ error: 'not_configured', message: `No credential store. Missing: ${storeMissing().join(', ')}.` });
+        return;
+      }
+      const rows = parseStarters(body.csv);
+      const { data } = await readContent('members.json');
+      const out = await loadStarters(rows, data.members || [], { write: body.write === true, force: body.force === true });
+      res.status(200).json({ ok: true, written: body.write === true, days: STARTER_DAYS, ...out });
+      return;
+    }
+
     if (action === 'stats') {
       const slugs = Array.isArray(body.slugs) ? body.slugs.map(String).slice(0, 500) : [];
       try {

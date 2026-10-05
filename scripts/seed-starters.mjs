@@ -1,6 +1,7 @@
 /* ==========================================================================
    scripts/seed-starters.mjs
 
+   The terminal version of /admin/starters/, which is the easier way.
    Loads starter passwords into the credential store, one per address, so
    members can sign in before the setup emails are working. Anybody who
    signs in with one is sent straight to pick their own password, and can
@@ -42,9 +43,8 @@
 
 import { readFileSync } from 'node:fs';
 
-import { kv, kvGet, storeReady, storeMissing } from '../api/_lib/store.js';
-import { hash, MIN_LENGTH } from '../api/_lib/passwords.js';
-import { starterKey, STARTER_DAYS } from '../api/member.js';
+import { storeReady, storeMissing } from '../api/_lib/store.js';
+import { parseStarters, loadStarters, STARTER_DAYS } from '../api/_lib/starters.js';
 
 const args = process.argv.slice(2);
 const file = args.find(a => !a.startsWith('--'));
@@ -60,56 +60,20 @@ if (!storeReady()) {
   process.exit(1);
 }
 
-const tidy = e => String(e || '').trim().toLowerCase();
-
-/* Same rule as sign in: the access list, or the contact address if there
-   is no list. */
 const roster = JSON.parse(readFileSync(new URL('../content/members.json', import.meta.url), 'utf8')).members;
-const owner = new Map();
-for (const m of roster) {
-  const list = Array.isArray(m.access) && m.access.length ? m.access : [m.contact && m.contact.email].filter(Boolean);
-  for (const e of list) owner.set(tidy(e), m.name);
-}
-
-/* Plain enough CSV: no quoted commas in an email or a starter password. */
-const lines = readFileSync(file, 'utf8').replace(/^﻿/, '').split(/\r?\n/).filter(l => l.trim());
-const head = lines.shift().split(',').map(h => h.trim().toLowerCase().replace(/^"|"$/g, ''));
-const ei = head.findIndex(h => h.includes('email'));
-const pi = head.findIndex(h => h.includes('password'));
-if (ei < 0 || pi < 0) {
-  console.error('The first row needs an email column and a password column. Found: ' + head.join(', '));
-  process.exit(1);
-}
-
-const out = { seeded: [], notOnRoster: [], alreadySet: [], alreadySeeded: [], tooShort: [] };
-const ttl = STARTER_DAYS * 24 * 60 * 60;
-
-for (const line of lines) {
-  const cells = line.split(',').map(c => c.trim().replace(/^"|"$/g, ''));
-  const email = tidy(cells[ei]);
-  const password = cells[pi] || '';
-  if (!email) continue;
-
-  if (!owner.has(email)) { out.notOnRoster.push(email); continue; }
-  if (password.length < MIN_LENGTH) { out.tooShort.push(email); continue; }
-  if (await kvGet(`pw:${email}`)) { out.alreadySet.push(email); continue; }
-  if (!force && await kvGet(starterKey(email))) { out.alreadySeeded.push(email); continue; }
-
-  if (write) await kv('SET', starterKey(email), await hash(password), 'EX', ttl);
-  out.seeded.push(`${email}  (${owner.get(email)})`);
-}
+const out = await loadStarters(parseStarters(readFileSync(file, 'utf8')), roster, { write, force });
 
 const show = (label, list) => {
   if (!list.length) return;
   console.log(`\n${label}: ${list.length}`);
-  for (const x of list) console.log('  ' + x);
+  for (const x of list) console.log('  ' + (x.email ? `${x.email}  (${x.business})` : x));
 };
 
 show(write ? 'Seeded' : 'Would seed', out.seeded);
 show('Not on the roster, skipped', out.notOnRoster);
 show('Already chose their own password, skipped', out.alreadySet);
 show('Starter already waiting, skipped (use --force to replace)', out.alreadySeeded);
-show('Under ' + MIN_LENGTH + ' characters, skipped', out.tooShort);
+show('Too short, skipped', out.tooShort);
 
 console.log(write
   ? `\nDone. Starters expire in ${STARTER_DAYS} days. Delete ${file} now.`

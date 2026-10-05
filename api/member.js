@@ -87,7 +87,7 @@
 
    For the first rollout, when the setup emails cannot go out yet, the
    chamber can hand each person a random starter password instead. They
-   are loaded with scripts/seed-starters.mjs, hashed the same way as real
+   are loaded at /admin/starters/ (or scripts/seed-starters.mjs), hashed the same way as real
    passwords, under starter:<email>, and expire on their own after
    STARTER_DAYS.
 
@@ -115,6 +115,7 @@ import { fileURLToPath } from 'node:url';
 
 import { kvGet, kvSet, kvDel, kvBump, storeReady, storeMissing } from './_lib/store.js';
 import { hash, matches, checkStrength, wasteTime, MIN_LENGTH } from './_lib/passwords.js';
+import { starterKey } from './_lib/starters.js';
 import { readContent, updateContent, ghMissing } from './_lib/github.js';
 import { sendMail, mailMissing } from './_lib/mail.js';
 import { BENEFITS, TIER_NAMES, summarize, describe, thisYear, yearOf } from '../data/benefits.js';
@@ -133,7 +134,6 @@ const INVITES_PER_DAY = 20;     // per business, so the form cannot be used to s
    allowed this long. Covers the minute or two between somebody being
    invited and the site rebuilding with them on it. */
 const GRACE_MINUTES = 15;
-export const STARTER_DAYS = 14;
 
 /* ---------- the roster ---------------------------------------------------- */
 
@@ -174,7 +174,6 @@ const findByEmail = email => {
    same business do not share one and cannot lock each other out. */
 const pwKey = email => `pw:${tidy(email)}`;
 const tryKey = email => `try:${tidy(email)}`;
-export const starterKey = email => `starter:${tidy(email)}`;
 
 /* ---------- the test sign in ---------------------------------------------- */
 

@@ -2572,6 +2572,127 @@ function passwordPage() {
 
 /* ---------- setup check --------------------------------------------------- */
 
+function startersPage() {
+  const body = `
+<div class="pagehead" data-season="spring">
+  <div class="wrap">
+    <h1>Starter passwords</h1>
+    <p>Load the starter password sheet so members can sign in. Each person is made to pick their own password the first time.</p>
+  </div>
+</div>
+<div class="wrap band" data-season="spring">
+  <div class="cols">
+    <div>
+      <form class="form" id="stform" style="max-width:28rem">
+        <div class="field">
+          <label for="stfile">Starter CSV</label>
+          <span class="help">Two columns with a header row: email, password.</span>
+          <input type="file" id="stfile" accept=".csv,text/csv" required>
+        </div>
+        <div class="btnrow"><button type="submit" class="btn">Check it</button></div>
+        <p class="help" id="stmsg" role="status" aria-live="polite"></p>
+      </form>
+      <div id="stresult" hidden>
+        <h2 id="sthead"></h2>
+        <div id="stlists"></div>
+        <div class="btnrow" id="stgo" hidden>
+          <button type="button" class="btn sun" id="stwrite">Load them</button>
+        </div>
+      </div>
+    </div>
+    <aside class="card">
+      <h4>Good to know</h4>
+      <p style="font-size:.95rem">Checking writes nothing. Only the hashes are stored, never the passwords, and nothing goes in GitHub.</p>
+      <p style="font-size:.95rem">Loading again is safe. Anybody who already has a starter or has picked their own password is skipped.</p>
+      <p style="font-size:.95rem;margin:0">Starters stop working after 14 days. When you are done here, delete the CSV from your computer.</p>
+    </aside>
+  </div>
+</div>
+<script>
+(function(){
+  var form=document.getElementById('stform'), msg=document.getElementById('stmsg'),
+      result=document.getElementById('stresult'), head=document.getElementById('sthead'),
+      lists=document.getElementById('stlists'), go=document.getElementById('stgo'),
+      writeBtn=document.getElementById('stwrite');
+  var csv='';
+
+  function post(write){
+    return fetch('/api/admin',{method:'POST',credentials:'same-origin',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({action:'starters', csv:csv, write:write})})
+      .then(function(r){ return r.text().then(function(t){
+        var j=null; try{ j=JSON.parse(t); }catch(e){}
+        if(r.status===401) throw new Error('signin');
+        if(!r.ok) throw new Error((j&&j.message)||'Something went wrong.');
+        return j;
+      });});
+  }
+
+  function block(label, items){
+    if(!items.length) return;
+    var d=document.createElement('details');
+    var s=document.createElement('summary'); s.textContent=label+': '+items.length; d.appendChild(s);
+    var ul=document.createElement('ul');
+    items.forEach(function(x){
+      var li=document.createElement('li');
+      li.textContent= x.email ? x.email+' ('+x.business+')' : x;
+      ul.appendChild(li);
+    });
+    d.appendChild(ul); lists.appendChild(d);
+  }
+
+  function show(d){
+    lists.replaceChildren(); result.hidden=false;
+    head.textContent = d.written
+      ? 'Loaded '+d.seeded.length+'. They work for '+d.days+' days.'
+      : d.seeded.length+' ready to load';
+    block(d.written ? 'Loaded' : 'Will load', d.seeded);
+    block('Not on the member roster, skipped', d.notOnRoster);
+    block('Already picked their own password, skipped', d.alreadySet);
+    block('Starter already waiting, skipped', d.alreadySeeded);
+    block('Too short, skipped', d.tooShort);
+    go.hidden = d.written || !d.seeded.length;
+    writeBtn.textContent='Load '+d.seeded.length;
+    writeBtn.disabled=false;
+  }
+
+  function oops(err){
+    if(err.message==='signin'){
+      msg.textContent='';
+      var a=document.createElement('a'); a.href='/admin/'; a.textContent='Sign in to the admin';
+      msg.append('You need to be signed in to the admin first. ', a, ', then come back to this page.');
+      return;
+    }
+    msg.textContent=err.message;
+  }
+
+  form.addEventListener('submit', function(e){
+    e.preventDefault();
+    var f=document.getElementById('stfile').files[0];
+    if(!f){ msg.textContent='Pick the CSV first.'; return; }
+    msg.textContent='Checking';
+    f.text().then(function(t){ csv=t; return post(false); })
+      .then(function(d){ msg.textContent=''; show(d); })
+      .catch(oops);
+  });
+
+  writeBtn.addEventListener('click', function(){
+    writeBtn.disabled=true; msg.textContent='Loading. This takes a few seconds.';
+    post(true).then(function(d){ msg.textContent=''; show(d); })
+      .catch(function(err){ writeBtn.disabled=false; oops(err); });
+  });
+})();
+</script>`;
+
+  return page({
+    title: 'Starter passwords',
+    description: 'Load starter passwords for member sign in.',
+    canonical: '/admin/starters/',
+    season: 'spring',
+    noindex: true
+  }, body);
+}
+
 function setupPage() {
   const body = `
 <div class="pagehead" data-season="winter">
@@ -3160,6 +3281,7 @@ async function main() {
     await cp(path.join('data', f), path.join(OUT, 'admin', f));
   }
 
+  await put(path.join('admin', 'starters'), startersPage());
   await put('setup', setupPage());
   await put('members', membersPage());
   await put(path.join('members', 'password'), passwordPage());

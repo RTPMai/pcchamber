@@ -1,24 +1,22 @@
-# Starter passwords
+# Starter passwords, loaded from the admin
 
-Four files. Extract at the repo root and overwrite.
+Six files. Extract at the repo root and overwrite. content/members.json is
+not in here; the one you already pushed is right.
 
-    content/members.json        access lists for all 61 members (88 addresses)
-    api/member.js               starter sign in, forced change, cleanup on remove
-    build.mjs                   sign in redirects to the change page; wording; team tag
-    scripts/seed-starters.mjs   loads the starters into Upstash
+    api/_lib/starters.js        new: the loading logic, shared by both ways in
+    api/admin.js                new "starters" action, admin sign in required
+    api/member.js               takes starterKey from the shared file
+    build.mjs                   builds /admin/starters/
+    scripts/seed-starters.mjs   terminal version, same logic
+    vercel.json                 gives the admin function 60 seconds
 
-Push first so the new sign in code is live, then load the starters from
-your machine:
+Once deployed:
 
-    vercel env pull .env.local
-    node --env-file=.env.local scripts/seed-starters.mjs starters.csv
-    node --env-file=.env.local scripts/seed-starters.mjs starters.csv --write
-
-The first run is a dry run. Expect 88 seeded and 11 "not on the roster"
-(the seven businesses that are not in the directory yet).
-
-Then delete starters.csv. Do not commit it. Starters expire in 14 days.
+1. Sign in at /admin/ with the admin passcode.
+2. Go to /admin/starters/ and pick starters.csv. "Check it" writes nothing.
+   Expect 88 ready and 11 not on the roster.
+3. Press Load. Then delete starters.csv from your computer.
 
 Check it took:
 
-    grep -c starterKey api/member.js      should print 6
+    api/_lib/starters.js exists, and /admin/starters/ loads after deploy.
