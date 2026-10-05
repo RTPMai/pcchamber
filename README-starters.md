@@ -1,22 +1,19 @@
-# Starter passwords, loaded from the admin
+# Starter passwords, admin loader, unlisted members
 
-Six files. Extract at the repo root and overwrite. content/members.json is
-not in here; the one you already pushed is right.
+Everything changed today, in one zip. Extract at the repo root and overwrite.
+Safe whether or not you already uploaded the earlier two.
 
-    api/_lib/starters.js        new: the loading logic, shared by both ways in
-    api/admin.js                new "starters" action, admin sign in required
-    api/member.js               takes starterKey from the shared file
-    build.mjs                   builds /admin/starters/
-    scripts/seed-starters.mjs   terminal version, same logic
-    vercel.json                 gives the admin function 60 seconds
+    content/members.json        access lists; 4 unlisted Individuals; 3 new businesses
+    data/members.js             MEMBERS is the public directory, ALL_MEMBERS is everybody
+    build.mjs                   /admin/starters/; starter redirect; hides listing
+                                buttons for unlisted members
+    api/_lib/starters.js        new: starter loading logic
+    api/admin.js                "starters" action
+    api/member.js               starter sign in; tells the page if a member is listed
+    api/_lib/audit.js           unlisted members not nagged for a description
+    admin/schema.js             "Keep off the public directory" checkbox
+    scripts/seed-starters.mjs   terminal version of the loader
+    vercel.json                 admin function gets 60 seconds
 
-Once deployed:
-
-1. Sign in at /admin/ with the admin passcode.
-2. Go to /admin/starters/ and pick starters.csv. "Check it" writes nothing.
-   Expect 88 ready and 11 not on the roster.
-3. Press Load. Then delete starters.csv from your computer.
-
-Check it took:
-
-    api/_lib/starters.js exists, and /admin/starters/ loads after deploy.
+Then /admin/ -> /admin/starters/ -> pick starters.csv -> Check it.
+Expect 99 ready, 0 not on the roster.

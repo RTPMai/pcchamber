@@ -444,7 +444,7 @@ export default async function handler(req, res) {
       case 'whoami': {
         const m = currentMember(req);
         res.status(200).json({
-          ...(m ? { signedIn: true, slug: m.slug, name: m.name } : { signedIn: false }),
+          ...(m ? { signedIn: true, slug: m.slug, name: m.name, listed: !m.unlisted } : { signedIn: false }),
           /* So the page can show a banner. If this is ever true on the
              live site, something has been left switched on. */
           demo: Boolean(demo)
@@ -552,7 +552,7 @@ export default async function handler(req, res) {
         }
 
         setSession(res, member, email);
-        res.status(200).json({ ok: true, name: member.name, slug: member.slug });
+        res.status(200).json({ ok: true, name: member.name, slug: member.slug, listed: !member.unlisted });
         return;
       }
 
@@ -652,7 +652,7 @@ export default async function handler(req, res) {
         await kvDel(tryKey(payload.email));
 
         setSession(res, member, payload.email);
-        res.status(200).json({ ok: true, name: member.name, slug: member.slug });
+        res.status(200).json({ ok: true, name: member.name, slug: member.slug, listed: !member.unlisted });
         return;
       }
 

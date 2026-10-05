@@ -283,6 +283,37 @@
       ]
     },
     {
+      "slug": "dr-horton-iowa",
+      "name": "D.R. Horton Iowa",
+      "category": "realestate",
+      "tier": "basic",
+      "city": "",
+      "summary": "",
+      "contact": {
+        "email": "iowamarketing@drhorton.com"
+      },
+      "access": [
+        "iowamarketing@drhorton.com",
+        "iowainfo@drhorton.com",
+        "djott@drhorton.com"
+      ]
+    },
+    {
+      "slug": "elite-construction",
+      "name": "Elite Construction",
+      "category": "home",
+      "tier": "basic",
+      "city": "",
+      "summary": "",
+      "contact": {
+        "person": "Joe Germain",
+        "email": "joegermain@eliteconstruction515.com"
+      },
+      "access": [
+        "joegermain@eliteconstruction515.com"
+      ]
+    },
+    {
       "slug": "fareway-polk-city",
       "name": "Fareway - Polk City",
       "category": "retail",
@@ -333,6 +364,37 @@
       "access": [
         "reyna.myott@grinnellbank.com",
         "bethany.salyer@grinnellbank.com"
+      ]
+    },
+    {
+      "slug": "hacienda-vieja",
+      "name": "Hacienda Vieja",
+      "category": "food",
+      "tier": "basic",
+      "city": "",
+      "summary": "",
+      "contact": {
+        "email": "celeste.galvan@icloud.com"
+      },
+      "access": [
+        "celeste.galvan@icloud.com",
+        "osvaldogalvanlepe54@hotmail.com"
+      ]
+    },
+    {
+      "slug": "halie-trappe",
+      "name": "Halie Trappe",
+      "category": "realestate",
+      "tier": "individual",
+      "unlisted": true,
+      "city": "",
+      "summary": "",
+      "contact": {
+        "person": "Halie Trappe",
+        "email": "halie@ankenyre.com"
+      },
+      "access": [
+        "halie@ankenyre.com"
       ]
     },
     {
@@ -427,6 +489,22 @@
       ]
     },
     {
+      "slug": "jayne-hall",
+      "name": "Jayne Hall",
+      "category": "services",
+      "tier": "individual",
+      "unlisted": true,
+      "city": "",
+      "summary": "",
+      "contact": {
+        "person": "Jayne Hall",
+        "email": "jayneathall@gmail.com"
+      },
+      "access": [
+        "jayneathall@gmail.com"
+      ]
+    },
+    {
       "slug": "kiwanis-club-of-polk-city",
       "name": "Kiwanis Club of Polk City",
       "category": "nonprofit",
@@ -509,6 +587,23 @@
       "logo": "/assets/members/lakeside-fellowship.webp",
       "access": [
         "office@lakesidefellowship.com"
+      ]
+    },
+    {
+      "slug": "laramie-sandquist",
+      "name": "Laramie Sandquist",
+      "category": "insurance",
+      "tier": "individual",
+      "unlisted": true,
+      "city": "",
+      "summary": "",
+      "contact": {
+        "person": "Laramie Sandquist",
+        "email": "sandql2@nationwide.com"
+      },
+      "access": [
+        "sandql2@nationwide.com",
+        "ljsandquist@gmail.com"
       ]
     },
     {
@@ -1166,6 +1261,22 @@
       "access": [
         "whatchasmokinluther@whatchasmokinbbq.com",
         "marketing@whatchasmokinbbq.com"
+      ]
+    },
+    {
+      "slug": "whitney-parker",
+      "name": "Whitney Parker",
+      "category": "finance",
+      "tier": "individual",
+      "unlisted": true,
+      "city": "",
+      "summary": "",
+      "contact": {
+        "person": "Whitney Parker",
+        "email": "whitney.parker@keystonesavings.bank"
+      },
+      "access": [
+        "whitney.parker@keystonesavings.bank"
       ]
     },
     {

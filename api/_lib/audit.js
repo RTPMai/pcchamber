@@ -87,7 +87,7 @@ const CHECKS = [
 
   ({ members }) => {
     const out = [];
-    const noSummary = members.filter(m => !m.summary);
+    const noSummary = members.filter(m => !m.summary && !m.unlisted);
     const noEmail = members.filter(m => !(m.contact && m.contact.email) && !(Array.isArray(m.access) && m.access.length));
     if (noSummary.length) {
       out.push({ level: noSummary.length > members.length / 4 ? 'high' : 'medium', where: 'Member directory',

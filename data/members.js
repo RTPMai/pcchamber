@@ -33,6 +33,10 @@
                contact address is often a shared inbox nobody reads. Left
                empty, the contact email is accepted so sign in works before
                anything is filled in.
+     unlisted  optional, true or absent. A member who can sign in and gets
+               member benefits but has no public page: no directory entry,
+               not in the counts, not in the sitemap. For Individual
+               members, who are a person rather than a business.
      logo      optional. Path to their logo, e.g. '/assets/members/slug.svg'
                Square-ish works best. SVG or PNG with a transparent
                background. Leave it out and the plate shows their initial,
@@ -63,4 +67,7 @@ const data = load();
 
 export const CATEGORIES = data.categories;
 export const TIERS = data.tiers;
-export const MEMBERS = data.members;
+/* MEMBERS is the public directory. ALL_MEMBERS includes the unlisted
+   ones, for checks that have to cover everybody. */
+export const ALL_MEMBERS = data.members;
+export const MEMBERS = data.members.filter(m => !m.unlisted);

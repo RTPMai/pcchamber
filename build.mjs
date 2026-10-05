@@ -16,7 +16,7 @@ import { existsSync } from 'node:fs';
 import path from 'node:path';
 
 import { SITE, DOORS } from './data/site.js';
-import { CATEGORIES, TIERS, MEMBERS } from './data/members.js';
+import { CATEGORIES, TIERS, MEMBERS, ALL_MEMBERS } from './data/members.js';
 import { RECURRING, CALENDAR } from './data/events.js';
 import { eventIcs, feedIcs, googleUrl, outlookUrl } from './tools/calendar-files.mjs';
 import { MEMBERSHIP, TIER_LIST, WHY, JOIN_FAQ } from './data/membership.js';
@@ -2161,9 +2161,9 @@ function membersPage() {
         <p id="wholine"></p>
         <div class="btnrow">
           <a class="btn sun" href="/policy-center/">Open the Business Policy Center</a>
-          <a class="btn ghost" href="/members/listing/">Edit your listing</a>
-          <a class="btn ghost" href="/directory/" id="mylisting">See your public page</a>
-          <a class="btn ghost" href="/members/deals/">Your deals</a>
+          <a class="btn ghost" href="/members/listing/" data-listed>Edit your listing</a>
+          <a class="btn ghost" href="/directory/" id="mylisting" data-listed>See your public page</a>
+          <a class="btn ghost" href="/members/deals/" data-listed>Your deals</a>
         </div>
 
         <section class="bens" id="bens" hidden aria-labelledby="benshead">
@@ -2241,6 +2241,8 @@ function membersPage() {
     who.textContent='Signed in as ' + d.name + '.';
     var mine=document.getElementById('mylisting');
     if(mine) mine.setAttribute('href','/directory/'+d.slug+'/');
+    /* Unlisted members, like Individuals, have no public page to edit. */
+    document.querySelectorAll('[data-listed]').forEach(function(a){ a.style.display = d.listed===false ? 'none' : ''; });
     loadBenefits();
     loadTeam();
   }
@@ -3225,7 +3227,7 @@ async function main() {
   /* A member on a level that does not exist would crash the directory
      page halfway through, or worse, get no benefits in the tracker without
      anybody noticing. Caught here instead, by name. */
-  const badTier = MEMBERS.filter(m => !TIERS[m.tier] || !TIER_LIST.some(t => t.id === m.tier));
+  const badTier = ALL_MEMBERS.filter(m => !TIERS[m.tier] || !TIER_LIST.some(t => t.id === m.tier));
   if (badTier.length) {
     console.error('\nThese members are on a membership level that does not exist:\n  ' +
       badTier.map(m => `${m.name}: "${m.tier}"`).join('\n  ') +
