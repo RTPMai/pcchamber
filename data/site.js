@@ -47,7 +47,7 @@ export const SITE = {
   },
 
   // Turn this off the day real member data replaces the samples.
-  demoBanner: true,
+  demoBanner: false,
   demoBannerText:
     'Demo site. The 61 member listings are real. Descriptions, membership tiers and some event dates are still being collected.',
 
