@@ -79,11 +79,11 @@
       "date": "2026-10-14",
       "start": "11:30",
       "end": "13:00",
-      "title": "Polk City Area Chamber Luncheon",
+      "title": "Member Lunch and Learn: Erin Huiatt, Des Moines Parent",
       "where": "Tournament Club of Iowa",
       "address": "1000 Tradition Dr, Polk City, IA 50226",
       "venue": "tournament-club-of-iowa",
-      "summary": "The monthly luncheon. Register through the club ahead of the date and pick your meal.",
+      "summary": "Erin Huiatt, owner of Des Moines Parent, on how community, connection, and collaboration helped grow her business.",
       "cost": "$20",
       "rsvp": {
         "label": "Register",
@@ -92,7 +92,8 @@
       "audience": "public",
       "season": "sun",
       "tickets": true,
-      "guestFee": "10"
+      "guestFee": "10",
+      "detail": "Plus simple ideas you can put into action in your own business. Register through the club ahead of the date and pick your meal."
     },
     {
       "id": "trunk-or-treat-2026-10-25",
@@ -132,6 +133,20 @@
       "venue": "arcadia",
       "summary": "An evening for current members, past members, and any business thinking about joining.",
       "detail": "Hors d’oeuvres, networking, and a chance to hear how the chamber can help your business. Come whether or not you are a member.",
+      "cost": "Free",
+      "audience": "public",
+      "season": "autumn"
+    },
+    {
+      "id": "nova-open-house-2026-11-19",
+      "date": "2026-11-19",
+      "start": "16:00",
+      "end": "19:00",
+      "title": "Nova MedSpa Open House",
+      "where": "Nova MedSpa",
+      "address": "1010 Tyler St Suite 3, Polk City, IA 50226",
+      "venue": "nova-med-spa",
+      "summary": "An open house at Nova MedSpa's Polk City location.",
       "cost": "Free",
       "audience": "public",
       "season": "autumn"
