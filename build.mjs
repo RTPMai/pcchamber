@@ -472,6 +472,7 @@ const TAIL = `<script>
   });
 })();
 </script>
+<script defer src="/assets/pwtoggle.js"></script>
 </body>
 </html>`;
 
@@ -2104,6 +2105,7 @@ function adminPage() {
 </header>
 <main class="wrap" id="admin"></main>
 <script type="module" src="/admin/app.js"></script>
+<script defer src="/assets/pwtoggle.js"></script>
 </body>
 </html>`;
 }
