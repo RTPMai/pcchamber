@@ -16,7 +16,7 @@ This is the front half of the platform. Dues collection, member logins, and even
 
 **The next event is on the home page automatically.** It reads the calendar and shows the soonest one. Past events drop off by themselves on the day after. Nothing to clean up.
 
-**It passes a WCAG 2.1 AA audit.** Thirteen page types, mobile and desktop, zero violations under axe-core. That is not a nice-to-have for an organisation that takes public money and speaks for the business community.
+**It passes a WCAG 2.1 AA audit.** Thirteen page types, mobile and desktop, zero violations under axe-core. That is not a nice-to-have for an organization that takes public money and speaks for the business community.
 
 **Search and filtering work without a page reload,** but every listing is already in the HTML before any JavaScript runs. Turn JavaScript off and the directory still works.
 
@@ -261,7 +261,7 @@ At `/members/listing/`, for anyone signed in. They change their name, descriptio
 
 Those are not hidden in the form and rejected later. They are never read from the request, so sending them does nothing. There is a test for exactly that.
 
-**Edits go live immediately.** No approval queue: a queue in an organisation with no staff is a queue that never empties, and members stop bothering after the second time a change sits for a fortnight.
+**Edits go live immediately.** No approval queue: a queue in an organization with no staff is a queue that never empties, and members stop bothering after the second time a change sits for a fortnight.
 
 The protection is that every edit is a git commit with the member's name on it, so the chamber can see who changed what and put it back in one click. An audit trail and an undo rather than a gate. If the board would rather have review before publishing, that is a real change and worth asking for deliberately.
 
@@ -328,7 +328,7 @@ So the admin works out which one it actually is and tells you:
 
 | What you see | What to do |
 | --- | --- |
-| Cannot see the repository | `GITHUB_REPO` is wrong, or the token does not list this repository under Repository access with Contents set to Read and write. On an organisation, an owner may still need to approve the token. |
+| Cannot see the repository | `GITHUB_REPO` is wrong, or the token does not list this repository under Repository access with Contents set to Read and write. On an organization, an owner may still need to approve the token. |
 | The token is not valid | It expired. Create a new one and update `GITHUB_TOKEN`. |
 | No branch called X | Set `GITHUB_BRANCH` to the default branch it names. |
 | content/... is not in them | The `content/` folder was not committed. Check `.gitignore`. |
@@ -361,7 +361,7 @@ A hub at `/resources/` with a card per section and a real page behind each one, 
 
 Two rules worth keeping:
 
-**Sort by the problem, not by who runs the programme.** A grant administered by the county still belongs under money. People arrive knowing what they need, not which agency provides it.
+**Sort by the problem, not by who runs the program.** A grant administered by the county still belongs under money. People arrive knowing what they need, not which agency provides it.
 
 **The Policy Center appears once.** It is a single button on the hub, not an entry inside each section. Repeating it in every group made one thing look like four.
 
@@ -407,13 +407,13 @@ Both forms carry a honeypot field positioned off screen rather than hidden with 
 
 | File | Use it for |
 | --- | --- |
-| `mark.svg` | The roundel alone, full colour. Header, footer, icons. |
+| `mark.svg` | The roundel alone, full color. Header, footer, icons. |
 | `wordmark-navy.svg` | The type alone, for light backgrounds |
 | `wordmark-white.svg` | The type alone, for navy |
 | `logo-horizontal.svg` | The full lockup. Print, letterhead, anything sent out. |
 | `logo-stacked.svg` | The full lockup, taller. Square spaces, social avatars. |
 
-**Why the mark and the type are separate files.** The roundel cannot be recoloured for a dark background. Its outer ring is navy and its gazebo is white, so inverting one destroys the other. On navy the roundel sits on a white plate at full colour, which is what the `.mark` class does. The wordmark is plain type and inverts cleanly, hence two colour versions of it and only one of the mark.
+**Why the mark and the type are separate files.** The roundel cannot be recolored for a dark background. Its outer ring is navy and its gazebo is white, so inverting one destroys the other. On navy the roundel sits on a white plate at full color, which is what the `.mark` class does. The wordmark is plain type and inverts cleanly, hence two color versions of it and only one of the mark.
 
 **They are `<img>` references, not inline SVG.** The artwork is about 38KB of path data. Inlining it into all 31 pages would add well over a megabyte of duplicated markup and stop it being cached.
 
@@ -430,7 +430,7 @@ Eight are in. When the board changes, drop the new headshots into a folder and r
 
 It crops each one to a true square, resizes to 256, and writes a WebP into `assets/board/`. Then set `photo` in `data/involved.js` to the filename without its extension. Anyone without a photo shows their initial instead, which reads as intentional rather than broken.
 
-**It crops rather than squashing,** because several headshots come in taller than they are wide and stretching one distorts the face. **It does not crop from the centre,** because in a portrait the face sits above the middle and a centred crop clips foreheads. A quarter comes off the top and the rest off the bottom, so the head keeps its room and the trim comes out of the chest.
+**It crops rather than squashing,** because several headshots come in taller than they are wide and stretching one distorts the face. **It does not crop from the center,** because in a portrait the face sits above the middle and a centered crop clips foreheads. A quarter comes off the top and the rest off the bottom, so the head keeps its room and the trim comes out of the chest.
 
 The photos carry an empty `alt`. The person's name sits right beside the picture, so describing it again only makes a screen reader say the name twice.
 
@@ -472,13 +472,13 @@ If you write JavaScript inside `build.mjs`, remember it passes through template 
 
 ## Re-running the accessibility audit
 
-Worth doing after any change to colours or markup.
+Worth doing after any change to colors or markup.
 
 ```
 npm install --no-save axe-core playwright
 ```
 
-Then point axe at each page in `dist/`. The one thing that has already failed once is colour contrast on muted grey text sitting on a seasonal wash. `--navy-soft` is set to a value that clears 4.5:1 on all five washes. If you lighten it, re-check.
+Then point axe at each page in `dist/`. The one thing that has already failed once is color contrast on muted gray text sitting on a seasonal wash. `--navy-soft` is set to a value that clears 4.5:1 on all five washes. If you lighten it, re-check.
 
 ---
 

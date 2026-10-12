@@ -33,7 +33,7 @@
 
    EDITS GO LIVE STRAIGHT AWAY
 
-   No approval queue. A queue in an organisation with no staff is a queue
+   No approval queue. A queue in an organization with no staff is a queue
    that never empties, and members stop bothering after the second time
    their change sits for a fortnight.
 

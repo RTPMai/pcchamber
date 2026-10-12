@@ -18,7 +18,7 @@
      the business name, phone, email, website, street address, and a slug
 
    WHAT YOU STILL HAVE TO DO
-     category and tier. Those are judgement calls and it will not guess.
+     category and tier. Those are judgment calls and it will not guess.
 
    It never overwrites data/members.js. That is deliberate.
    ========================================================================== */
@@ -29,7 +29,7 @@ import { existsSync } from 'node:fs';
 const IN  = 'tools/paste.txt';
 const OUT = 'data/members.generated.js';
 
-/* ---------- recognisers -------------------------------------------------- */
+/* ---------- recognizers -------------------------------------------------- */
 
 const RE = {
   email:  /[\w.+-]+@[\w-]+\.[\w.-]+/,

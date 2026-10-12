@@ -22,7 +22,7 @@ The chamber needs a member database, dues billing, event registration, and a web
 
 **A caveat on those figures.** ChamberMaster and GrowthZone do not publish prices. The numbers above come from competitors who sell against them and from chamber budgets that are public. They are a reasonable anchor, not a quote. The one solid fact is that the price is quote-only and gated behind a demo request. If the board wants a real number, someone has to sit through the demo.
 
-**The question to answer before comparing anything.** What share of annual chamber revenue is $5,000? For an organisation this size that may be a large fraction of the budget, or it may be recoverable in a single year through automated renewals that stop memberships lapsing quietly. Either answer is defensible. Guessing is not.
+**The question to answer before comparing anything.** What share of annual chamber revenue is $5,000? For an organization this size that may be a large fraction of the budget, or it may be recoverable in a single year through automated renewals that stop memberships lapsing quietly. Either answer is defensible. Guessing is not.
 
 ---
 
@@ -47,7 +47,7 @@ It does **not** have logins, dues collection, or stored payment details. That is
 
 **It survives a board turnover.** A vendor does not resign.
 
-**The Administrative Director seat is currently empty.** Choosing a system before knowing who will operate it daily is how organisations end up with software nobody uses.
+**The Administrative Director seat is currently empty.** Choosing a system before knowing who will operate it daily is how organizations end up with software nobody uses.
 
 ## The honest case for building
 

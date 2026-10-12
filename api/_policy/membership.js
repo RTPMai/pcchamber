@@ -51,7 +51,7 @@ const MEMBERSHIP = {
 const BENEFITS = {
   'directory-listing': {
     name: 'Directory listing, chamber and NP Living',
-    detail: 'Your business appears in the online chamber directory with your address, phone, email and website, and in the North Polk Living directory. This is the listing the chamber office looks at when someone calls asking for a recommendation, so keeping your details current matters more than most people realise.',
+    detail: 'Your business appears in the online chamber directory with your address, phone, email and website, and in the North Polk Living directory. This is the listing the chamber office looks at when someone calls asking for a recommendation, so keeping your details current matters more than most people realize.',
   },
   'window-cling': {
     name: 'Chamber window cling',
@@ -67,11 +67,11 @@ const BENEFITS = {
   },
   'gdmp-reciprocal': {
     name: 'Reciprocal Greater Des Moines Partnership membership',
-    detail: 'Your chamber membership gives you access to the Greater Des Moines Partnership, the regional business organisation for the metro. That means their events, their business resources and their advocacy network, at no extra cost. For a business here that wants metro-level connections, this is quietly one of the largest dollar-value items on the list.',
+    detail: 'Your chamber membership gives you access to the Greater Des Moines Partnership, the regional business organization for the metro. That means their events, their business resources and their advocacy network, at no extra cost. For a business here that wants metro-level connections, this is quietly one of the largest dollar-value items on the list.',
   },
   'ribbon-cutting': {
     name: 'Ribbon cuttings',
-    detail: 'The chamber will organise and attend a ribbon cutting for a new business, a new location, a major remodel or a significant anniversary. We bring the oversized scissors, invite the membership and city officials, and take photos you can use. Contact the office a few weeks ahead so it can be promoted properly.',
+    detail: 'The chamber will organize and attend a ribbon cutting for a new business, a new location, a major remodel or a significant anniversary. We bring the oversized scissors, invite the membership and city officials, and take photos you can use. Contact the office a few weeks ahead so it can be promoted properly.',
   },
   'events-calendar': {
     name: 'Events calendar listing',
@@ -117,7 +117,7 @@ const BENEFITS = {
 
   'email-sig-logo': {
     name: 'Email signature logo and newsletter recognition',
-    detail: 'Your logo is carried in the chamber email signature and you are recognised in the chamber newsletter. This puts your brand in front of the full membership repeatedly through the year rather than once.',
+    detail: 'Your logo is carried in the chamber email signature and you are recognized in the chamber newsletter. This puts your brand in front of the full membership repeatedly through the year rather than once.',
   },
   'golf-hole': {
     name: 'Golf hole sponsorship',

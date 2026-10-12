@@ -37,7 +37,7 @@ export const FAQ = [
   },
   {
     q: 'Who runs the chamber?',
-    a: 'A volunteer board of directors elected by the membership, with day-to-day work handled by chamber staff and committee volunteers.'
+    a: 'A volunteer board of directors elected by the membership, with committee volunteers handling the day-to-day work.'
   }
 ];
 
@@ -71,12 +71,12 @@ export const RESOURCE_GROUPS = [
     season: 'sun',
     title: 'Money you can go after',
     blurb: 'Grants, loans, and free advice, with straight talk about who actually qualifies.',
-    intro: 'Most of these programmes are open to businesses here and most local owners never apply. The eligibility rules are the part that catches people out, so read those before the dollar figures.',
+    intro: 'Most of these programs are open to businesses here and most local owners never apply. The eligibility rules are the part that catches people out, so read those before the dollar figures.',
     links: [
-      { label: 'Iowa Economic Development & Finance Authority', href: 'https://opportunityiowa.gov/business/financial-assistance', note: 'State programmes for expansion, equipment, and workforce training. This is the old IEDA, now merged with the Iowa Finance Authority.' },
+      { label: 'Iowa Economic Development & Finance Authority', href: 'https://opportunityiowa.gov/business/financial-assistance', note: 'State programs for expansion, equipment, and workforce training. This is the old IEDA, now merged with the Iowa Finance Authority.' },
       { label: 'IowaGrants.gov', href: 'https://www.iowagrants.gov/', note: 'Where state grant applications are actually filed. Register before a deadline, not on the day.' },
       { label: 'Iowa SBDC', href: 'https://www.iowasbdc.org/', note: 'Free one-to-one business advising. Genuinely free, not a sales funnel.' },
-      { label: 'SBA Iowa District Office', href: 'https://www.sba.gov/district/iowa', note: 'SBA loan programmes and lender matching.' },
+      { label: 'SBA Iowa District Office', href: 'https://www.sba.gov/district/iowa', note: 'SBA loan programs and lender matching.' },
       { label: 'SCORE Des Moines', href: 'https://www.score.org/desmoines', note: 'Free, confidential mentoring from people who have run businesses. Phone, video, email, or in person, for as long as you want it.' },
       { label: 'Targeted Small Business certification', href: 'https://opportunityiowa.gov/business/small-business-entrepreneurs/small-business-resources/targeted-small-business-program', note: 'For Iowa businesses under $4 million average gross income that are at least 51% owned and run by a woman, a minority, a service-disabled veteran, or a person with a disability. See state buying needs 48 hours early, skip competitive bidding on state purchases under $25,000, and apply for loans up to $50,000.' },
       { label: 'Iowa Center for Economic Success', href: 'https://theiowacenter.org/', note: 'Coaching, classes, and business loans up to $50,000. Home of the SBA Women\'s Business Center for Iowa. 515-283-0940.' },
@@ -112,7 +112,7 @@ export const RESOURCE_GROUPS = [
       { label: 'IowaWORKS', href: 'https://www.iowaworks.gov/', note: 'Post jobs at no cost and connect to hiring events.' },
       { label: 'Iowa Workforce Development', href: 'https://workforce.iowa.gov/', note: 'Unemployment insurance, wage rules, and the posters you are required to display.' },
       { label: 'Workforce and training grants', href: 'https://workforce.iowa.gov/opportunities/grants', note: 'Money towards training existing staff.' },
-      { label: 'DMACC business and industry training', href: 'https://www.dmacc.edu/dbr/skills-training.html', note: 'Customised training for your staff. The state 260E and 260F programmes can reimburse part of the cost.' },
+      { label: 'DMACC business and industry training', href: 'https://www.dmacc.edu/dbr/skills-training.html', note: 'Customized training for your staff. The state 260E and 260F programs can reimburse part of the cost.' },
       { label: 'Evelyn K. Davis Center', href: 'https://lsiowa.org/evelyn-k-davis-center/', note: 'Workforce training, job search help, and small business coaching in Des Moines. Now run by Lutheran Services in Iowa.' },
       { label: 'The chamber job board', href: '/jobs/', note: 'Free for members. Openings at member businesses, seen by people who already live here.' }
     ]
@@ -125,9 +125,9 @@ export const RESOURCE_GROUPS = [
     intro: 'The July 2 to 4 flooding put Polk County under an SBA disaster declaration. The deadline to apply for damage to buildings, equipment and stock was extended to November 20, 2026. Working capital loans are open until April 23, 2027, and a business does not need to have had physical damage to apply for one. Nonprofits are covered by a second declaration with later deadlines.',
     links: [
       { label: 'Apply for an SBA disaster loan', href: 'https://lending.sba.gov/', note: 'Physical damage applications reopened under a grace period and close November 20, 2026. Economic injury applications are open until April 23, 2027: working capital for bills the flooding stopped you paying, up to $2 million at 4%.' },
-      { label: 'Nonprofits: apply by November 2', href: 'https://www.sba.gov/funding-programs/disaster-assistance', note: 'A separate declaration covers private nonprofits and faith-based organisations. Physical damage closes November 2, 2026, economic injury June 1, 2027, at 3.625%.' },
+      { label: 'Nonprofits: apply by November 2', href: 'https://www.sba.gov/funding-programs/disaster-assistance', note: 'A separate declaration covers private nonprofits and faith-based organizations. Physical damage closes November 2, 2026, economic injury June 1, 2027, at 3.625%.' },
       { label: 'SBA fact sheet for this disaster', href: '/assets/docs/sba-disaster-loan-fact-sheet.pdf', note: 'Declaration #21727 and #21728. Rates, terms, limits, and what is not eligible. PDF.' },
-      { label: 'The SBA news release', href: '/assets/docs/sba-disaster-loan-news-release.pdf', note: 'The original July 24 announcement, including the outreach centres that have since closed. PDF.' },
+      { label: 'The SBA news release', href: '/assets/docs/sba-disaster-loan-news-release.pdf', note: 'The original July 24 announcement, including the outreach centers that have since closed. PDF.' },
       { label: 'SBA customer service', href: 'mailto:disastercustomerservice@sba.gov', note: 'Or 800-659-2955. They will tell you whether it is worth applying before you fill anything in.' },
       { label: 'Help for households', href: 'https://homelandsecurity.iowa.gov/assistance', note: 'State grants of up to $7,000 and disaster case advocacy for residents. Grant applications are due 45 days after the governor\'s proclamation. Case advocates can help for up to 180 days after the declaration.' },
       { label: 'Iowa disaster assistance flyer', href: '/assets/docs/iowa-disaster-assistance.pdf', note: 'Iowa HSEM, plain English. Also 515-675-1884 or disastercaseadvocacy@iowa.gov. PDF.' }
@@ -146,7 +146,7 @@ export const RESOURCE_GROUPS = [
       { label: 'Catch Des Moines', href: 'https://www.catchdesmoines.com/', note: 'Regional tourism listings. Worth it if you get visitor traffic from Saylorville and Big Creek.' },
       { label: 'Greater Des Moines Partnership', href: 'https://www.dsmpartnership.com/', note: 'Metro-wide business network. Basic Business membership includes reciprocal membership.' },
       { label: 'North Polk Living', href: 'https://www.iowalivingmagazines.com/north-polk', note: 'The local monthly magazine. Openings, milestones, and events are free to send in. Press releases go to tammy@iowalivingmagazines.com.' },
-      { label: 'Goldman Sachs 10,000 Small Businesses', href: 'https://www.iowa10ksb.com/', note: 'A no-cost growth programme for established businesses, run through DMACC and the other Iowa community colleges. Offices on the Ankeny campus. Take the eligibility quiz before you apply.' },
+      { label: 'Goldman Sachs 10,000 Small Businesses', href: 'https://www.iowa10ksb.com/', note: 'A no-cost growth program for established businesses, run through DMACC and the other Iowa community colleges. Offices on the Ankeny campus. Take the eligibility quiz before you apply.' },
       { label: 'Iowa APEX Accelerator', href: 'https://www.ciras.iastate.edu/government-contracting/', note: 'Free help selling to federal, state, and local government: registration, bids, and certifications. Run by Iowa State\'s CIRAS.' },
       { label: 'IASourceLink', href: 'https://www.iasourcelink.com/', note: 'Searchable directory of 360+ nonprofit business resources across Iowa. Start here when nothing above fits.' }
     ]

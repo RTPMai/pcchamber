@@ -414,7 +414,7 @@ a:hover{ color:var(--tint-ink); }
 .listing .logo img, .memberhead .logo img, .logoprev img, .deal-who .logo img{
   width:100%; height:100%; object-fit:contain; display:block;
 }
-/* No logo yet: the initial, set in the member's own season colour. */
+/* No logo yet: the initial, set in the member's own season color. */
 .listing .logo .initial{
   font-family:'Fraunces',Georgia,serif; font-size:1.5rem; font-weight:600;
   color:var(--tint-ink);
@@ -457,7 +457,7 @@ a:hover{ color:var(--tint-ink); }
   border:1px solid var(--tint);
 }
 
-/* Tier badges in the directory. Fixed colour per level, overriding the
+/* Tier badges in the directory. Fixed color per level, overriding the
    card's category season, so two Investors never look different. Heavier
    the higher the level. */
 .badge[data-tier="partner"] { background:var(--spring-wash); color:var(--spring-ink); border-color:var(--spring); }

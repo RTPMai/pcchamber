@@ -13,7 +13,7 @@
      { items: [{ title, meta, text, href }] }
      { button: { label, href } }
      { rows: [[left, right], ...] }       two columns, like a receipt
-     { note: 'small grey text' }
+     { note: 'small gray text' }
    ========================================================================== */
 
 import { escHtml as e } from './mail.js';

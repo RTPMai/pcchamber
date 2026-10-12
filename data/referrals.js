@@ -14,7 +14,7 @@
 
    2. It is honest about gaps. A category with no member says so. Pointing
       a member at nobody costs the chamber the credibility the Policy
-      Centre is built on, and an admitted gap doubles as a recruiting line.
+      Center is built on, and an admitted gap doubles as a recruiting line.
 
    Fields:
      id        stable identifier

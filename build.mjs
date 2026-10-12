@@ -307,7 +307,7 @@ function clock(hhmm) {
 const timeRange = e => (e.start && e.end) ? `${clock(e.start)} to ${clock(e.end)}` : (e.time || '');
 
 /* Members can supply a logo. Until they do, the plate shows their initial
-   in their category's season colour, which looks deliberate rather than
+   in their category's season color, which looks deliberate rather than
    like a missing image. */
 /* A white logo on a white plate is invisible, so a member whose logo is
    light gets a navy plate instead. Set by the member when they upload, or
@@ -327,10 +327,10 @@ const catSeason = id => SEASONS[Math.max(0, CATEGORIES.findIndex(c => c.id === i
 
 /* The real logo, as three separate files rather than one lockup.
 
-   The roundel cannot simply be recoloured for a dark background: its outer
+   The roundel cannot simply be recolored for a dark background: its outer
    ring is navy and its gazebo is white, so inverting one destroys the other.
-   So on navy it sits on a white plate, at full colour, as the brand intends.
-   The wordmark is plain text and does invert, hence two colour versions.
+   So on navy it sits on a white plate, at full color, as the brand intends.
+   The wordmark is plain text and does invert, hence two color versions.
 
    These are <img> references, not inline SVG. Inlining 38KB of paths into
    all 31 pages would be 1.2MB of duplicated markup for no benefit. */
@@ -624,7 +624,7 @@ function directoryIndex() {
        showed a badge. */
     /* Community Partner and up. Basic and Individual members carry no
        badge, so a badge means somebody paid for visibility. The badge is
-       coloured by level (data-tier), never by the card's category season,
+       colored by level (data-tier), never by the card's category season,
        so every member on the same level looks the same. */
     const badge = (TIERS[m.tier]?.rank ?? 9) < TIERS.basic.rank
       ? `<span class="badge" data-tier="${m.tier}">${esc(TIERS[m.tier].label)}</span>` : '';
@@ -1332,7 +1332,7 @@ function resourcesPage() {
 <div class="pagehead" data-season="winter">
   <div class="wrap">
     <h1>Business resources</h1>
-    <p>Sorted by the problem you are trying to solve rather than by who runs the programme.</p>
+    <p>Sorted by the problem you are trying to solve rather than by who runs the program.</p>
   </div>
 </div>
 <div class="wrap band">
@@ -1533,7 +1533,7 @@ function involvedPage() {
 <div class="band warm">
   <div class="wrap"><div class="col">
     <h2>Who is on the board</h2>
-    <p>Directors are elected by the membership and serve as volunteers. They set the budget, approve programmes, and decide what the chamber says on behalf of local business.</p>
+    <p>Directors are elected by the membership and serve as volunteers. They set the budget, approve programs, and decide what the chamber says on behalf of local business.</p>
   </div>
   <div class="people">${board}</div>
   <div class="col">

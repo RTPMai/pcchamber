@@ -32,18 +32,18 @@ const SITE = {
   org: 'Polk City Area Chamber of Commerce',
   intro:
     'New laws, the November ballot, and local decisions that affect businesses here. Each one is explained in plain language, with links so you can check it yourself.',
-  reviewedOn: 'September 1, 2026',
-  reviewedOnISO: '2026-09-01',
+  reviewedOn: 'October 12, 2026',
+  reviewedOnISO: '2026-10-12',
 
   /* Set this to whatever reviewedOnISO used to be, each time you review.
      Anything added or updated after this date gets a "New" or "Updated"
      badge and shows in the What's new list on the home page.
      Leave it empty on the very first launch, when everything is new. */
-  previousReviewISO: '',
+  previousReviewISO: '2026-09-01',
 
   /* The same date written the way a person reads it. Shows up as
      "What changed since August 1, 2026" on the home page. */
-  previousReviewLabel: '',
+  previousReviewLabel: 'September 1, 2026',
 
   cadence: 'Reviewed monthly',
   contactEmail: 'admin@polkcitychamber.com',
@@ -80,7 +80,7 @@ const TOOLS = [
   {
     title: 'Where do I vote?',
     blurb: 'The official polling place lookup. Polls are open 7 a.m. to 8 p.m.',
-    url: 'https://apps.sos.iowa.gov/elections/voterreg/pollingplace/search.aspx',
+    url: 'https://sos.iowa.gov/voters/find-my-precinctpolling-place',
   },
   {
     title: 'What district am I in?',
@@ -100,7 +100,7 @@ const TOOLS = [
   {
     title: 'Chamber business resources',
     blurb: 'Our list of places that help with funding, licensing, and business advice.',
-    url: 'https://polkcitychamber.com/business-resources',
+    url: '/resources/',
   },
 ];
 
@@ -333,6 +333,7 @@ const ENTRIES = [
     id: 'tax-federal-changes',
     group: 'tax',
     added: '2026-09-01',
+    updated: '2026-10-12',
     topics: ['tax', 'money'],
     title: 'Federal tax rules changed a lot, mostly in small business favor',
     meta: 'One Big Beautiful Bill Act, signed July 4, 2025',
@@ -340,10 +341,10 @@ const ENTRIES = [
     body: `
       <p>A federal tax law signed in July 2025 rewrote several rules that matter to small businesses. Most took effect for the 2025 tax year, with more kicking in for 2026. The short version of what changed:</p>
       <ul>
-        <li><strong>Full expensing of equipment came back.</strong> You can deduct 100% of the cost of qualifying equipment in the year you put it into service, rather than a little each year. This was in the middle of being phased out. It was restored.</li>
+        <li><strong>Full expensing of equipment came back.</strong> You can deduct 100% of the cost of qualifying equipment in the year you put it into service, rather than a little each year. This was in the middle of being phased out. It was restored permanently for property bought after January 19, 2025.</li>
         <li><strong>The Section 179 limits went way up.</strong> This is the other way to write off equipment immediately. The ceiling is far above anything a typical Polk City business would hit, which effectively means the limit is no longer the constraint.</li>
-        <li><strong>The pass-through deduction was made permanent.</strong> If you file as a sole proprietor, LLC, partnership, or S corp, this is the deduction on your business income that was set to expire at the end of 2025. It did not expire. There is also a new minimum deduction for anyone with at least a small amount of qualified business income.</li>
-        <li><strong>Research costs are deductible again in the year you spend them</strong>, rather than spread over five years. Relevant if you develop products or software.</li>
+        <li><strong>The pass-through deduction was made permanent.</strong> If you file as a sole proprietor, LLC, partnership, or S corp, this is the deduction on your business income that was set to expire at the end of 2025. It did not expire. Starting in 2026, there is also a new minimum deduction of $400 if you have at least $1,000 of qualified business income from a business you actively work in.</li>
+        <li><strong>Research costs done in the U.S. are deductible again in the year you spend them</strong>, rather than spread over five years. Research done outside the U.S. is still spread over 15 years. Relevant if you develop products or software.</li>
         <li><strong>Meals you provide to employees for your own convenience are no longer deductible</strong> starting in 2026. They used to be half deductible. This is one of the few changes that goes the wrong way.</li>
       </ul>`,
     matters: {
@@ -363,14 +364,15 @@ const ENTRIES = [
     id: 'tax-equipment-vehicles',
     group: 'tax',
     added: '2026-09-01',
+    updated: '2026-10-12',
     topics: ['tax', 'money', 'development'],
     title: 'Buying equipment or a work vehicle? Timing matters right now.',
     meta: 'Section 179 and bonus depreciation',
-    plain: 'Full first-year write-off is confirmed for 2026 but not guaranteed after that. If a purchase is coming anyway, the year you make it can change your tax bill.',
+    plain: 'Full first-year write-off is now permanent for most equipment bought after January 19, 2025. If a purchase is coming anyway, the year you make it can still change which tax bill it lowers.',
     body: `
       <p>There are two ways to deduct the cost of equipment up front, and they work together. Your accountant will pick the combination. What you need to know as an owner:</p>
       <ul>
-        <li><strong>2026 is confirmed at 100%.</strong> Property placed in service this year can be fully deducted. What happens in 2027 is not settled. A phase-down could resume, or Congress could extend it. Watch for legislation late this year.</li>
+        <li><strong>100% is now permanent.</strong> The 2025 law made full first-year write-off permanent for qualifying property bought after January 19, 2025. There is no phase-down scheduled. Timing still matters because it decides which tax year gets the deduction.</li>
         <li><strong>"Placed in service" is the deadline, not "ordered."</strong> Equipment sitting in a crate on December 31 does not count. It has to be installed and ready to use.</li>
         <li><strong>Vehicles are their own mess.</strong> SUVs in the common weight range are capped at a much lower amount than other equipment. Pickups with a long cargo bed and cargo vans without rear seating generally are not. The weight rating on the sticker inside your driver's door is what decides it.</li>
         <li><strong>You need more than half business use</strong> for the vehicle to qualify at all, and your deduction is reduced to the business percentage.</li>
@@ -392,6 +394,7 @@ const ENTRIES = [
     id: 'tax-deductions-basics',
     group: 'tax',
     added: '2026-09-01',
+    updated: '2026-10-12',
     topics: ['tax'],
     title: 'What actually counts as a business deduction',
     meta: 'The rule, and the three things people get wrong',
@@ -412,7 +415,7 @@ const ENTRIES = [
     },
     sources: [
       { label: 'Deducting business expenses', publisher: 'IRS', url: 'https://www.irs.gov/businesses/small-businesses-self-employed/deducting-business-expenses' },
-      { label: 'Business expenses, Publication 535 guidance', publisher: 'IRS', url: 'https://www.irs.gov/forms-pubs/about-publication-535' },
+      { label: 'Guide to business expense resources', publisher: 'IRS', url: 'https://www.irs.gov/forms-pubs/guide-to-business-expense-resources' },
     ],
   },
 
@@ -420,11 +423,11 @@ const ENTRIES = [
     id: 'tax-iowa',
     group: 'tax',
     added: '2026-09-01',
-    updated: '2026-09-01',
+    updated: '2026-10-12',
     topics: ['tax'],
     title: 'Iowa taxes: income, sales, and what is on the ballot',
     meta: 'State level',
-    plain: 'Iowa income tax is a flat 3.8%. The window to protest your property assessment is April 2 to April 30 and it cannot be extended. There is also a tax question on the November ballot.',
+    plain: 'Iowa income tax is a flat 3.8%. The window to protest your property assessment is April 2 to April 30. There is also a tax question on the November ballot.',
     body: `
       <p><strong>Income tax.</strong> Iowa moved to a flat individual rate of 3.8%. For pass-through owners, your business income flows onto your personal return, so this rate is the one that hits you.</p>
       <p><strong>Sales tax and withholding.</strong> Registration, filing schedules, and permits all run through the Iowa Department of Revenue. Filing frequency depends on your volume and can change, so check your notices rather than assuming last year's schedule still applies.</p>
@@ -438,7 +441,7 @@ const ENTRIES = [
           <li><strong>January 1.</strong> The assessment date. Whatever your property was worth that day is what the assessor is valuing, so that is the date your evidence has to speak to.</li>
           <li><strong>By April 1.</strong> Assessment notices go out, but only if your value changed. No notice does not mean no assessment.</li>
           <li><strong>April 2 to April 25.</strong> Informal review with the assessor. This is the easy path. You call, they often walk the property, and if they agree you are done. Free, and no formal filing. Go early. Late requests can get denied simply for lack of time to review them.</li>
-          <li><strong>April 2 to April 30.</strong> Formal written protest to the Board of Review. This is the hard deadline and it cannot be extended. If April 30 falls on a weekend, you get the next business day.</li>
+          <li><strong>April 2 to April 30.</strong> Formal written protest to the Board of Review. This is the hard deadline. It only gets extended in counties under a disaster declaration, which happened in 17 Iowa counties in 2026, not Polk. If April 30 falls on a weekend, you get the next business day.</li>
         </ul>
         <p>One thing that trips people up: you must file with the Board of Review during that window to preserve any later appeal. If you skip it, you cannot go to the state appeal board or district court afterward.</p>
         <p>The test the assessor applies is simple. Could you sell the property for that number today? If yes, the value is probably right. If clearly not, you have a case, and comparable sales are the evidence that wins it.</p>`,
@@ -454,6 +457,7 @@ const ENTRIES = [
     id: 'tax-where-to-get-help',
     group: 'tax',
     added: '2026-09-01',
+    updated: '2026-10-12',
     referrals: 'accounting',
     topics: ['tax', 'money'],
     title: 'Where to get real answers, including free ones',
@@ -479,7 +483,7 @@ const ENTRIES = [
       { label: 'Small business and self-employed tax center', publisher: 'IRS', url: 'https://www.irs.gov/businesses/small-businesses-self-employed' },
       { label: 'Free business counseling', publisher: "America's SBDC Iowa", url: 'https://iowasbdc.org/' },
       { label: 'Coaching and small business loans', publisher: 'The Iowa Center', url: 'https://theiowacenter.org/' },
-      { label: 'Tax scams and consumer alerts', publisher: 'IRS', url: 'https://www.irs.gov/newsroom/tax-scams-consumer-alerts' },
+      { label: 'Recognize tax scams and fraud', publisher: 'IRS', url: 'https://www.irs.gov/newsroom/tax-scamsconsumer-alerts' },
     ],
   },
 
@@ -487,6 +491,7 @@ const ENTRIES = [
     id: 'property-tax-sf2472',
     group: 'law',
     added: '2026-09-01',
+    updated: '2026-10-12',
     topics: ['tax', 'development'],
     title: 'Property taxes are going down. City budgets are getting capped.',
     meta: 'Senate File 2472, signed May 18, 2026, now law',
@@ -494,20 +499,20 @@ const ENTRIES = [
     body: `
       <p>The state expects this law to cut property taxes by about $4.2 billion over six years. Here is what it actually does.</p>
       <ul>
-        <li>Cities and counties can only grow their main budget by 2% a year. A few things are exempt, including school funding and some special levies. County hospitals get 4%. The bus system and emergency management get 3%.</li>
-        <li>Cities and counties cannot keep more than 35% of their yearly spending in savings.</li>
+        <li>Cities and counties can only grow property tax collections on existing property by 2% a year, starting with budgets for July 2027. Taxes on new construction are added on top and do not count against the cap. A few things are exempt, including school funding and some special levies. County hospitals get 4%. The bus system and emergency management get 3%.</li>
+        <li>Starting July 2027, cities and counties cannot keep more than 35% of their yearly spending in savings. Highly rated borrowers are exempt.</li>
         <li>Homeowners get a new discount of 10% off their taxable value, up to $20,000. This does not apply to commercial property.</li>
-        <li>Apartment buildings become their own tax category in 2027. Their taxes go up about 6%, phased in over three years.</li>
-        <li>TIF districts are now capped at 23 years. After year 20, the city can only use 60% of the money and cannot borrow against it.</li>
+        <li>Apartment buildings become their own tax category with the January 2027 assessment. Their taxable value will be set 3 points higher than houses in 2027 and 6 points higher after that.</li>
+        <li>New TIF districts are capped at 23 years. Existing TIF districts with no end date can keep only 60% of the money after 20 years, and cannot take on new debt while over that limit.</li>
         <li>The Business Property Tax Credit stays at $150,000. But the $125 million the state used to send cities to make up the difference now goes into a state fund instead.</li>
       </ul>`,
     matters: {
       heading: 'What this means in Polk City',
       html: `
         <p>About 90% of our property tax base is houses. Only about 10% is businesses. The city council has said its number one goal is bringing in more commercial development, so homeowners are not carrying so much of the load.</p>
-        <p>Now here is the tension. Polk City is growing much faster than 2% a year. Every new house means more streets to plow, more water to treat, and more calls for police. But the money the city can collect is capped at 2%. Something has to give. Usually that shows up as slower projects, thinner services, or new fees.</p>
-        <p>The TIF change matters even more. TIF is how a small city makes the numbers work on a commercial project. Shortening it to 23 years makes some of those deals harder to close. That is a direct hit to the exact goal the city is chasing.</p>
-        <p>If you own an apartment building or a mixed use building, your taxes go up starting in 2027. Worth mentioning to your accountant before you set next year's budget.</p>`,
+        <p>Now here is the tension. The 2% cap applies to taxes on existing property. Taxes on new houses and buildings are added on top, so growth still brings in money. But every existing home's share is capped, while costs for streets, water, and police keep rising. If those costs rise faster than 2%, something has to give. Usually that shows up as slower projects, thinner services, or new fees.</p>
+        <p>The TIF change matters even more. TIF is how a small city makes the numbers work on a commercial project. Capping new districts at 23 years makes some of those deals harder to close. That is a direct hit to the exact goal the city is chasing.</p>
+        <p>If you own an apartment building or a mixed use building, your taxes start going up with the 2027 assessment, which hits bills due in fall 2028. Worth mentioning to your accountant before you set next year's budget.</p>`,
     },
     sources: [
       { label: 'A clear breakdown of what the law changes', publisher: 'Iowa Capital Dispatch', url: 'https://iowacapitaldispatch.com/2026/05/18/gov-kim-reynolds-signs-property-tax-law-projected-to-save-4-2-billion-over-6-years/' },
@@ -521,19 +526,21 @@ const ENTRIES = [
     id: 'business-court-sf639',
     group: 'law',
     added: '2026-09-01',
+    updated: '2026-10-12',
     topics: ['development'],
     title: 'Iowa now has a court just for big business lawsuits',
-    meta: 'Senate File 639, now law',
-    plain: 'Two judges will handle large business disputes. Only applies to cases worth $500,000 or more, so most small businesses will never see it.',
+    meta: 'Senate File 639, in effect since September 1, 2026',
+    plain: 'Two judges now handle large business disputes. It only applies to cases seeking $200,000 or more, or cases mainly asking a judge to order someone to do or stop doing something. Most small businesses will never see it.',
     body: `
-      <p>Two judges are set aside to handle complicated business lawsuits. To qualify, a case has to involve at least $500,000.</p>
+      <p>Two judges, Jeffrey Bert and David Nelmark, are set aside to handle complicated business lawsuits. The court opened September 1, 2026. To qualify, a case has to seek at least $200,000 in damages, or mainly ask the court for an order instead of money.</p>
       <p>The kinds of cases it covers include contract fights, fraud, technology and patent licensing, trade secrets, non-compete agreements, commercial real estate disputes, and shareholder cases.</p>`,
     matters: {
       heading: 'What this means for you',
       html: `<p>For most Main Street businesses, nothing changes. The dollar threshold is too high. It matters if you are signing a large contract, a franchise deal, or a big commercial lease. Knowing a dispute would get resolved faster changes whether a fight is worth having. Most relevant to construction, development, and larger manufacturers.</p>`,
     },
     sources: [
-      { label: 'What the business court covers', publisher: 'NFIB Iowa', url: 'https://www.nfib.com/news/news/the-iowa-legislative-session-recap/' },
+      { label: 'The law as passed', publisher: 'Iowa Legislature', url: 'https://www.legis.iowa.gov/docs/publications/LGE/91/SF639.pdf' },
+      { label: 'The two judges appointed to the business court', publisher: 'Iowa Judicial Branch', url: 'https://www.iowacourts.gov/announcements/chief-justice-christensen-appoints-judge-jeffrey-d-bert-and-judge-david-nelmark-to-serve-exclusivel' },
     ],
   },
 
@@ -541,14 +548,15 @@ const ENTRIES = [
     id: 'faster-filings-sf629',
     group: 'law',
     added: '2026-09-01',
+    updated: '2026-10-12',
     topics: ['development'],
-    title: 'Business paperwork at the state should move faster',
+    title: 'You can now pay for rush service on state business filings',
     meta: 'Senate File 629, effective July 1, 2026',
-    plain: 'Filing an LLC or getting a certificate of good standing should take less time than it used to.',
-    body: `<p>The law speeds up how quickly the Secretary of State processes business filings.</p>`,
+    plain: 'If you need an LLC or other business filing done fast, you can now pay extra for rush service, as quick as one hour.',
+    body: `<p>The Secretary of State now offers paid rush service on business filings: one hour ($200), same day ($125), two days ($50), or five days ($15), on top of the regular fee. You also get written confirmation when it is filed. Regular processing did not change.</p>`,
     matters: {
       heading: 'What this means for you',
-      html: `<p>Small, but useful. If you are starting an LLC, selling your business, or need a certificate of good standing for your bank, expect a shorter wait. Good to know if you are planning around a deadline.</p>`,
+      html: `<p>Small, but useful. If you are starting an LLC, closing a sale, or up against a bank deadline, you can now buy your way to a faster filing instead of waiting in line.</p>`,
     },
     sources: [
       { label: 'New laws taking effect this summer and fall', publisher: 'NFIB Iowa', url: 'https://www.nfib.com/news/news/a-strong-season-for-iowa-small-business/' },
@@ -560,12 +568,13 @@ const ENTRIES = [
     id: 'child-care-hf2514',
     group: 'law',
     added: '2026-09-01',
+    updated: '2026-10-12',
     referrals: 'childcare',
     topics: ['workforce'],
     title: 'Child care workers can now get child care help, permanently',
     meta: 'House File 2514, effective July 1, 2026',
     plain: 'A program that helps daycare staff afford their own child care is now permanent. That should mean more open daycare spots locally, which makes it easier for you to hire.',
-    body: `<p>Since 2023 this had been a temporary pilot program. It is now permanent. People who work in child care can get state child care assistance no matter what they earn.</p>`,
+    body: `<p>Since 2023 this had been a temporary pilot program. It is now permanent. People who work in child care can get state child care assistance no matter what they earn, as long as they work at least 32 hours a week in child care.</p>`,
     matters: {
       heading: 'What this means for you',
       html: `<p>Think of this as a hiring issue, not a social program. Daycares here are short staffed, which means fewer open spots, which means parents cannot take shifts. Helping daycares keep employees opens up spots for everyone else's workers. If you run a daycare or are thinking about opening one, this changes your staffing math directly.</p>`,
@@ -579,17 +588,18 @@ const ENTRIES = [
     id: 'startup-investment-sf2453',
     group: 'law',
     added: '2026-09-01',
+    updated: '2026-10-12',
     topics: ['development'],
-    title: 'State universities have to invest in Iowa startups',
+    title: 'State universities have to invest in startups built on their research',
     meta: 'Senate File 2453, must comply by July 1, 2027',
-    plain: 'Somewhere between $39 and $49 million is headed toward Iowa startups. The money is not available yet. We will post it here when it is.',
-    body: `<p>Iowa, Iowa State, and UNI each have to put 1% of their endowment into approved funds that invest in Iowa startups. That works out to roughly $39 to $49 million. They can ask for a waiver if the market makes it a bad idea.</p>`,
+    plain: 'Roughly $39 million or more is headed to funds that back startups coming out of Iowa, Iowa State, and UNI research. Most local businesses will not be eligible.',
+    body: `<p>Iowa, Iowa State, and UNI each have to put at least 1% of their foundation endowments into state-certified innovation funds that back companies built on university research. That works out to roughly $39 million or more. The law takes effect December 31, 2026, and the money has to be in place by July 1, 2027. A foundation can get a one-year waiver if there are not enough good funds or the market is bad.</p>`,
     matters: {
       heading: 'What this means for you',
-      html: `<p>Nothing to do yet. The funds have to be set up before any money moves. If you are building something that could grow fast, the useful thing is knowing when the door opens. We will watch for it.</p>`,
+      html: `<p>For most members, nothing. This money is for companies spun out of university research. If you are building something on technology licensed from one of the three universities, talk to that school's research office about which funds qualify.</p>`,
     },
     sources: [
-      { label: 'How the investment requirement works', publisher: 'NFIB Iowa', url: 'https://www.nfib.com/news/news/the-iowa-legislative-session-recap/' },
+      { label: 'The law as passed', publisher: 'Iowa Legislature', url: 'https://www.legis.iowa.gov/docs/publications/LGE/91/SF2453.pdf' },
       { label: 'State help for small businesses and startups', publisher: 'Opportunity Iowa', url: 'https://opportunityiowa.gov/business/small-business-entrepreneurs/small-business-resources' },
     ],
   },
@@ -598,16 +608,19 @@ const ENTRIES = [
     id: 'cdl-english-sf2426',
     group: 'law',
     added: '2026-09-01',
+    updated: '2026-10-12',
     topics: ['workforce'],
     title: 'New English test for commercial drivers',
-    meta: 'Senate File 2426, now law',
-    plain: 'Anyone applying for a CDL now has to pass an English test. If you hire drivers, expect a smaller pool of applicants.',
-    body: `<p>People applying for a commercial driver's license now have to pass an English proficiency test before they can be licensed.</p>`,
+    meta: 'Senate File 2426, testing starts by March 1, 2027',
+    plain: 'By March 1, 2027, anyone getting or renewing a CDL will have to pass an English test. Employers can already be fined $10,000 per driver who does not meet the federal English standard.',
+    body: `<p>Starting by March 1, 2027, or sooner if the DOT finishes its new records system, anyone applying for or renewing a CDL or learner's permit will have to pass a computer-based English test.</p>
+      <p>Drivers already have to meet the federal English standard, and the penalties are in place now. A driver who does not meet it faces a serious misdemeanor and a $1,000 fine. A carrier faces a $10,000 fine per driver and can be ordered off the road in Iowa.</p>`,
     matters: {
       heading: 'What this means for you',
-      html: `<p>If you hire drivers for trucking, delivery, construction, or farm work, this is a new step for anyone you recruit. Finding drivers was already hard. Build extra time into your hiring plans.</p>`,
+      html: `<p>If you hire drivers for trucking, delivery, construction, or farm work, the fine lands on you, not just the driver. Check your current drivers now, and build the test into hiring and renewal plans before March. Finding drivers was already hard.</p>`,
     },
     sources: [
+      { label: 'The law as passed', publisher: 'Iowa Legislature', url: 'https://www.legis.iowa.gov/docs/publications/LGE/91/SF2426.pdf' },
       { label: 'Notable bills from this session', publisher: 'Iowa Capital Dispatch', url: 'https://iowacapitaldispatch.com/2026/05/04/the-2026-legislative-session-is-over-heres-what-passed-failed-and-what-is-already-iowa-law/' },
     ],
   },
@@ -616,13 +629,14 @@ const ENTRIES = [
     id: 'bills-returning-2027',
     group: 'law',
     added: '2026-09-01',
+    updated: '2026-10-12',
     topics: ['tax', 'workforce', 'development'],
     title: 'Three bills that failed and will probably be back',
     meta: 'Did not pass in 2026. Speak up before January.',
     plain: 'Right to repair, energy costs, and penny rounding all died this year. Lawmakers usually try again. Now is when your opinion counts.',
     body: `
       <ul>
-        <li><strong>Right to repair.</strong> Would affect equipment dealers, repair shops, and farms.</li>
+        <li><strong>Right to repair.</strong> Would have required farm equipment makers to sell parts, tools, and software to independent repair shops and owners. Would affect equipment dealers, repair shops, and farms.</li>
         <li><strong>Energy costs.</strong> A package of changes to utility and energy rules for employers.</li>
         <li><strong>Penny rounding.</strong> Rounding cash transactions at the register.</li>
       </ul>`,
@@ -642,6 +656,7 @@ const ENTRIES = [
     id: 'grants-start-here',
     group: 'grants',
     added: '2026-09-01',
+    updated: '2026-10-12',
     referrals: 'banking',
     topics: ['money'],
     title: 'Start here before you chase any grant',
@@ -665,7 +680,7 @@ const ENTRIES = [
       { label: 'Find your local SBDC counselor', publisher: "America's SBDC Iowa", url: 'https://iowasbdc.org/' },
       { label: 'Coaching and small business loans', publisher: 'The Iowa Center', url: 'https://theiowacenter.org/' },
       { label: 'Search Iowa business resources', publisher: 'IASourceLink', url: 'https://www.iasourcelink.com/' },
-      { label: 'The chamber resource list', publisher: 'Polk City Area Chamber', url: 'https://polkcitychamber.com/business-resources' },
+      { label: 'The chamber resource list', publisher: 'Polk City Area Chamber', url: '/resources/' },
     ],
   },
 
@@ -673,28 +688,28 @@ const ENTRIES = [
     id: 'grants-training-staff',
     group: 'grants',
     added: '2026-09-01',
-    updated: '2026-09-01',
+    updated: '2026-10-12',
     referrals: 'hr',
     topics: ['money', 'workforce'],
     title: 'Money to train the people you already have',
     meta: 'Iowa Workforce Development and IEDA. Ongoing.',
-    plain: 'Manufacturers can get 80% of training costs reimbursed through a new program open right now. Other programs cover internships, apprenticeships and training your existing staff. This is the most overlooked money on this page.',
+    plain: 'Smaller manufacturers can get up to 80% of training costs back through a new program, if a new round opens. Other programs cover apprenticeships and training your existing staff. This is the most overlooked money on this page.',
     body: `
-      <p><strong>Open right now: AMP'D Iowa.</strong> Advanced Manufacturing Pathways Development is a new program that opened June 29, 2026, funded by a $4.7 million federal grant. Eligible manufacturers get reimbursed for <strong>up to 80% of training costs</strong>, capped at $4,000 per employee and $250,000 per employer. It covers both new hires and people already on your payroll. You need a manufacturing classification and an Iowa location, and priority goes to small and medium employers. Applications are on IowaGrants.gov.</p>
+      <p><strong>AMP'D Iowa.</strong> Advanced Manufacturing Pathways Development is a new program funded by a $4.7 million federal grant. It opened June 29, 2026, and the first application deadline was July 24, 2026. The state does not show a new round yet, so call Iowa Workforce Development before you plan around it.</p>
+      <p>Manufacturers with fewer than 250 full-time employees get <strong>80% of training costs</strong> back. Those with 250 to 499 get 65%, and 500 or more get 50%. The cap is $4,000 per employee and $250,000 per employer. The state pays in two parts: when training ends, and after the worker stays six months. It covers new hires and people already on your payroll. You need a manufacturing industry code (NAICS 31 to 33) and an Iowa location, the job has to be on the federal list of eligible occupations, and you cannot have had permanent layoffs in the last six months. Applications are on IowaGrants.gov.</p>
       <p>Several longer-running programs help with the same problem.</p>
       <ul>
-        <li><strong>Iowa Jobs Training Program, known as 260F.</strong> Helps pay to train employees you already have. Runs through the community colleges, which for us means DMACC.</li>
-        <li><strong>Registered Apprenticeship.</strong> Training grants covering more than 1,000 occupations, administered by Iowa Workforce Development. Not just the building trades.</li>
-        <li><strong>Student Internship Program.</strong> Grants to small and medium companies in targeted industries to run paid internships.</li>
-        <li><strong>STEM Internship Program.</strong> Same idea, for science, technology, engineering, and math roles.</li>
-        <li><strong>Community College Consortium, known as 260.</strong> For training projects where two or more businesses go in together.</li>
-        <li><strong>Child care grants for employers.</strong> Iowa Workforce Development runs grants for projects that help employers expand child care options for their workers. Worth a look given how tight local capacity is.</li>
+        <li><strong>Iowa Jobs Training Program, known as 260F.</strong> Helps pay to train employees you already have. Now run by Iowa Workforce Development. It is for businesses that manufacture, process, assemble, or do research and development. Retail, health care, and professional services businesses cannot use it.</li>
+        <li><strong>Registered Apprenticeship.</strong> Yearly grants for businesses that already sponsor a registered apprenticeship program, covering more than 1,000 occupations. Not just the building trades. The last window ran January 2 to February 2, 2026. Set up your program first, then apply in January.</li>
+        <li><strong>Internship programs.</strong> The state's two internship grants, for innovative businesses and for STEM roles, are both closed for the year that runs July 2026 to June 2027 because the Legislature changed their funding. Check back next year.</li>
+        <li><strong>Community College Consortium, part of the 260F program.</strong> For training projects where two or more businesses go in together. The same retail, health care, and professional services exclusion applies.</li>
+        <li><strong>Child care grants for employers.</strong> Iowa Workforce Development has run Child Care Business Incentive Grants in past years to help employers expand child care for their workers. They are not open now, but watch for a new round given how tight local capacity is.</li>
       </ul>`,
     matters: {
       heading: 'Why this fits Polk City',
       html: `
-        <p>Most Polk City businesses are too small to run a training budget. These programs are built for exactly that situation, and most apply to people already on your payroll, not just new hires.</p>
-        <p>If you are a manufacturer, look at AMP'D first. An 80% reimbursement is a better deal than almost anything else on this page, and it is open now rather than on a future window.</p>
+        <p>Most Polk City businesses are too small to run a training budget. These programs are built for exactly that situation, and most apply to people already on your payroll, not just new hires. Be aware that most of them are aimed at manufacturing and similar work.</p>
+        <p>If you are a smaller manufacturer, call about AMP'D first. An 80% reimbursement is a better deal than almost anything else on this page, so it is worth asking when the next round opens.</p>
         <p>The consortium option is worth a look for the chamber itself. If several members need similar training, going in together may unlock money none of you could get alone. Tell the chamber if that interests you.</p>`,
     },
     sources: [
@@ -708,12 +723,13 @@ const ENTRIES = [
     id: 'grants-targeted-small-business',
     group: 'grants',
     added: '2026-09-01',
+    updated: '2026-10-12',
     topics: ['money'],
     title: 'If you are a woman, minority, veteran with a service-connected disability, or a person with a disability',
     meta: 'Targeted Small Business certification, IEDA',
     plain: 'Free state certification that gets you early access to state contracts and the right to sell up to $25,000 to state agencies without competitive bidding.',
     body: `
-      <p>Iowa's Targeted Small Business program certifies businesses that are at least 51% owned, operated, and actively managed by a woman, a person with minority status, a service-disabled veteran, or a person with a disability.</p>
+      <p>Iowa's Targeted Small Business program certifies businesses that are at least 51% owned, operated, and actively managed by a woman, a person with minority status, a service-disabled veteran, or a person with a disability. If the business has a board, at least 51% of the board must also be from these groups.</p>
       <p><strong>To qualify you must:</strong></p>
       <ul>
         <li>Be located in Iowa</li>
@@ -726,7 +742,7 @@ const ENTRIES = [
         <li>Bond waivers of up to $50,000 on state construction projects</li>
         <li>The ability to sell up to $25,000 in goods or services to a state agency without competitive bidding</li>
         <li>A listing in the public directory that both government and private buyers use</li>
-        <li>Free business counseling</li>
+        <li>Introductions to free business help and state purchasing contacts</li>
       </ul>`,
     matters: {
       heading: 'Why this is worth an afternoon',
@@ -734,10 +750,11 @@ const ENTRIES = [
         <p>The certification itself costs nothing. The $4 million ceiling means nearly every chamber member who fits the ownership criteria qualifies on size.</p>
         <p>The part people miss is the procurement side. State agencies have to report how much they buy from certified businesses. That is a real sales channel, not a token gesture, and most eligible owners never sign up for it.</p>
         <p><strong>Who this is not for.</strong> If you do not sell to the state, certification is paperwork with no payoff. A restaurant, a boutique or a lawn care business will get nothing out of it. A contractor, printer, IT firm or marketing agency will.</p>
-        <p>The programme used to include low-interest loans of up to $50,000. That is no longer on the IEDA programme page and should not be relied on. Third-party sites still describe it as current.</p>`,
+        <p><strong>There is also a loan.</strong> IEDA offers Targeted Small Business loans of up to $50,000 to start or expand. They can pay for equipment, furnishings, inventory, and some operating costs, but not real estate. You do not have to be certified to apply, and loan recipients get free business counseling. Start with the pre-application form and email it to tsbloan@iowaeda.com.</p>`,
     },
     sources: [
       { label: 'Program details and how to qualify', publisher: 'Opportunity Iowa', url: 'https://opportunityiowa.gov/business/small-business-entrepreneurs/small-business-resources/targeted-small-business-program' },
+      { label: 'TSB loans and the pre-application form', publisher: 'Opportunity Iowa', url: 'https://opportunityiowa.gov/business/small-business-entrepreneurs/small-business-resources/targeted-small-business-program/tsb-loans' },
       { label: 'Start a certification application', publisher: 'Iowa Economic Development Authority', url: 'https://iowaeda.microsoftcrmportals.com/tsb-application-start/' },
       { label: 'What certification gets you as a state vendor', publisher: 'Iowa Dept. of Administrative Services', url: 'https://das.iowa.gov/vendors/targeted-small-business-program' },
     ],
@@ -747,16 +764,16 @@ const ENTRIES = [
     id: 'grants-food-and-farm',
     group: 'grants',
     added: '2026-09-01',
-    updated: '2026-09-01',
+    updated: '2026-10-12',
     topics: ['money', 'development'],
     title: 'Food, farm, and anything you make from Iowa products',
-    meta: 'Choose Iowa Value-Added Grants. Window opens about Dec. 1, closes mid-January.',
-    plain: 'Up to $25,000 for equipment, a commercial kitchen, or an on-farm store. You have to match it dollar for dollar, and small businesses get preference.',
+    meta: 'Choose Iowa Value-Added Grants. Window opens Dec. 1, 2026, closes Jan. 15, 2027.',
+    plain: 'Up to $25,000 for equipment, a commercial kitchen, or an on-farm store. You have to match it dollar for dollar, and small and medium businesses get preference.',
     body: `
       <p>The Iowa Department of Agriculture runs cost-share grants to help businesses sell more Iowa agricultural products, either by producing more or by reaching new markets.</p>
       <p><strong>What it covers:</strong> equipment used to produce value-added agricultural products, an on-farm store or commercial kitchen, and food hub development or expansion.</p>
-      <p><strong>The rules:</strong> up to $25,000. You must match the grant one to one from private sources, in cash, financing or other grant funds. In-kind contributions do not count. The project cannot already be underway when you apply, and it has to finish within 12 months. Preference goes to businesses under 50 employees. Applications are scored and you need at least 70 points to be considered.</p>
-      <p><strong>The timing.</strong> The window has opened around December 1 and closed at noon in mid-January in recent years. The last round closed January 16. That is a short window over the holidays, so decide in November, not December.</p>
+      <p><strong>The rules:</strong> up to $25,000. You must match the grant one to one from private sources, in cash, financing or other grant funds. In-kind contributions do not count. You cannot start the project or buy anything until the grant agreement is signed, and it has to finish within 12 months. Preference goes to small and medium businesses, meaning up to 250 full-time employees. Applications are scored and you need at least 70 points to be considered.</p>
+      <p><strong>The timing.</strong> The next window opens December 1, 2026 and closes at noon on January 15, 2027. Winners are expected in late March. That is a short window over the holidays, so decide in November, not December.</p>
       <p><strong>An important exception.</strong> Meat and dairy processing projects are <em>not</em> eligible for this grant. They have their own separate programs, the Butchery Innovation Grant and the Dairy Innovation Grant, on the same website.</p>`,
     matters: {
       heading: 'Who this actually fits here',
@@ -774,27 +791,28 @@ const ENTRIES = [
     id: 'grants-manufacturers-and-startups',
     group: 'grants',
     added: '2026-09-01',
-    updated: '2026-09-01',
+    updated: '2026-10-12',
     topics: ['money', 'development'],
-    title: 'Manufacturers, inventors, and anyone selling outside Iowa',
+    title: 'Manufacturers, inventors, and anyone selling overseas',
     meta: 'CIRAS, IEDA Innovation Continuum, and STEP',
-    plain: 'Equipment grants up to $50,000 for manufacturers, up to $75,000 for federal research applications, and reimbursement for the cost of finding customers in other states or countries.',
+    plain: 'Technology grants up to $75,000 for manufacturers, up to $75,000 for federal research applications, and help with the cost of finding customers in other countries. The manufacturing assessment window is open now.',
     body: `
-      <p><strong>Manufacturing 4.0 Technology Investment Program.</strong> Equipment grants up to $50,000, and connected-technology infrastructure grants up to $25,000. You can apply for both, but $75,000 is the lifetime maximum for a business.</p>
-      <p>The conditions are specific. You need a <strong>1 to 1 cash match</strong>, from a private source. In-kind does not count. You need 3 to 124 full-time employees across all locations, at least 51% of revenue from selling manufactured goods, at least three years in operation, and good standing with the Iowa Department of Revenue. Failure on that last one is an automatic denial.</p>
-      <p><strong>The timing trap on this one is brutal.</strong> A CIRAS assessment from Iowa State is required and must be submitted with the application. But the window to <em>request</em> the assessment closes months before applications open. For the round that opened January 5, the assessment request window had already closed on November 21. If you wait until you see applications open, you have missed it by six weeks. Ask CIRAS about the assessment in the fall.</p>
+      <p><strong>Manufacturing 4.0 Technology Investment Program.</strong> Grants of up to $75,000 over the life of the business, for smart manufacturing equipment and connected-technology hardware or software.</p>
+      <p>The conditions are specific. You need a <strong>1 to 1 cash match</strong>, from a private source. In-kind does not count. You need a manufacturing industry code (NAICS 31 to 33), 3 to 124 full-time employees across all locations, at least 51% of revenue from selling manufactured goods, at least three years in operation, and good standing with the Iowa Department of Revenue. Failure on that last one is an automatic denial.</p>
+      <p><strong>The timing trap on this one is brutal.</strong> A CIRAS assessment from Iowa State is required and must be submitted with the application. But the window to <em>request</em> the assessment closes months before applications open. <strong>For the next round, you can request a CIRAS assessment from September 8 through November 20, 2026.</strong> Applications open January 4, 2027 and close January 29, 2027 on IowaGrants.gov. If you wait until you see applications open, you have missed it.</p>
       <p><strong>America's Seed Fund support.</strong> If you are going after a federal SBIR or STTR research grant, Iowa will put in up to $75,000. That is $50,000 once you win a phase one award and another $25,000 when you submit a phase two proposal.</p>
       <p><strong>The Iowa Innovation Continuum.</strong> Five state-backed funds that invest in Iowa companies through loans or royalty agreements rather than plain grants. These are for technology and high growth businesses, not Main Street retail.</p>
-      <p><strong>STEP export grant.</strong> Reimburses eligible small businesses for the cost of expanding into markets outside Iowa.</p>`,
+      <p><strong>Export help.</strong> IEDA's export programs, partly paid for by the federal STEP grant, pay back 75% of some costs, up to $8,000. That covers trade shows abroad, U.S. trade shows with a lot of foreign buyers, and translating your website or marketing for another country. They are only for selling outside the United States, not to other states. Apply at least 45 days before the event.</p>`,
     matters: {
       heading: 'Be honest about whether this is you',
       html: `
         <p>Most of these are not for a retail shop or a service business. They are for manufacturers, product companies, and technology startups.</p>
-        <p>The manufacturing grants are the most likely fit for a Polk City area member. If you make something in a building with equipment in it, the CIRAS assessment is worth the call regardless of whether you apply, and the call needs to happen in autumn.</p>`,
+        <p>The manufacturing grants are the most likely fit for a Polk City area member. If you make something in a building with equipment in it, the CIRAS assessment is worth the call regardless of whether you apply, and the request window closes November 20.</p>`,
     },
     sources: [
       { label: 'Manufacturing 4.0 rules, match and deadlines', publisher: 'Opportunity Iowa', url: 'https://opportunityiowa.gov/business/financial-assistance/manufacturing-40-technology-investment' },
       { label: 'Grants and funding programs', publisher: 'Opportunity Iowa', url: 'https://opportunityiowa.gov/business/financial-assistance/grants-funding' },
+      { label: 'Export assistance programs', publisher: 'Opportunity Iowa', url: 'https://opportunityiowa.gov/business/international-trade/financial-services' },
       { label: 'Where these applications are filed', publisher: 'IowaGrants.gov', url: 'https://www.iowagrants.gov/' },
     ],
   },
@@ -803,6 +821,7 @@ const ENTRIES = [
     id: 'grants-nonprofit-and-community',
     group: 'grants',
     added: '2026-09-01',
+    updated: '2026-10-12',
     topics: ['money', 'development'],
     title: 'Community project money, and the catch on it',
     meta: 'Prairie Meadows and Polk County. Applications open December, close late February.',
@@ -810,8 +829,8 @@ const ENTRIES = [
     body: `
       <p>Since 1989, Polk County and Prairie Meadows have put more than $1.8 billion back into the community through grant programs. There are two related tracks.</p>
       <p><strong>Prairie Meadows grants.</strong> Community Betterment Grants run from $100 to $99,999 for small and medium projects. Legacy Grants run from $100,000 to $1 million for large signature projects. Applications typically open in December and close at the end of February. Categories include arts and culture, economic development, education, and health and human services.</p>
-      <p><strong>Polk County Community Betterment Grants.</strong> Funded from the county's share of Prairie Meadows profits and awarded by the Board of Supervisors.</p>
-      <p><strong>The eligibility catch.</strong> Applicants must be nonprofit, tax-exempt organizations. A for-profit business cannot apply directly. Organizations under religious management are not eligible for the county program under state law.</p>`,
+      <p><strong>Polk County grants.</strong> Funded from the county's share of Prairie Meadows profits and awarded by the Board of Supervisors. Community Betterment Grants run $500 to $10,000, and you apply December 1 to February 28. Community Development Grants for larger projects run $15,000 to $100,000, and you apply July 1 to August 31.</p>
+      <p><strong>The eligibility catch.</strong> Applicants must be nonprofits with IRS tax-exempt status, or a city, county, public school district, or church. A for-profit business cannot apply directly. Legacy Grant projects must be mainly in Polk or a nearby county. Organizations under religious management are not eligible for the county program under state law.</p>`,
     matters: {
       heading: 'How a business actually uses this',
       html: `
@@ -830,14 +849,15 @@ const ENTRIES = [
     id: 'grants-where-to-look',
     group: 'grants',
     added: '2026-09-01',
+    updated: '2026-10-12',
     topics: ['money'],
     title: 'Where to look for everything else',
     meta: 'Two official listings, plus one common trap',
-    plain: 'IowaGrants.gov lists every state grant. Grants.gov lists every federal one. And no, most USDA rural programs will not work here, for a reason worth understanding.',
+    plain: 'IowaGrants.gov lists every state grant. Grants.gov lists every federal one. And USDA rural programs usually will not work here, for a reason worth understanding.',
     body: `
       <p><strong>IowaGrants.gov</strong> is the state's official listing of open grant opportunities. Anyone can browse it. Search by agency or keyword.</p>
       <p><strong>Grants.gov</strong> is the federal equivalent.</p>
-      <p><strong>The USDA rural trap.</strong> People see that Polk City has about 6,500 residents and assume USDA rural business programs apply. Two problems. First, most of those programs only accept applications from a city, county, tribe, or nonprofit, not from the business itself. Second, and more important, eligibility is not just about your town's population. Money has to go to areas outside the built-up edge of any city of 50,000 or more. Polk City sits right against Ankeny, which passed 77,000 people. Check the USDA eligibility map for your specific address before you invest any time.</p>`,
+      <p><strong>The USDA rural trap.</strong> People see that Polk City has about 6,500 residents and assume USDA rural business programs apply. Two problems. First, some of those programs, like Rural Business Development Grants, only take applications from a city, county, tribe, or nonprofit, not from the business itself. Second, and more important, eligibility is not just about your town's population. Money has to go to areas outside the built-up edge of any city of 50,000 or more. Polk City sits right against Ankeny, which passed 77,000 people. Check the USDA eligibility map for your specific address before you invest any time.</p>`,
     matters: {
       heading: 'A word on grant scams',
       html: `
@@ -852,15 +872,44 @@ const ENTRIES = [
   },
 
   {
+    id: 'voting-dates-2026',
+    group: 'ballot',
+    added: '2026-10-12',
+    topics: ['elections'],
+    title: 'Voting dates and deadlines for November 3',
+    meta: 'Early voting starts October 14',
+    plain: 'Early voting opens October 14. Mail ballot requests are due October 19. Polk City has its own early voting day on October 20.',
+    body: `
+      <ul>
+        <li><strong>Wednesday, October 14.</strong> Early voting starts at the Polk County Election Office, 2309 Euclid Ave., Des Moines. Open 8 a.m. to 4:30 p.m. weekdays through November 2, plus Saturday, October 24 (8 a.m. to 4 p.m.) and Saturday, October 31 (8 a.m. to 5 p.m.). Mailed ballots go out the same day.</li>
+        <li><strong>Monday, October 19 at 5 p.m.</strong> Mail ballot requests must be received by the county. Postmarks do not count. This is also the deadline to pre-register. After that you can still register in person when you vote, with ID and proof of address.</li>
+        <li><strong>Tuesday, October 20, 10 a.m. to 4 p.m.</strong> Early voting in Polk City at the Community Room, 200 S. 4th St. Nearby: Heartland Church in Ankeny (October 19), Bondurant Library (October 20), and Johnston Library (October 21 to 24).</li>
+        <li><strong>Tuesday, November 3.</strong> Polls are open 7 a.m. to 8 p.m. Polk City 1 votes at Lakeside Fellowship, 1121 W. Bridge Rd. Polk City 2 votes at Polk City United Methodist Church, 1421 W. Broadway St. Mailed ballots must arrive by 8 p.m. that day, so mail them at least a week early.</li>
+      </ul>
+      <p>Statewide offices are also on the ballot: Attorney General, Secretary of State, Auditor, Treasurer, and Secretary of Agriculture.</p>`,
+    matters: {
+      heading: 'Why this is on a chamber website',
+      html: `<p>Your employees vote too. Posting these dates in the break room costs nothing. If you have staff who work long shifts, the October 20 satellite in town is the easiest way for them to vote without losing time.</p>`,
+    },
+    sources: [
+      { label: 'November 3 voter information and sample ballots', publisher: 'Polk County Auditor', url: 'https://www.polkcountyiowa.gov/county-auditor/election/news-and-press-releases/general-election-november-3-2026-voter-information/' },
+      { label: 'Track your mailed ballot', publisher: 'Iowa Secretary of State', url: 'https://sos.iowa.gov/elections/absenteeballotstatus/absentee/search' },
+      { label: 'Make a plan to vote', publisher: 'Iowa Secretary of State', url: 'https://sos.iowa.gov/news-resources/secretary-pate-encourages-iowans-make-plan-vote-2026-general-election' },
+    ],
+  },
+
+  {
     id: 'income-tax-amendment-sjr11',
     group: 'ballot',
     added: '2026-09-01',
+    updated: '2026-10-12',
     topics: ['tax', 'elections'],
     title: 'Ballot question: make income tax increases harder',
-    meta: 'Senate Joint Resolution 11, you vote on it November 3',
-    plain: 'A yes vote would change the state constitution so raising income taxes needs two thirds of lawmakers instead of a simple majority.',
+    meta: 'Constitutional Amendment 1 on the back of your ballot. It started as Senate Joint Resolution 11.',
+    plain: 'A yes vote would change the state constitution so raising the individual or corporate income tax rate, or creating a new state income tax, needs two thirds of each chamber instead of a simple majority. Local option taxes are not covered.',
     body: `
-      <p>Right now, lawmakers can raise income tax rates with a simple majority vote. This change would require two thirds of both chambers to agree instead.</p>
+      <p>Right now, lawmakers can raise income tax rates with a simple majority vote. This change would require two thirds of both chambers to agree instead. It covers individual and corporate income tax rates and any new state income tax. It does not cover local option taxes.</p>
+      <p>Look for it on the back of the ballot, listed as Constitutional Amendment 1.</p>
       <p>It already passed the Legislature twice, which is what puts it in front of voters. The final vote in the House was 57 to 21 on May 3.</p>
       <p>Some background worth having. Iowa's income tax is currently a flat 3.8%. Next year's state budget is $9.6 billion. It plans to spend about $1.2 billion more than it takes in, covered by drawing down a savings fund.</p>`,
     matters: {
@@ -871,6 +920,7 @@ const ENTRIES = [
         <p>For a business owner, the question underneath this is where the money comes from instead. If income taxes get hard to raise, pressure usually shifts to sales taxes, fees, and property taxes. Property taxes were just capped at the local level. Worth thinking about these two changes together.</p>`,
     },
     sources: [
+      { label: 'Official ballot wording, Polk City sample ballot', publisher: 'Polk County Auditor', url: 'https://www.polkcountyiowa.gov/media/jwwhzzpy/polk_city_1-sample.pdf' },
       { label: 'The amendment, the vote, and the budget picture', publisher: 'NFIB Iowa', url: 'https://www.nfib.com/news/news/the-iowa-legislative-session-recap/' },
       { label: 'Sample ballots and election dates', publisher: 'Polk County Auditor', url: 'https://www.polkcountyiowa.gov/county-auditor/election/' },
     ],
@@ -880,20 +930,21 @@ const ENTRIES = [
     id: 'governor-race',
     group: 'ballot',
     added: '2026-09-01',
+    updated: '2026-10-12',
     topics: ['elections', 'tax'],
     title: 'Governor: an open seat for the first time in 20 years',
-    meta: 'Zach Lahn (R) and Rob Sand (D). Rated a toss-up.',
+    meta: 'Zach Lahn (R) and Rob Sand (D). Rated lean Democratic.',
     plain: 'Kim Reynolds is not running again. Whoever wins sets the tax and business agenda for the next four years.',
     body: `
       <p>Gov. Kim Reynolds is not running for a third term. This is Iowa's first open race for governor since 2006.</p>
       <p>Zach Lahn is a businessman and farmer. He won a five way Republican primary on June 2 by less than one percentage point over Congressman Randy Feenstra, 37.8% to 37.0%.</p>
       <p>Rob Sand is the state auditor and the only Democrat currently holding a statewide office in Iowa. He ran unopposed in his primary.</p>
-      <p>The Cook Political Report, which rates races nationally, calls this one a toss-up.</p>`,
+      <p>The Cook Political Report, which rates races nationally, moved this race from toss-up to lean Democratic in August.</p>`,
     matters: {
       heading: 'Why it matters for business',
       html: `
         <p>The governor drives the tax agenda. How the new property tax law gets carried out, and whether the state changes its business incentives, both run through that office.</p>
-        <p>There is also a practical angle. A close race means both campaigns want local audiences between now and November. If you would like a candidate to come talk to Polk City businesses, this is the year to ask. Tell the chamber.</p>`,
+        <p>There is also a practical angle. A competitive race means both campaigns want local audiences between now and November. If you would like a candidate to come talk to Polk City businesses, this is the year to ask. Tell the chamber.</p>`,
     },
     sources: [
       { label: 'Who is running, and past results', publisher: 'Ballotpedia', url: 'https://ballotpedia.org/Iowa_gubernatorial_and_lieutenant_gubernatorial_election,_2026' },
@@ -906,13 +957,14 @@ const ENTRIES = [
     id: 'senate-race',
     group: 'ballot',
     added: '2026-09-01',
+    updated: '2026-10-12',
     topics: ['elections'],
     title: 'U.S. Senate: another open seat',
     meta: 'Ashley Hinson (R), Josh Turek (D), Thomas Laehn (L)',
     plain: 'Joni Ernst is retiring. The race is close, and the farm economy is the issue driving it.',
     body: `
       <p>Sen. Joni Ernst is retiring after two terms. Ashley Hinson currently represents northeast Iowa in Congress. Josh Turek is a state representative.</p>
-      <p>In August, Cook Political Report moved this race from leaning Republican to a toss-up. They pointed to the farm economy and a tough national climate for Republicans. A recent poll had Hinson ahead 48 to 45.</p>`,
+      <p>In August, Cook Political Report moved this race from leaning Republican to a toss-up. They pointed to the farm economy and a tough national climate for Republicans. Recent polls show a close race. A Fox News poll taken September 24 to 28 had Turek at 49% and Hinson at 47% among likely voters, within the margin of error.</p>`,
     matters: {
       heading: 'Why it matters for business',
       html: `
@@ -929,20 +981,20 @@ const ENTRIES = [
     id: 'congressional-district',
     group: 'ballot',
     added: '2026-09-01',
+    updated: '2026-10-12',
     topics: ['elections'],
     title: 'U.S. House: Polk City is in the 3rd District',
     meta: 'Zach Nunn (R) and Sarah Trone Garriott (D)',
-    plain: 'One of the closest House races in the country runs right through here. Nunn has held the seat since 2022. Trone Garriott is a state senator who has flipped two Republican seats before.',
+    plain: 'One of the closest House races in the country runs right through here. Nunn has held the seat since 2022. Trone Garriott is a state senator from West Des Moines.',
     body: `
-      <p>Polk County is split between Iowa's 3rd and 4th congressional districts. Polk City is in the <strong>3rd</strong>, along with the rest of Senate District 23.</p>
+      <p>All of Polk County, including Polk City, is in Iowa's <strong>3rd</strong> Congressional District.</p>
       <p><strong>Zach Nunn (Republican)</strong> is the incumbent, from Bondurant. He won the seat in 2022 by unseating Cindy Axne, and was reelected in 2024.</p>
       <p><strong>Sarah Trone Garriott (Democrat)</strong> is a state senator from West Des Moines and an ordained Lutheran pastor who works on interfaith engagement for the Des Moines Area Religious Council. She won the June 2 primary. State Rep. Jennifer Konfrst had been running and dropped out in favor of her.</p>
-      <p>This is expected to be one of the most competitive House races in the country. Polling last fall showed Trone Garriott ahead of Nunn in Polk County by a wide margin, while Nunn led comfortably in the rural parts of the district outside Polk and Dallas counties.</p>`,
+      <p>Analysts rate this as one of the most competitive House races in the country.</p>`,
     matters: {
       heading: 'Why this office matters even if you never vote',
       html: `
-        <p>Your congressional office is who you call when a federal agency is sitting on something. A stuck permit, an SBA loan problem, an export question, a dispute with a federal contractor. That is casework, and every congressional office does it regardless of party.</p>
-        <p>Because the district line runs through Polk County, a neighbor a few miles away may have a different office. If your address is near the edge of town, confirm it on the county district maps before you make that call.</p>`,
+        <p>Your congressional office is who you call when a federal agency is sitting on something. A stuck permit, an SBA loan problem, an export question, a dispute with a federal contractor. That is casework, and every congressional office does it regardless of party.</p>`,
     },
     sources: [
       { label: '3rd District race overview', publisher: 'Ballotpedia', url: 'https://ballotpedia.org/Iowa%27s_3rd_Congressional_District_election,_2026' },
@@ -956,7 +1008,7 @@ const ENTRIES = [
     id: 'state-legislature-races',
     group: 'ballot',
     added: '2026-09-01',
-    updated: '2026-09-01',
+    updated: '2026-10-12',
     topics: ['elections', 'tax'],
     title: 'Polk City gets a brand new state senator and a brand new state representative',
     meta: 'Senate District 23 and House District 45, no incumbent in either',
@@ -966,34 +1018,35 @@ const ENTRIES = [
 
       <h4>Senate District 23</h4>
       <p>The district covers rural northern Polk County plus parts of eastern Polk and eastern Dallas counties, including Polk City, Alleman, Elkhart, Granger, Runnells, and parts of Grimes and Urbandale.</p>
-      <p>Jack Whitver of Grimes held the seat and served as Senate Majority Leader from 2018. He announced in September 2025 that he would not run again, citing ongoing treatment following a brain tumor diagnosis. In the June 2 Republican primary, Wes Enos defeated Mike Bousselot, a sitting senator from Ankeny who had moved over to run here with Whitver's backing.</p>
+      <p>Jack Whitver of Grimes held the seat and served as Senate Majority Leader from 2018. He announced in September 2025 that he would not run again, citing ongoing treatment following a brain tumor diagnosis. Mike Bousselot, a state senator from Ankeny, won the June 2 Republican primary over Wes Enos, about 65% to 35%. Bousselot ended his campaign on August 14 to take a private sector job, and on August 19 the Republican Party named Enos as its nominee.</p>
       <ul>
-        <li><strong>Wes Enos (Republican)</strong> of Bondurant.</li>
+        <li><strong>Wes Enos (Republican)</strong>, a former Bondurant City Council member.</li>
         <li><strong>Tony Thompson (Democrat)</strong>, a farmer and business owner from Elkhart. He was unopposed in the primary.</li>
       </ul>
 
       <h4>House District 45</h4>
       <p>The district includes Polk City, Bondurant, Mitchellville, part of Carlisle and nearby communities.</p>
-      <p>Brian Lohse of Bondurant had held the seat since 2019 and was running for a fifth term. He lost the June 2 Republican primary to Austin Stubbs by roughly 75% to 25%. Stubbs was backed by Americans for Prosperity Iowa.</p>
+      <p>Brian Lohse of Bondurant had held the seat since 2019 and was running for a fifth term. He lost the June 2 Republican primary to Austin Stubbs by roughly 75% to 25%.</p>
       <ul>
-        <li><strong>Austin Stubbs (Republican)</strong> of Bondurant.</li>
-        <li><strong>Kendra Haug (Democrat)</strong> of Bondurant. She was unopposed in the primary.</li>
+        <li><strong>Austin Stubbs (Republican)</strong>.</li>
+        <li><strong>Kendra Haug (Democrat)</strong>. She was unopposed in the primary.</li>
       </ul>
-      <p>The Des Moines Register sent questionnaires to candidates in these races covering taxes, education, eminent domain and the state budget. That is the best place to compare them in their own words, and it is linked below.</p>`,
+      <p>Candidate profiles for House District 45 are linked below.</p>`,
     matters: {
       heading: 'Why this is the most important thing on this page for the chamber',
       html: `
         <p>Come January, nobody representing Polk City at the Statehouse will have held the job before. That has not happened here in a long time.</p>
         <p>Everything in the New Laws section came out of these two chambers. The property tax cap, the TIF limits that make commercial development harder to finance, the child care program. Right to repair and the energy bill come back in January. All of it gets decided by people who, as of today, have no record on how any of it affects a business in Polk City.</p>
         <p>That cuts both ways. There is no established relationship to lean on. There is also no fixed position to argue against. A new legislator's first year is when they are most open to hearing from constituents, and both winners will be looking for local footing.</p>
-        <p>Worth noting: all four candidates are from Bondurant or Elkhart. None are from Polk City. Nobody arrives already knowing our commercial development problem or our 90 to 10 tax base. Someone has to tell them, early.</p>
+        <p>Worth noting: nobody arrives already knowing our commercial development problem or our 90 to 10 tax base. Someone has to tell them, early.</p>
         <p>That is the argument for the chamber having an advocacy function at all. If we wait until February, the session is already moving and positions are set.</p>`,
     },
     sources: [
-      { label: 'Candidate questionnaires for House District 45', publisher: 'Des Moines Register', url: 'https://bluewaterhealthyliving.com/news/national-news/iowa/meet-the-candidates-for-iowa-house-district-45-in-polk-county/' },
+      { label: 'House District 45 race overview', publisher: 'Ballotpedia', url: 'https://ballotpedia.org/Iowa_House_of_Representatives_District_45' },
       { label: 'Three Iowa House incumbents lost their primaries', publisher: 'Iowa Capital Dispatch', url: 'https://iowacapitaldispatch.com/briefs/three-iowa-house-incumbents-lose-primary-elections/' },
       { label: 'Wes Enos, the Republican nominee in Senate District 23', publisher: 'Des Moines Register', url: 'https://www.desmoinesregister.com/story/news/politics/elections/2026/08/19/wes-enos-republican-nominee-iowa-senate-district-23-election/91374099007/' },
-      { label: 'Official list of everyone who filed to run', publisher: 'Iowa Secretary of State', url: 'https://sos.iowa.gov/sites/default/files/2026-04/2026%20Primary%20-%20Candidate%20List%20Database%20-%20All%20Elections_1.pdf' },
+      { label: 'Official list of general election candidates', publisher: 'Iowa Secretary of State', url: 'https://sos.iowa.gov/sites/default/files/2026-08/2026%20General%20-%20Candidate%20List%20Database%20-%20All%20Elections_0.pdf' },
+      { label: 'Senate District 23 nominee change', publisher: 'KCRG', url: 'https://www.kcrg.com/2026/08/14/state-sen-mike-bousselot-ends-2026-campaign/' },
       { label: 'Find your legislators by address', publisher: 'Iowa Legislature', url: 'https://www.legis.iowa.gov/legislators/find' },
       { label: 'Look up your full sample ballot', publisher: 'Ballotpedia', url: 'https://ballotpedia.org/Polk_County_Sample_Ballot_(Iowa)' },
     ],
@@ -1003,47 +1056,48 @@ const ENTRIES = [
     id: 'county-township-local-races',
     group: 'ballot',
     added: '2026-09-01',
-    updated: '2026-09-01',
+    updated: '2026-10-12',
     topics: ['elections'],
     title: 'County offices, township officers, and judges',
     meta: 'Also on the November 3 ballot',
-    plain: 'Polk City does not pick a county supervisor this year. But the county attorney, recorder, and treasurer are on everyone\'s ballot, along with township officers, three county boards, and judges.',
+    plain: 'Polk City does not pick a county supervisor this year. But the county attorney, recorder, and treasurer are on everyone\'s ballot, along with three county boards and judges.',
     body: `
       <h4>County supervisor: not your district this year</h4>
       <p>Three of the five seats on the Polk County Board of Supervisors are up, but none of them cover Polk City.</p>
       <ul>
-        <li><strong>District 1:</strong> the southwest side of Des Moines, West Des Moines, Clive, and Windsor Heights.</li>
-        <li><strong>District 4:</strong> east and southeast Des Moines, Pleasant Hill, Runnells, Camp Township, and Four Mile Township. Longtime supervisor Tom Hockensmith is retiring.</li>
+        <li><strong>District 1:</strong> the southwest side of Des Moines, West Des Moines, Clive, and Windsor Heights. Supervisor Matt McCoy lost his June primary to John Forbes.</li>
+        <li><strong>District 4:</strong> east and southeast Des Moines, Pleasant Hill, Runnells, Camp Township, and Four Mile Township. Longtime supervisor Tom Hockensmith is retiring. Heather Jones-Brown (D) faces Alyson DeMoss (R).</li>
         <li><strong>District 5:</strong> north and northwestern Des Moines, the East Village, and parts of downtown. Longtime supervisor Angela Connolly is retiring.</li>
       </ul>
 
       <h4>Countywide offices, on every Polk County ballot</h4>
       <ul>
-        <li><strong>County Attorney.</strong> Kimberly Graham is the Democratic candidate.</li>
-        <li><strong>County Recorder.</strong> An open seat, since longtime recorder Julie Haggerty is retiring. Lisa J. Chiodo won the June 2 Democratic primary with 54% over Luisita McBurney. A third candidate, Tiara May-Sims, withdrew but still appeared on the ballot. The recorder keeps permanent public records: birth, death and marriage certificates, and real estate documents.</li>
-        <li><strong>County Treasurer.</strong> Mary Wells is the Democratic candidate.</li>
+        <li><strong>County Attorney.</strong> Incumbent Kimberly Graham (Democrat) faces Jonah Dyer (Republican), a Des Moines defense lawyer named by a Republican convention in June.</li>
+        <li><strong>County Recorder.</strong> An open seat, since longtime recorder Julie Haggerty is retiring. Lisa J. Chiodo (Democrat) is unopposed. The recorder keeps permanent public records: birth, death and marriage certificates, and real estate documents.</li>
+        <li><strong>County Treasurer.</strong> Incumbent Mary L. Wells (Democrat) is unopposed.</li>
       </ul>
-      <p>Several of these had no Republican file, so some may be effectively decided already. Your sample ballot will show who actually appears.</p>
+      <p>Your sample ballot will show exactly who appears.</p>
 
       <h4>Everything else down the ballot</h4>
       <ul>
-        <li><strong>Township officers.</strong> Polk City sits in a township, and trustees and the clerk are elected on this ballot.</li>
+        <li><strong>Township officers.</strong> Trustee and clerk races appear only on ballots in rural precincts outside city limits, such as Madison Township. They are not on Polk City ballots.</li>
         <li><strong>Three nonpartisan county boards.</strong> Hospital Board of Trustees, Soil and Water Conservation Board, and Agricultural Extension Council.</li>
         <li><strong>Judicial retention.</strong> Yes or no on whether sitting judges keep their seats. No opponents.</li>
-        <li><strong>Local public measures.</strong> Cities and counties can put bond issues or other questions on this ballot.</li>
+        <li><strong>Local public measures.</strong> No city or county measures are on Polk City ballots this year.</li>
       </ul>
       <p>City council and school board are not on this ballot. Iowa moved those to odd years, so the next ones are November 2027.</p>`,
     matters: {
       heading: 'Why the county board still matters to you',
       html: `
-        <p>You are not voting for a supervisor this year, but three of five seats are changing hands, and two long-serving members are leaving. That reshapes the board for years.</p>
+        <p>You are not voting for a supervisor this year, but the board will have at least three new members in January. Tom Hockensmith and Angela Connolly are retiring, and Matt McCoy lost his primary. That reshapes the board for years.</p>
         <p>This is the body that sets the county property tax levy, decides how Polk County spends its Community Development Block Grant money, and awards the county community betterment grants covered in the Grants section. Those decisions reach Polk City whether or not we picked the people making them.</p>
         <p>Practical advice: pull your sample ballot about a week early and look up anything you do not recognize. The bottom of the ballot is where most people quit, and those races are often decided by the fewest votes.</p>`,
     },
     sources: [
-      { label: 'Who is running for Polk County offices', publisher: 'Des Moines Register', url: 'https://www.aol.com/articles/running-polk-county-elections-2026-110146287.html' },
+      { label: 'Polk City sample ballots, precincts 1 and 2', publisher: 'Polk County Auditor', url: 'https://www.polkcountyiowa.gov/media/jwwhzzpy/polk_city_1-sample.pdf' },
+      { label: 'Republicans enter county supervisor and attorney races', publisher: 'Axios Des Moines', url: 'https://www.axios.com/local/des-moines/2026/06/30/scoop-republicans-enter-polk-county-races-for-supervisor-and-attorney' },
       { label: 'Official Polk County election results', publisher: 'Polk County Auditor', url: 'https://polkelectionia.gov/ElectionNight' },
-      { label: 'What the general election covers', publisher: 'Polk County Auditor', url: 'https://www.polkcountyiowa.gov/county-auditor/election/news-and-press-releases/general-election-november-3-2026-candidate-information/' },
+      { label: 'What the general election covers', publisher: 'Polk County Auditor', url: 'https://www.polkcountyiowa.gov/county-auditor/election/news-and-press-releases/general-election-november-3-2026-voter-information/' },
       { label: 'Sample ballot lookup by address', publisher: 'Ballotpedia', url: 'https://ballotpedia.org/Polk_County_Sample_Ballot_(Iowa)' },
       { label: 'Election dates, early voting, and absentee', publisher: 'Polk County Auditor', url: 'https://www.polkcountyiowa.gov/county-auditor/election/' },
     ],
@@ -1053,6 +1107,7 @@ const ENTRIES = [
     id: 'economic-development-manager',
     group: 'local',
     added: '2026-09-01',
+    updated: '2026-10-12',
     topics: ['development'],
     title: 'Polk City has someone working on business recruitment now',
     meta: 'Started July 2026',
@@ -1065,7 +1120,7 @@ const ENTRIES = [
         <p>If you are looking to expand, move, find space, or get connected to someone, this is a door worth knocking on. Tell the chamber what you need and we will make sure it gets to the right people.</p>`,
     },
     sources: [
-      { label: 'Council packet announcing the arrangement', publisher: 'City of Polk City', url: 'https://www.polkcityia.gov/sites/g/files/vyhlif5571/f/agendas/1_cc_agenda_july_13_2026_full_packet.pdf' },
+      { label: 'Council packet announcing the arrangement', publisher: 'City of Polk City', url: 'https://www.polkcityia.gov/AgendaCenter/ViewFile/Agenda/_07132026-155' },
       { label: 'Partnership benefits for chamber members', publisher: 'Greater Des Moines Partnership', url: 'https://www.dsmpartnership.com/investors-and-affiliate-network/regional-chamber-members/member-benefits' },
     ],
   },
@@ -1074,6 +1129,7 @@ const ENTRIES = [
     id: 'cdbg-funding',
     group: 'local',
     added: '2026-09-01',
+    updated: '2026-10-12',
     topics: ['development'],
     title: 'Federal grant money renewed for Polk County',
     meta: 'Announced August 11, 2026',
@@ -1083,7 +1139,7 @@ const ENTRIES = [
       <p>Nine cities take part, including Polk City. The others are Altoona, Bondurant, Clive, Grimes, Johnston, Pleasant Hill, Urbandale, and Windsor Heights, plus the unincorporated parts of the county.</p>`,
     matters: {
       heading: 'What this means for you',
-      html: `<p>Each city picks what it spends the money on, and the list changes year to year. Sidewalks, utilities, accessibility work, and other infrastructure all qualify. If your block is due for that kind of work, getting into the conversation early is how you have a say in the timing. Otherwise you find out when the orange barrels show up.</p>`,
+      html: `<p>Each city picks what it spends the money on, and the list changes year to year. Sidewalks, utilities, accessibility work, and other infrastructure all qualify. So does storefront facade rehabilitation, which is the use most directly aimed at businesses. If your block is due for that kind of work, getting into the conversation early is how you have a say in the timing. Otherwise you find out when the orange barrels show up.</p>`,
     },
     sources: [
       { label: 'The announcement and the list of cities', publisher: 'Polk County', url: 'https://www.polkcountyiowa.gov/news-and-announcements/polk-county-announces-continuation-of-federal-community-development-block-grants-cdbg/' },
@@ -1118,17 +1174,18 @@ const ENTRIES = [
     id: 'project-watchlist',
     group: 'local',
     added: '2026-09-01',
+    updated: '2026-10-12',
     topics: ['development'],
     title: 'Projects worth watching',
     meta: 'Checked and updated at each review',
     plain: 'Five local projects that could change your foot traffic, your costs, or your access. The trail connection is the one with a real deadline.',
     body: `
       <ul>
-        <li><strong>510 S. 3rd Street.</strong> The city asked for development proposals and has been reviewing them.</li>
+        <li><strong>510 S. 3rd Street.</strong> A review committee picked HBU Development and DEV Partners. Their concept is two 16-unit apartment buildings plus a commercial building. The council held a hearing on selling the land September 28. Rezoning and site plan approval would still come later.</li>
         <li><strong>Trail connection.</strong> Linking the Neal Smith Trail to the High Trestle Trail. Targeted to finish by December 2026.</li>
-        <li><strong>East Northside Drive intersection.</strong> Construction will affect access for nearby businesses.</li>
+        <li><strong>East Northside Drive intersection.</strong> Construction on the N. 3rd Street and E. Northside Drive intersection is underway, with a contract deadline of November 16, 2026.</li>
         <li><strong>Regional water agreement.</strong> The council has been voting on changes to the shared water contract. Water capacity and rates are a real cost for some members.</li>
-        <li><strong>Highway 415 corridor.</strong> The stretch between Polk City and Ankeny, where most of the growth pressure sits.</li>
+        <li><strong>Highway 415 corridor.</strong> The stretch between Polk City and Ankeny, where most of the growth pressure sits. A Highway 415 and 44th Street concept study went to the council work session on October 12.</li>
       </ul>`,
     matters: {
       heading: 'The one with a date on it',
@@ -1136,7 +1193,9 @@ const ENTRIES = [
     },
     sources: [
       { label: 'City agendas, minutes, and project notices', publisher: 'City of Polk City', url: 'https://www.polkcityia.gov/' },
-      { label: 'Mayor and city council', publisher: 'City of Polk City', url: 'https://www.polkcityia.gov/mayor-council' },
+      { label: 'Council agendas and packets', publisher: 'City of Polk City', url: 'https://www.polkcityia.gov/AgendaCenter' },
+      { label: 'Sale of 510 S. 3rd Street', publisher: 'City of Polk City', url: 'https://www.polkcityia.gov/400/Sale-of-510-S-3rd-Street' },
+      { label: 'Mayor and city council', publisher: 'City of Polk City', url: 'https://www.polkcityia.gov/167/Mayor-City-Council' },
     ],
   },
 ];

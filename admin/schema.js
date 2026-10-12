@@ -82,7 +82,7 @@ export const COLLECTIONS = [
         help: 'Dollars, for example 10. When this and the button link are both set, members go straight to the link and everyone else pays this first, online. The link is then never shown publicly. Leave empty for no fee.' },
       { id: 'tickets', label: 'Luncheon tickets can be used', type: 'check',
         help: 'Lets members bring someone on one of their luncheon tickets. Checking that person in logs the ticket in the benefits tracker.' },
-      { id: 'season', label: 'Colour', type: 'select', options: ['sun', 'autumn', 'spring', 'winter'],
+      { id: 'season', label: 'Color', type: 'select', options: ['sun', 'autumn', 'spring', 'winter'],
         labels: { sun: 'Orange', autumn: 'Brown', spring: 'Green', winter: 'Blue' },
         help: 'Cosmetic. Keeps the luncheons looking like each other.' },
       { id: 'id', label: 'Reference', type: 'text', required: true, advanced: true,

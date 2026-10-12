@@ -20,7 +20,7 @@ export function scopeCss(css, scope = '#policyapp') {
 
   while (i < css.length) {
     /* Skip whitespace first. Without this, a comment sitting between two
-       rules is not recognised as a comment, gets absorbed into the next
+       rules is not recognized as a comment, gets absorbed into the next
        selector, and that whole rule silently escapes scoping. */
     if (/\s/.test(css[i])) { out.push(css[i]); i++; continue; }
 
@@ -86,7 +86,7 @@ function rewrite(selector, scope) {
     const s = part.trim();
     if (!s) return s;
 
-    /* :root holds the Policy Center's own colour variables. Pinning them to
+    /* :root holds the Policy Center's own color variables. Pinning them to
        the container keeps them out of the main site's variable space. */
     if (s === ':root' || s === 'html' || s === 'body' || s === 'html body') return scope;
 

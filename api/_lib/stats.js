@@ -15,7 +15,7 @@
      st:m:2027-03:<slug>   the same, for one month
 
    To avoid counting one person reloading a page twenty times, each
-   visitor is recognised for one day by a hash of their address, browser
+   visitor is recognized for one day by a hash of their address, browser
    and the date. The hash is kept for a day and a bit, then expires. No
    cookies, nothing that identifies anybody.
    ========================================================================== */

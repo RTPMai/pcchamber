@@ -27,5 +27,5 @@ const load = () => JSON.parse(readFileSync(new URL('../content/deals.json', impo
 export const DEALS = load().deals || [];
 
 /* Most members will have one or two. Three stops the page turning into
-   somebody's product catalogue. */
+   somebody's product catalog. */
 export const MAX_DEALS = 3;

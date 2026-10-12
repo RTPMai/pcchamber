@@ -135,7 +135,7 @@ async function diagnose(name) {
   if (repoRes.status === 404) {
     return `Cannot see the repository "${repo}". Either GITHUB_REPO is wrong, or the token has not been given access to it. `
       + `A fine-grained token has to name this repository under Repository access, with Contents set to Read and write. `
-      + `If you created it as a fine-grained token on an organisation, an owner may still need to approve it.`;
+      + `If you created it as a fine-grained token on an organization, an owner may still need to approve it.`;
   }
 
   if (!repoRes.ok) {

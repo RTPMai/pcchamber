@@ -10,7 +10,7 @@ This file is the fact-checking guide. Use it when you write a new entry or when 
 
 Every factual claim should trace to a **primary source**, meaning the government body that actually did the thing. Anything with a number in it, a date, a name, or a dollar amount should also have a **second, independent** source.
 
-Independent means a different organisation, not a different page on the same website. Two Ballotpedia pages is one source. Two Choose Iowa pages is one source.
+Independent means a different organization, not a different page on the same website. Two Ballotpedia pages is one source. Two Choose Iowa pages is one source.
 
 If you cannot find a second source, either write the claim more loosely or say plainly in the entry that it is unconfirmed. We did that with the Senate District 23 primary result and it was the right call.
 
@@ -50,7 +50,7 @@ These are the bodies that made the decision. If a Tier 1 source contradicts anyt
 
 ## Tier 3: use with a stated bias in mind
 
-- **[NFIB Iowa](https://www.nfib.com/state-news/iowa)** is currently our most-cited non-government source at 7 links. Their legislative recaps are genuinely the best small-business summary of an Iowa session. But NFIB is an advocacy organisation with positions. Use them for **what a bill does**, never for **whether a bill is good**. Anything we take from NFIB should ideally be confirmed against the enrolled bill text.
+- **[NFIB Iowa](https://www.nfib.com/state-news/iowa)** is currently our most-cited non-government source at 7 links. Their legislative recaps are genuinely the best small-business summary of an Iowa session. But NFIB is an advocacy organization with positions. Use them for **what a bill does**, never for **whether a bill is good**. Anything we take from NFIB should ideally be confirmed against the enrolled bill text.
 - **Cook Political Report.** Race ratings are a forecast, not a fact. Always attribute them as their rating.
 - **Greater Des Moines Partnership, chamber and trade groups.** They advocate for their members. Same rule as NFIB.
 
@@ -68,7 +68,7 @@ These are the bodies that made the decision. If a Tier 1 source contradicts anyt
 
 Fix these when you get to them.
 
-**Single-source entries.** These rest on one organisation and need a second:
+**Single-source entries.** These rest on one organization and need a second:
 
 - `business-court-sf639`. Only NFIB. Confirm against the enrolled bill.
 - `child-care-hf2514`. Only Iowa Capital Dispatch.
@@ -100,7 +100,7 @@ The pattern: **dollar amounts were usually right, eligibility rules and deadline
 ## A five-minute check for any new entry
 
 1. Can you point at a `.gov` page that says this?
-2. Is there a second source from a different organisation?
+2. Is there a second source from a different organization?
 3. Does every date and dollar figure appear in at least one primary source?
 4. For any grant: who is eligible, who is **excluded**, is a match required, and when does the window actually open and close?
 5. Is the source page dated, and is that date recent enough to trust?

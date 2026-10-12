@@ -18,7 +18,7 @@
     },
     {
       "title": "Coffee and Connections",
-      "when": "Fourth Thursday of the month, 7:45 am",
+      "when": "One Thursday a month, 7:45 am",
       "where": "Rising Sun Cafe",
       "summary": "An hour of networking before the working day starts. No program, no speaker.",
       "cost": "Free, buy your own coffee",
@@ -104,7 +104,7 @@
       "where": "Polk City Town Square",
       "address": "107 S 3rd St, Polk City, IA 50226",
       "summary": "A community event for Polk City area residents, with local businesses handing out candy.",
-      "detail": "Attendees can vote for their favourite decorated trunk at the chamber table. A sign-up link for businesses will go out by email.",
+      "detail": "Attendees can vote for their favorite decorated trunk at the chamber table. A sign-up link for businesses will go out by email soon.",
       "cost": "Free",
       "audience": "public",
       "season": "autumn"
@@ -138,6 +138,40 @@
       "season": "autumn"
     },
     {
+      "id": "luncheon-2026-11-11",
+      "date": "2026-11-11",
+      "start": "11:30",
+      "end": "13:00",
+      "title": "Polk City Area Chamber Luncheon",
+      "where": "Tournament Club of Iowa",
+      "address": "1000 Tradition Dr, Polk City, IA 50226",
+      "venue": "tournament-club-of-iowa",
+      "summary": "Lunch, a short program, and time to catch up with other members.",
+      "cost": "$20",
+      "rsvp": {
+        "label": "Register",
+        "href": "https://tcofiowa.com/product/2026-chamber-of-commerce-meetings/"
+      },
+      "audience": "public",
+      "season": "sun",
+      "tickets": true,
+      "guestFee": "10",
+      "detail": "Register through the club ahead of the date and pick your meal."
+    },
+    {
+      "id": "coffee-2026-11-19",
+      "date": "2026-11-19",
+      "start": "07:45",
+      "end": "09:00",
+      "title": "Coffee and Connections",
+      "where": "Rising Sun Cafe",
+      "address": "107 N 2nd St, Polk City, IA 50226",
+      "summary": "Early networking before the day starts. Turn up, buy a coffee, talk to people.",
+      "cost": "Free",
+      "audience": "public",
+      "season": "winter"
+    },
+    {
       "id": "nova-open-house-2026-11-19",
       "date": "2026-11-19",
       "start": "16:00",
@@ -150,6 +184,40 @@
       "cost": "Free",
       "audience": "public",
       "season": "autumn"
+    },
+    {
+      "id": "luncheon-2026-12-09",
+      "date": "2026-12-09",
+      "start": "11:30",
+      "end": "13:00",
+      "title": "Polk City Area Chamber Luncheon",
+      "where": "Tournament Club of Iowa",
+      "address": "1000 Tradition Dr, Polk City, IA 50226",
+      "venue": "tournament-club-of-iowa",
+      "summary": "Lunch, a short program, and time to catch up with other members.",
+      "cost": "$20",
+      "rsvp": {
+        "label": "Register",
+        "href": "https://tcofiowa.com/product/2026-chamber-of-commerce-meetings/"
+      },
+      "audience": "public",
+      "season": "sun",
+      "tickets": true,
+      "guestFee": "10",
+      "detail": "Register through the club ahead of the date and pick your meal."
+    },
+    {
+      "id": "coffee-2026-12-17",
+      "date": "2026-12-17",
+      "start": "07:45",
+      "end": "09:00",
+      "title": "Coffee and Connections",
+      "where": "Rising Sun Cafe",
+      "address": "107 N 2nd St, Polk City, IA 50226",
+      "summary": "Early networking before the day starts. Turn up, buy a coffee, talk to people.",
+      "cost": "Free",
+      "audience": "public",
+      "season": "winter"
     }
   ]
 }

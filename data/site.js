@@ -27,7 +27,7 @@ export const SITE = {
 
   /* RED ALERT BAR
      A red strip above the header on every page. For things with a
-     deadline: storm recovery, a programme closing, a road shut.
+     deadline: storm recovery, a program closing, a road shut.
 
      It switches itself off after the date in `until`, so a stale notice
      cannot sit there for a year. Set `active: false` to pull it early.
