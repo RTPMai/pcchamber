@@ -186,6 +186,20 @@
       "season": "autumn"
     },
     {
+      "id": "small-business-saturday-2026-11-28",
+      "date": "2026-11-28",
+      "start": "09:00",
+      "end": "15:00",
+      "title": "Shop Small Business Saturday on the Polk City Square",
+      "where": "Polk City Town Square",
+      "address": "107 S 3rd St, Polk City, IA 50226",
+      "summary": "Shop local on Small Business Saturday and support the vendors and small businesses on and around the square.",
+      "detail": "Hosted by the Polk City Downtown District and the Polk City Area Chamber. Open to everyone.",
+      "cost": "Free to attend",
+      "audience": "public",
+      "season": "autumn"
+    },
+    {
       "id": "luncheon-2026-12-09",
       "date": "2026-12-09",
       "start": "11:30",

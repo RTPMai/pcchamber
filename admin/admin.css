@@ -284,3 +284,25 @@ details summary{ cursor:pointer; font-weight:600; margin-top:10px; }
 .pickrow{ margin-top:-4px; }
 .linkish{ background:none; border:0; padding:4px 0; font:inherit; color:var(--navy); text-decoration:underline; cursor:pointer; }
 .btn:disabled, .btn[disabled]{ opacity:.45; cursor:not-allowed; }
+
+/* ---------- Help panel ----------------------------------------------------- */
+.helpbox{
+  margin:0 0 0 auto; height:100%; max-height:100%; width:min(30rem, 100%); max-width:100%;
+  border:0; border-left:1px solid var(--rule); padding:24px 24px 40px;
+  background:var(--paper); color:var(--navy); overflow-y:auto;
+}
+.helpbox::backdrop{ background:rgba(6,39,52,.35); }
+.help-head{ display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:8px; }
+.help-head h2{ font-family:'Fraunces',Georgia,serif; font-weight:600; font-size:1.6rem; margin:0; }
+.helpbox h3{ font-size:.8rem; text-transform:uppercase; letter-spacing:.08em; color:var(--navy-soft); margin:22px 0 8px; }
+.helpbox h3[hidden]{ display:none; }
+.helpbox .bsearch{ width:100%; margin:4px 0 4px; }
+.help-topic{ border:1px solid var(--rule); border-radius:10px; margin:0 0 8px; background:var(--paper-warm); }
+.help-topic[hidden]{ display:none; }
+.help-topic summary{ cursor:pointer; padding:12px 16px; font-weight:600; list-style-position:inside; }
+.help-topic[open] summary{ border-bottom:1px solid var(--rule-soft); }
+.help-topic ol{ margin:12px 0; padding:0 18px 0 38px; }
+.help-topic li{ margin:0 0 6px; }
+.help-note{ font-size:.92rem; color:var(--navy-mid); margin:0 16px 14px; }
+.help-note.stuck{ margin:24px 0 0; padding-top:16px; border-top:1px solid var(--rule); }
+@media (max-width:600px){ .helpbox{ padding:18px 16px 32px; } }

@@ -93,6 +93,11 @@ const CHECKS = [
       out.push({ level: noSummary.length > members.length / 4 ? 'high' : 'medium', where: 'Member directory',
         text: `${plural(noSummary.length, 'member')} of ${members.length} have no description.` });
     }
+    const asked = members.filter(m => m.sizeRequested);
+    if (asked.length) {
+      out.push({ level: 'high', where: 'Member directory',
+        text: `${plural(asked.length, 'size request')} waiting for approval: ${asked.map(m => m.name).join(', ')}.` });
+    }
     if (noEmail.length) {
       out.push({ level: 'medium', where: 'Member directory',
         text: `${plural(noEmail.length, 'member')} have no email, so they cannot sign in or get member emails: ${noEmail.map(m => m.name).join(', ')}.` });

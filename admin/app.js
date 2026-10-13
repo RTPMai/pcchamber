@@ -15,6 +15,7 @@
 import { COLLECTIONS } from './schema.js';
 import { BENEFITS, TIER_NAMES, benefitsFor, summarize, uptake, describe, thisYear, yearOf } from './benefits.js';
 import { duesYear, money, duesFor, billTo } from './dues.js';
+import { HELP, HELP_INTRO, HELP_STUCK } from './help.js';
 
 const $ = sel => document.querySelector(sel);
 const el = (tag, attrs = {}, ...kids) => {
@@ -292,6 +293,8 @@ function screenList() {
       el('button', { class: 'back', onclick: leaveCollection }, 'All sections'),
       el('h1', {}, c.title),
       c.note && el('p', { class: 'note' }, c.note),
+      c.key === 'members' && items().some(m => m.sizeRequested) && el('p', { class: 'note warn' },
+        (n => `${n} size request${n === 1 ? '' : 's'} waiting. Open the member to approve or turn it down. Search "size request" to find them.`)(items().filter(m => m.sizeRequested).length)),
       needing > 0 && el('p', { class: 'note warn' },
         `${needing} of ${items().length} still ${c.flagNote ? c.flagNote.toLowerCase() : 'need attention'}.`),
       el('div', { class: 'row' },
@@ -450,7 +453,34 @@ function openItem(i) {
 
   const msg = el('p', { class: 'msg', role: 'status' });
 
+  /* A member asked for a size from their own listing. Approving or
+     turning it down saves straight away, on its own. */
+  const sizeLabel = id => ((c.fields.find(f => f.id === 'size') || {}).labels || {})[id] || id || 'none';
+  const sizeBox = c.key === 'members' && !adding && item.sizeRequested && el('div', { class: 'panel attention-list' },
+    el('p', {}, el('strong', {}, 'Size request. '),
+      `${item.name} says they are ${sizeLabel(item.sizeRequested.size).toLowerCase()}` +
+      (item.sizeRequested.at ? `, asked ${item.sizeRequested.at}` : '') +
+      `. Approved size now: ${item.size ? sizeLabel(item.size).toLowerCase() : 'not set'}.`),
+    el('div', { class: 'row' },
+      el('button', { class: 'btn primary', onclick: () => decideSize('approve') }, 'Approve'),
+      el('button', { class: 'btn', onclick: () => decideSize('decline') }, 'Turn down')),
+    el('p', { class: 'help' }, 'Turning it down leaves their size as it is. Let them know why, since they will not be told.'));
+
+  async function decideSize(decision) {
+    if (state.dirty && !confirm('You have unsaved changes in this section. They will be lost if you carry on. Carry on?')) return;
+    if (!state.who) { msg.textContent = 'Say who you are first.'; return; }
+    msg.textContent = 'Saving';
+    try {
+      await call({ action: 'size', slug: item.slug, decision, who: state.who });
+      await loadCollection(c);
+      screenList();
+    } catch (e) { msg.textContent = e.message; }
+  }
+
   const keep = () => {
+    /* Setting the size by hand to what they asked for settles the request. */
+    if (item.sizeRequested && item.size === item.sizeRequested.size) delete item.sizeRequested;
+
     /* Fill in anything that can be worked out before complaining about it.
        References and web addresses live in the advanced section, so asking
        somebody to fill one in means asking them to find a box they cannot
@@ -490,6 +520,7 @@ function openItem(i) {
     el('div', {},
       el('button', { class: 'back', onclick: backToList }, 'Back to ' + c.title.toLowerCase()),
       el('h1', {}, adding ? 'Add to ' + c.title.toLowerCase() : c.label(item)),
+      sizeBox || null,
       body,
       el('div', { class: 'row sticky' },
         el('button', { class: 'btn primary', onclick: keep }, adding ? 'Add it' : 'Keep changes'),
@@ -1528,6 +1559,71 @@ $('#signout').addEventListener('click', async () => {
   state.file = null; state.collection = null; state.dirty = false;
   screenSignIn('Signed out.');
 });
+
+/* ---------- help ------------------------------------------------------------
+   The Help button in the top bar. Opens a panel of how-tos, with the ones
+   for the screen you are on at the top, and a search box. The words live
+   in admin/help.js so they can be changed without touching this file.
+   It sits on top of whatever is on screen and changes nothing, so opening
+   it never loses unsaved work. */
+
+function openHelp() {
+  const old = document.getElementById('helpbox');
+  if (old) old.remove();
+  const here = (current || '').split('/')[0];
+  const mine = HELP.filter(t => t.screens.includes(here));
+  const rest = HELP.filter(t => !t.screens.includes(here));
+
+  const topic = t => {
+    const d = el('details', { class: 'help-topic', 'data-find': [t.title, t.words || '', ...t.steps, t.note || ''].join(' ').toLowerCase() },
+      el('summary', {}, t.title),
+      el('ol', {}, t.steps.map(s => el('li', {}, s))),
+      t.note && el('p', { class: 'help-note' }, t.note));
+    return d;
+  };
+  const top = mine.map(topic), others = rest.map(topic);
+  const all = [...top, ...others];
+  const topHead = top.length ? el('h3', {}, 'For this screen') : null;
+  const restHead = el('h3', {}, top.length ? 'Everything else' : 'All topics');
+  const none = el('p', { class: 'help', hidden: true }, 'Nothing matches that. Try a different word, like "event", "member" or "email".');
+
+  const search = el('input', { type: 'search', class: 'bsearch', placeholder: 'What are you trying to do?', 'aria-label': 'Search help' });
+  search.addEventListener('input', () => {
+    const q = search.value.trim().toLowerCase();
+    const words = q.split(/\s+/).filter(Boolean);
+    let shown = 0;
+    for (const d of all) {
+      const hit = !words.length || words.every(w => d.dataset.find.includes(w));
+      d.hidden = !hit;
+      if (hit) shown++;
+      if (words.length && hit && shown === 1) d.open = true;
+    }
+    /* While searching, results are one list; the headings only help when browsing. */
+    if (topHead) topHead.hidden = words.length > 0;
+    restHead.hidden = words.length > 0;
+    none.hidden = shown > 0;
+  });
+
+  const close = () => box.close();
+  const box = el('dialog', { id: 'helpbox', class: 'helpbox', 'aria-label': 'Help' },
+    el('div', { class: 'help-head' },
+      el('h2', {}, 'Help'),
+      el('button', { class: 'btn small', onclick: close }, 'Close')),
+    el('p', { class: 'help' }, HELP_INTRO),
+    search,
+    topHead, top,
+    restHead, others,
+    none,
+    el('p', { class: 'help-note stuck' }, HELP_STUCK));
+  /* A click on the dimmed area outside the panel closes it. */
+  box.addEventListener('click', e => { if (e.target === box) close(); });
+  box.addEventListener('close', () => { box.remove(); $('#help').focus(); });
+  document.body.append(box);
+  box.showModal();
+  if (!matchMedia('(hover: none)').matches) search.focus();
+}
+
+$('#help').addEventListener('click', openHelp);
 
 /* ---------- following an address -----------------------------------------
    Used on load, after sign-in, and when back or forward is pressed. */

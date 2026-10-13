@@ -338,6 +338,32 @@ export default async function handler(req, res) {
       return;
     }
 
+    /* A member's size request: approve copies it to size, turn down
+       clears it. One member at a time, on the server, so it cannot clash
+       with somebody else's save. */
+    if (action === 'size') {
+      const { slug, decision, who } = body;
+      if (!who || !String(who).trim()) {
+        res.status(400).json({ error: 'no_name', message: 'Say who you are before saving.' });
+        return;
+      }
+      if (!['approve', 'decline'].includes(decision)) {
+        res.status(400).json({ error: 'bad_decision', message: 'Approve or turn down.' });
+        return;
+      }
+      let name = slug;
+      const out = await updateContent('members.json', data => {
+        const m = (data.members || []).find(x => x.slug === slug);
+        if (!m) throw Object.assign(new Error('That member is no longer in the directory.'), { status: 404 });
+        if (!m.sizeRequested) throw Object.assign(new Error('There is no size request waiting for this member. It may already have been handled.'), { status: 409 });
+        name = m.name;
+        if (decision === 'approve') m.size = m.sizeRequested.size;
+        delete m.sizeRequested;
+      }, `${decision === 'approve' ? 'Approve' : 'Turn down'} size request for ${slug}`, String(who).trim());
+      res.status(200).json({ ok: true, ...out, name });
+      return;
+    }
+
     /* The benefits log. Adding and removing one entry at a time, on the
        server, rather than saving the whole file from the browser. Two
        people logging at once then both land, instead of the second being

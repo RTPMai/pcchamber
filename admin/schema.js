@@ -101,7 +101,7 @@ export const COLLECTIONS = [
     note: 'Slugs are permanent. Once a page is public and search engines have found it, changing the slug breaks every link pointing at it.',
     sort: 'name',
     label: m => m.name,
-    sub: m => [m.summary ? null : 'No description yet', m.city].filter(Boolean).join(' · '),
+    sub: m => [m.sizeRequested ? 'Size request waiting' : null, m.summary ? null : 'No description yet', m.city].filter(Boolean).join(' · '),
     flag: m => !m.summary,
     flagNote: 'Needs a sentence',
     fields: [
@@ -119,7 +119,7 @@ export const COLLECTIONS = [
       { id: 'size', label: 'Size, for dues', type: 'select',
         options: ['small', 'mid', 'large', 'nonprofit'],
         labels: { small: 'Under 5 employees', mid: '5 to 15 employees', large: '16 or more employees', nonprofit: 'Nonprofit, any size' },
-        help: 'Only matters for Basic Business, which is priced by size. Needed before they can be sent a dues invoice.' },
+        help: 'Only matters for Basic Business, which is priced by size. Needed before they can be sent a dues invoice. Members can ask for a size from their own listing; it shows at the top of this page for you to approve.' },
       { id: 'city', label: 'Town', type: 'text' },
       { id: 'person', label: 'Contact name', type: 'text', path: 'contact.person' },
       { id: 'phone', label: 'Phone', type: 'tel', path: 'contact.phone' },

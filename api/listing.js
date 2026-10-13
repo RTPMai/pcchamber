@@ -20,7 +20,11 @@
      slug     their web address. Changing it after search engines have
               found the page breaks every link to it.
      tier     what they pay. That is a billing decision, not a form field.
-     size, dues  the same, for the dues invoice. See data/dues.js.
+     size     not directly. A Basic member picks a size and it is saved as
+              sizeRequested. An admin approves it in the member directory
+              before it counts for dues, so nobody can pick the cheap row
+              and have it stick.
+     dues     the dues override. A board decision, not a form field.
      access   who can sign in as them. If this were editable, anybody who
               got into one account could add themselves permanently.
 
@@ -41,6 +45,7 @@
 import { createHash } from 'node:crypto';
 import { currentMember } from './member.js';
 import { updateContent, ghMissing, writeAsset, deleteAsset } from './_lib/github.js';
+import { SIZES } from '../data/dues.js';
 
 /* Long enough for anything genuine, short enough that the field cannot be
    used to publish an essay on the chamber's website. */
@@ -230,6 +235,14 @@ export default async function handler(req, res) {
 
     const category = clean(body.category, 40);
 
+    /* Size, Basic Business only. Undefined means the form did not send
+       one, so whatever is there is left alone. */
+    const askedSize = body.size === undefined ? undefined : clean(body.size, 20);
+    if (askedSize && !SIZES.some(z => z.id === askedSize)) {
+      res.status(400).json({ error: 'bad_size', message: 'Pick one of the sizes listed.' });
+      return;
+    }
+
     /* Applied to a freshly read copy of the file, and only ever to this
        member's own record. Everything about them that is not in the form
        is carried across untouched, which is what protects slug, tier and
@@ -257,6 +270,15 @@ export default async function handler(req, res) {
       if (!list[i].summary) delete list[i].summary;
       if (!list[i].about) delete list[i].about;
       if (!list[i].city) delete list[i].city;
+
+      /* A size request. Matching the approved size clears any pending
+         request; anything else waits for an admin. */
+      if (askedSize !== undefined && before.tier === 'basic') {
+        if (!askedSize || askedSize === before.size) delete list[i].sizeRequested;
+        else if (!(before.sizeRequested && before.sizeRequested.size === askedSize)) {
+          list[i].sizeRequested = { size: askedSize, at: new Date().toISOString().slice(0, 10) };
+        }
+      }
 
       /* With no access list, the contact email is the sign in. Changing it
          here would lock out whoever is signed in right now. So the old

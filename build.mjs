@@ -858,6 +858,23 @@ const gated = e => Boolean(e && e.rsvp && e.rsvp.href && Number(e.guestFee) > 0)
 const nextGated = () => CALENDAR.filter(e => gated(e) && e.date >= todayISO()).sort((a, b) => a.date.localeCompare(b.date))[0];
 const publicHref = e => gated(e) ? `/events/#${e.id}` : e.rsvp.href;
 
+/* What a gated event costs, said once. The luncheon used to show the lunch
+   price, a guest fee button and the lunch price again, which read like two
+   prices for one lunch. Members pay the club for lunch. Guests pay the same
+   lunch plus the chamber's guest fee, so their total is spelled out. */
+const dollars = v => { const n = Number(String(v || '').replace(/[^0-9.]/g, '')); return n > 0 ? n : null; };
+const money = n => `$${Number.isInteger(n) ? n : n.toFixed(2)}`;
+function prices(e) {
+  const fee = Number(e.guestFee) || 0, lunch = dollars(e.cost);
+  return {
+    fee, lunch,
+    member: lunch ? `${money(lunch)} for lunch, paid to the club when you register.` : 'Lunch is paid to the club when you register.',
+    guest: lunch
+      ? `${money(lunch + fee)} total: a ${money(fee)} chamber guest fee now, then ${money(lunch)} for lunch, paid to the club when you register.`
+      : `A ${money(fee)} chamber guest fee now, then lunch, paid to the club when you register.`
+  };
+}
+
 function rsvpBlock(e) {
   if (!e.rsvp) return '';
 
@@ -869,21 +886,20 @@ function rsvpBlock(e) {
   }
 
   if (gated(e)) {
-    const fee = Number(e.guestFee);
-    return `<div class="gate" data-event="${esc(e.id)}" data-fee="${fee}">
+    const pr = prices(e);
+    return `<div class="gate" data-event="${esc(e.id)}" data-fee="${pr.fee}">
     <div class="gate-choices">
       <div class="gate-choice">
-        <strong>Chamber member?</strong>
-        <p>No guest fee. Sign in and go straight to registration.</p>
+        <strong>Chamber member${pr.lunch ? `: ${money(pr.lunch)}` : ''}</strong>
+        <p>${esc(pr.member)} No guest fee. Sign in first.</p>
         <button type="button" class="btn sun gate-member">Register as a member</button>
       </div>
       <div class="gate-choice">
-        <strong>Not a member yet?</strong>
-        <p>Guests pay a $${fee} chamber guest fee, then register with the venue. <a href="/join/">Join</a> and you skip it.</p>
-        <button type="button" class="btn gate-guest">Pay $${fee} and register</button>
+        <strong>Guest${pr.lunch ? `: ${money(pr.lunch + pr.fee)}` : ''}</strong>
+        <p>${esc(pr.guest)} <a href="/join/">Join</a> and you skip the guest fee.</p>
+        <button type="button" class="btn gate-guest">Pay the ${money(pr.fee)} guest fee</button>
       </div>
     </div>
-    <p class="gate-note">${esc(e.cost ? `Lunch is ${e.cost}, paid to the venue when you register.` : 'Lunch is paid to the venue when you register.')}</p>
   </div>`;
   }
 
@@ -938,7 +954,8 @@ function eventsPage() {
   ${e.address ? `<p class="where">${esc(e.address)}</p>` : ''}
   <p>${esc(e.summary)}</p>
   ${e.detail ? `<p>${esc(e.detail)}</p>` : ''}
-  ${e.cost ? `<p class="cost">${esc(e.cost)}</p>` : ''}
+  ${e.cost && !Number(e.guestFee) ? `<p class="cost">${esc(e.cost)}</p>` : ''}
+  ${e.cost && !e.id && Number(e.guestFee) ? `<p class="cost">Members ${esc(money(prices(e).lunch || 0))}, guests ${esc(money((prices(e).lunch || 0) + prices(e).fee))}. Lunch is paid to the club, the guest fee to the chamber.</p>` : ''}
   ${rsvpBlock(e)}
   ${reg}
   ${add}
@@ -1208,7 +1225,7 @@ ${eventLd.map(o => `<script type="application/ld+json">${JSON.stringify(o)}</scr
     form.appendChild(field('Your name', name));
     form.appendChild(field('Email', email));
     form.appendChild(field('Business (optional)', biz));
-    var go=make('button',{type:'submit','class':'btn sun'},'Continue to pay $' + fee);
+    var go=make('button',{type:'submit','class':'btn sun'},'Continue to pay the $' + fee + ' guest fee');
     form.appendChild(go);
     form.appendChild(make('p',{'class':'reg-msg',role:'status'}));
     gate.appendChild(form);
@@ -2100,6 +2117,7 @@ function adminPage() {
   <div class="wrap">
     <strong>Chamber admin</strong>
     <span class="who" id="whoami"></span>
+    <button id="help" type="button" aria-haspopup="dialog">Help</button>
     <button id="signout" hidden>Sign out</button>
   </div>
 </header>
@@ -3299,7 +3317,7 @@ async function main() {
      disallowed in robots.txt, and it carries noindex. */
   await mkdir(path.join(OUT, 'admin'), { recursive: true });
   await writeFile(path.join(OUT, 'admin', 'index.html'), adminPage());
-  for (const f of ['app.js', 'schema.js', 'admin.css']) {
+  for (const f of ['app.js', 'schema.js', 'help.js', 'admin.css']) {
     await cp(path.join('admin', f), path.join(OUT, 'admin', f));
   }
   /* The benefits tracker counts in the browser with the same code the
