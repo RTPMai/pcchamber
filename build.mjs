@@ -449,6 +449,7 @@ function footer() {
           <li><a href="${s.instagram}">Instagram</a></li>
           <li><a href="${s.linkedin}">LinkedIn</a></li>
           <li><a href="${s.tiktok}">TikTok</a></li>
+          <li><a href="${s.youtube}">YouTube</a></li>
         </ul>
       </div>
     </div>

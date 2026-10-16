@@ -303,15 +303,20 @@
       "name": "Elite Construction",
       "category": "home",
       "tier": "basic",
-      "city": "",
+      "city": "Boone",
       "summary": "",
       "contact": {
         "person": "Joe Germain",
-        "email": "joegermain@eliteconstruction515.com"
+        "phone": "515-230-3872",
+        "email": "eliteconstruction515@gmail.com",
+        "web": "https://www.eliteconstruction515.com",
+        "address": "808 7th Street, Boone, IA, 50036"
       },
       "access": [
-        "joegermain@eliteconstruction515.com"
-      ]
+        "joegermain@eliteconstruction515.com",
+        "eliteconstruction515@gmail.com"
+      ],
+      "logo": "/assets/members/elite-construction.webp"
     },
     {
       "slug": "fareway-polk-city",

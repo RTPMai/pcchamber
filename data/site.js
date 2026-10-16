@@ -22,7 +22,8 @@ export const SITE = {
     facebook: 'https://www.facebook.com/polkcitychamber',
     instagram: 'https://www.instagram.com/polkcitychamber',
     linkedin: 'https://www.linkedin.com/company/go-polk-city/',
-    tiktok: 'https://www.tiktok.com/@polkcitychamber'
+    tiktok: 'https://www.tiktok.com/@polkcitychamber',
+    youtube: 'https://www.youtube.com/channel/UCndg7vLfAKBheqFRqbeBytQ'
   },
 
   /* RED ALERT BAR
