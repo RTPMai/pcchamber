@@ -153,6 +153,7 @@ It never shows a value, only whether one exists, which is why it needs no passwo
 | `KV_REST_API_TOKEN` | Same | Yes, or `UPSTASH_REDIS_REST_TOKEN` |
 | `RESEND_API_KEY` | Password setup and reset emails | Yes |
 | `MEMBER_EMAIL_FROM` | Same | Yes |
+| `FORMS_TO` | Where join and event form submissions go. Defaults to the chamber email in `data/site.js` | No |
 | `MEMBER_PASSCODE` | Policy Center shared fallback | Until every member has an email |
 | `ADMIN_PASSCODE` | The admin | Yes, and not the same as `MEMBER_PASSCODE` |
 | `GITHUB_REPO` | The admin | Yes, as `owner/repository` |

@@ -1950,6 +1950,7 @@ function formPage(form, { canonical, season, aside }) {
       ${notice}
       <form class="form" id="theform"${live ? ` action="${esc(SITE.formEndpoint)}" method="POST"` : ''}>
         <input type="hidden" name="_subject" value="${esc(form.subject)}">
+        <input type="hidden" name="_form" value="${esc(form.key)}">
         <input type="text" name="_gotcha" tabindex="-1" autocomplete="off" aria-hidden="true" class="gotcha">
         ${form.fields.map(field).join('')}
         <div class="btnrow"><button type="submit" class="btn sun">${esc(form.submit)}</button></div>
@@ -1968,10 +1969,6 @@ function formPage(form, { canonical, season, aside }) {
   /* Written as an escape, a newline is consumed by the build's template
      literals before it reaches the browser, breaking the string it sits
      in. Built from its character code, nothing can eat it. */
-  var NEWLINE=String.fromCharCode(10);
-  /* Written as an escape, a newline is eaten by the build's template
-     literals before it reaches the browser and breaks the string it sits
-     in. Built from its character code, nothing can consume it. */
   var NEWLINE=String.fromCharCode(10);
   var f=document.getElementById('theform'), done=document.getElementById('done');
   if(!f) return;
@@ -2016,7 +2013,8 @@ function formPage(form, { canonical, season, aside }) {
 
     var btn=f.querySelector('button[type=submit]');
     btn.disabled=true; btn.textContent='Sending';
-    fetch(f.action, { method:'POST', body:new FormData(f), headers:{Accept:'application/json'} })
+    /* Sent urlencoded, not as FormData, so the function gets it parsed. */
+    fetch(f.action, { method:'POST', body:new URLSearchParams(new FormData(f)), headers:{Accept:'application/json'} })
       .then(function(r){
         if(!r.ok) throw new Error('bad response');
         f.hidden=true; done.hidden=false; done.scrollIntoView({block:'center'});

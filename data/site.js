@@ -53,15 +53,13 @@ export const SITE = {
     'Demo site. The 61 member listings are real. Descriptions, membership tiers and some event dates are still being collected.',
 
   /* FORMS
-     The join form and the event form post here. Any form service that
-     accepts a plain POST works: Formspree, Basin, Getform, Tally.
+     The join form and the event form post here. /api/track?form=1 emails
+     each one to the chamber through Resend (see api/_lib/forms.js), to
+     FORMS_TO in Vercel or the email above.
 
-     Leave it empty and both forms fall back to opening an email instead,
-     so nothing breaks before it is set up.
-
-     Formspree free tier handles 50 submissions a month, which is more
-     than this chamber will use. Create a form, paste the endpoint here.  */
-  formEndpoint: '',
+     Leave it empty and both forms fall back to opening an email instead.
+     If Resend is down or not set up, they fall back the same way.  */
+  formEndpoint: '/api/track?form=1',
 
   /* POLICY CENTER
      Now part of this site at /policy-center/ rather than a separate

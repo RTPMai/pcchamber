@@ -3,6 +3,7 @@
 
    Two forms: joining the chamber, and adding an event to the community
    calendar. Both post to SITE.formEndpoint.
+   `key` tells api/_lib/forms.js which one arrived. Do not change it.
 
    If that endpoint is empty, both forms turn themselves into an email
    link instead. Nothing breaks, it just falls back.
@@ -12,6 +13,7 @@
    ========================================================================== */
 
 export const JOIN_FORM = {
+  key: 'join',
   title: 'Join the chamber',
   lede: 'Tell us about the business. We will send an invoice and a short follow-up about how you want your directory listing written.',
   note: 'Nothing here commits you to anything. If you are not sure which level fits, leave it on "Not sure yet" and we will advise.',
@@ -38,6 +40,7 @@ export const JOIN_FORM = {
 };
 
 export const EVENT_FORM = {
+  key: 'event',
   title: 'Add an event to the calendar',
   lede: 'Open to anyone running something in the Polk City area. You do not have to be a member.',
   note: 'Events go up within a working day and come off the site automatically once the date has passed.',
