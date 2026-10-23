@@ -170,6 +170,32 @@ export const COLLECTIONS = [
   },
 
   {
+    id: 'sponsorships',
+    file: 'sponsorships.json',
+    key: 'sponsorships',
+    season: 'autumn',
+    title: 'Sponsorship menu',
+    blurb: 'What the chamber sells sponsorships of, and the price. The invoice screen picks from this list.',
+    note: 'Changing a price here changes it for invoices sent from now on. Invoices already sent keep the price they went out at.',
+    sort: 'name',
+    label: x => x.name || 'Untitled sponsorship',
+    sub: x => [x.price ? '$' + x.price : null, x.retired ? 'not offered now' : null].filter(Boolean).join(' \u00b7 '),
+    fields: [
+      { id: 'name', label: 'Sponsorship', type: 'text', required: true,
+        help: 'How it reads on the invoice. "Golf tournament hole sponsor 2027".' },
+      { id: 'price', label: 'Price in dollars', type: 'text', required: true,
+        help: 'Just the number, like 500. The invoice screen can change it for one invoice if needed.' },
+      { id: 'detail', label: 'What they get', type: 'textarea',
+        help: 'Optional. Shown on the invoice under the line, so the sponsor knows what they paid for.' },
+      { id: 'retired', label: 'Not offered right now', type: 'check',
+        help: 'Hides it from the invoice screen without losing it.' },
+      { id: 'id', label: 'Reference', type: 'text', required: true, advanced: true,
+        derive: x => slug(x.name || 'sponsorship').slice(0, 40),
+        help: 'Filled in for you.' }
+    ]
+  },
+
+  {
     id: 'jobs',
     file: 'jobs.json',
     key: 'jobs',

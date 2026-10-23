@@ -306,3 +306,24 @@ details summary{ cursor:pointer; font-weight:600; margin-top:10px; }
 .help-note{ font-size:.92rem; color:var(--navy-mid); margin:0 16px 14px; }
 .help-note.stuck{ margin:24px 0 0; padding-top:16px; border-top:1px solid var(--rule); }
 @media (max-width:600px){ .helpbox{ padding:18px 16px 32px; } }
+
+/* ---------- event photos ---------- */
+.btn.danger{ color:var(--alert); border-color:var(--alert); }
+.btn.danger:hover{ background:#FDECEA; }
+.admin-photos{ display:grid; gap:14px; grid-template-columns:repeat(auto-fill,minmax(180px,1fr)); margin:18px 0; }
+.admin-photo{ margin:0; border:1px solid var(--rule); border-radius:10px; overflow:hidden; background:var(--paper); }
+.admin-photo img{ width:100%; aspect-ratio:1; object-fit:cover; display:block; background:var(--rule-soft); }
+.admin-photo figcaption{ display:flex; flex-wrap:wrap; align-items:center; gap:6px 12px; padding:8px; font-size:.88rem; }
+.admin-photo figcaption input[type=text]{ width:100%; font-size:.88rem; padding:6px 8px; }
+.admin-photo label.small{ display:inline-flex; align-items:center; gap:4px; margin:0; font-weight:500; }
+.admin-photo.gone img{ opacity:.25; }
+.admin-photo.gone figcaption::before{ content:'Will be removed'; flex:1 0 100%; color:var(--alert); font-weight:600; }
+
+/* ---------- sponsorship invoices ---------- */
+.sp-lines{ display:flex; flex-direction:column; gap:10px; margin-bottom:8px; }
+.sp-line{ display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
+.field .sp-line select{ width:auto; flex:2 1 240px; }
+.field .sp-line input{ width:auto; flex:2 1 200px; }
+.field .sp-line .sp-amt, .field.check .sp-amt, .field input.sp-amt{ width:110px; height:auto; flex:0 0 110px; }
+.field.check .sp-amt{ order:1; }
+.sp-total{ font-weight:600; font-size:1.05rem; margin:6px 0 12px; }

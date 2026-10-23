@@ -126,8 +126,8 @@
       "schedule": "0 15 5 1,4,7,10 *"
     },
     {
-      "path": "/api/digest?job=audit",
-      "schedule": "0 14 1 * *"
+      "path": "/api/digest?job=daily",
+      "schedule": "0 12 * * *"
     }
   ]
 }

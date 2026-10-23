@@ -183,6 +183,15 @@ function screenHome() {
         el('button', { class: 'card', 'data-season': 'winter', onclick: () => screenMessage() },
           el('strong', {}, 'Message to members'),
           el('span', {}, 'Email every member, or only some: all the restaurants, all the Sponsors.')),
+        el('button', { class: 'card', 'data-season': 'sun', onclick: () => screenWeekly() },
+          el('strong', {}, 'Monday email'),
+          el('span', {}, 'Luncheon, events and member deals, every Monday morning. Writes itself.')),
+        el('button', { class: 'card', 'data-season': 'spring', onclick: () => screenGallery() },
+          el('strong', {}, 'Event photos'),
+          el('span', {}, 'Albums of photos from luncheons and events. Pick the photos, press Save.')),
+        el('button', { class: 'card', 'data-season': 'autumn', onclick: () => screenSponsorships() },
+          el('strong', {}, 'Sponsorship invoices'),
+          el('span', {}, 'Bill a sponsorship through Stripe, with the member\u2019s sponsorship credit taken off.')),
         el('button', { class: 'card', 'data-season': 'spring', onclick: () => screenDigest() },
           el('strong', {}, 'Quarterly member email'),
           el('span', {}, 'Each member\u2019s listing stats and unused benefits, once a quarter.')),
@@ -1198,6 +1207,280 @@ async function screenDigest() {
     frame));
 }
 
+/* ---------- the Monday email ------------------------------------------------
+   Notes at the top of api/_lib/weekly.js. Nothing to write: this screen
+   is for switching it on, checking what it will say, and sending this
+   week's by hand if the schedule is off. */
+
+async function screenWeekly(flash) {
+  mark('weekly');
+  render(el('p', { class: 'loading' }, 'Loading the Monday email'));
+  let st;
+  try { st = await call({ action: 'wk-status' }, DG); } catch (e) { return failScreen(e); }
+
+  const frame = el('iframe', { class: 'mailpreview', title: 'Preview', hidden: true });
+  const status = el('div', { class: 'flash', role: 'status' }, flash || '');
+  const testTo = el('input', { type: 'email', value: adminEmail(), placeholder: 'you@example.com', 'aria-label': 'Send a test to' });
+
+  const run = async (payload, then) => {
+    status.textContent = 'Working';
+    try {
+      const r = await call({ who: state.who, ...payload }, DG);
+      status.textContent = r.message || '';
+      if (then) then(r);
+    } catch (e) { status.replaceChildren(el('span', { class: 'err' }, e.message)); }
+  };
+
+  const toggle = (key, label, help) => {
+    const box = el('input', { type: 'checkbox', id: 'wk-' + key, checked: st.settings[key] });
+    box.addEventListener('change', () => run({ action: 'wk-settings', [key]: box.checked }, () => screenWeekly('Saved.')));
+    return el('div', { class: 'field check' },
+      box,
+      el('label', { for: 'wk-' + key }, label),
+      el('span', { class: 'help' }, help));
+  };
+
+  const preview = () => run({ action: 'wk-preview' }, r => {
+    frame.srcdoc = r.html; frame.hidden = false;
+    status.textContent = r.empty ? 'Nothing on this week, so this would not go out.' : `Subject: ${r.subject}`;
+  });
+
+  const cur = st.current && st.current.week === st.week ? st.current : null;
+  const c = st.counts;
+  const room = Math.max(0, st.limit - st.sentToday);
+  const a = st.audience;
+
+  render(el('div', {},
+    el('button', { class: 'back', onclick: goHome }, 'All sections'),
+    el('h1', {}, 'Monday email'),
+    el('p', { class: 'lede' },
+      `Goes to ${a.total} address${a.total === 1 ? '' : 'es'}: ${a.subscribers} from the newsletter list` +
+      (st.settings.members ? ` and ${a.members} member address${a.members === 1 ? '' : 'es'} (anyone on both gets one copy).` : '. Members are not included.')),
+    st.missing.length > 0 && el('p', { class: 'note warn' }, `Email is not set up. Missing in Vercel: ${st.missing.join(', ')}.`),
+    el('p', { class: 'note' }, st.empty
+      ? 'Nothing on right now: no events in the next two weeks and no member deals up. A week like that is skipped.'
+      : `This week it would carry ${c.luncheon ? 'the next luncheon, ' : ''}${c.events} other event${c.events === 1 ? '' : 's'} and ${c.deals} member deal${c.deals === 1 ? '' : 's'}${c.newDeals ? ` (${c.newDeals} new)` : ''}. To change what it says, change the events or the deals.`),
+    toggle('auto', 'Send it automatically every Monday morning',
+      'Off until you are happy with it. When on, it goes out around 7 am Central with nobody pressing anything.'),
+    toggle('members', 'Include members as well as newsletter subscribers',
+      'Members who opted out of member email are left off either way.'),
+    a.total > st.limit && el('p', { class: 'note warn' },
+      `The list is bigger than the ${st.limit} emails a day Resend allows on this plan. The rest go out the next morning by themselves. Raise MAIL_DAILY_LIMIT in Vercel after upgrading Resend.`),
+    cur && el('p', { class: 'help' }, cur.skipped
+      ? `This week\u2019s was skipped: ${cur.skipped}`
+      : `This week\u2019s went to ${cur.sent} of ${cur.total}${cur.queued ? `, ${cur.queued} still waiting for tomorrow\u2019s allowance` : ''}.`),
+    el('div', { class: 'row' },
+      el('button', { class: 'btn', onclick: preview }, 'Preview this week\u2019s'),
+      testTo,
+      el('button', { class: 'btn', onclick: () => { localStorage.setItem('pcc-admin-email', testTo.value.trim()); run({ action: 'wk-test', to: testTo.value }); } }, 'Send me a test'),
+      el('button', { class: 'btn primary', disabled: st.missing.length > 0 || st.empty || Boolean(cur && !cur.queued),
+        onclick: () => confirm(`Send this week\u2019s Monday email to ${a.total} address${a.total === 1 ? '' : 'es'} now? ${a.total > room ? `${room} can go today; the rest go tomorrow morning.` : ''}`)
+          && run({ action: 'wk-start' }, r => setTimeout(() => screenWeekly(r.message), 600)) },
+        cur ? (cur.queued ? 'Send what is waiting' : 'Sent this week') : 'Send this week\u2019s now')),
+    el('p', { class: 'help' }, `${st.sentToday} of ${st.limit} emails used today.`),
+    status,
+    frame));
+}
+
+/* ---------- event photos ----------------------------------------------------
+   Notes at the top of api/_lib/gallery.js and data/gallery.js.
+
+   Photos are shrunk here in the browser before they go anywhere: a phone
+   photo is 4 to 8 MB, the website needs about 400 KB. Each one is sent as
+   it is picked, but nothing is published until Save, which makes one
+   commit for the whole album, so one rebuild however many photos. */
+
+const gal = { pending: null };   // the album open now, with unsaved changes
+
+function readAsDataUrl(blob) {
+  return new Promise((ok, no) => { const r = new FileReader(); r.onload = () => ok(r.result); r.onerror = no; r.readAsDataURL(blob); });
+}
+
+async function shrink(file, longest, quality) {
+  let bmp;
+  try { bmp = await createImageBitmap(file, { imageOrientation: 'from-image' }); }
+  catch { bmp = await createImageBitmap(file); }
+  const scale = Math.min(1, longest / Math.max(bmp.width, bmp.height));
+  const w = Math.round(bmp.width * scale), h = Math.round(bmp.height * scale);
+  const c = document.createElement('canvas');
+  c.width = w; c.height = h;
+  const g = c.getContext('2d');
+  g.imageSmoothingQuality = 'high';
+  g.drawImage(bmp, 0, 0, w, h);
+  let q = quality, blob;
+  do {
+    blob = await new Promise(ok => c.toBlob(ok, 'image/jpeg', q));
+    q -= 0.1;
+  } while (blob && blob.size > (longest > 1000 ? 1.4e6 : 3.5e5) && q > 0.4);
+  if (!blob) throw new Error('could not shrink');
+  return { data: await readAsDataUrl(blob), w, h, url: URL.createObjectURL(blob) };
+}
+
+async function loadGallery() {
+  const f = await call({ action: 'load', file: 'gallery.json' });
+  return (f.data.albums || []).slice().sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+}
+
+async function screenGallery(flash) {
+  if (gal.pending && gal.pending.dirty && !confirm('You have photo changes that are not saved. Leave anyway?')) return;
+  gal.pending = null; state.dirty = false;
+  mark('gallery');
+  render(el('p', { class: 'loading' }, 'Loading event photos'));
+  let albums;
+  try { albums = await loadGallery(); } catch (e) { return failScreen(e); }
+
+  render(el('div', {},
+    el('button', { class: 'back', onclick: goHome }, 'All sections'),
+    el('h1', {}, 'Event photos'),
+    flash && el('div', { class: 'flash', role: 'status' }, flash),
+    el('p', { class: 'lede' }, albums.length
+      ? `${albums.length} album${albums.length === 1 ? '' : 's'} on the website, at /gallery/.`
+      : 'No albums yet. Make the first one and it shows at /gallery/ and on the events page.'),
+    el('div', { class: 'row' }, el('button', { class: 'btn primary', onclick: () => screenAlbum('new') }, 'New album')),
+    albums.length > 0 && el('ul', { class: 'list' }, albums.map(a => el('li', {},
+      el('button', { class: 'row-open', onclick: () => screenAlbum(a.slug) },
+        el('span', { class: 'who' },
+          el('strong', {}, a.title),
+          el('span', {}, `${a.date} · ${(a.photos || []).length} photo${(a.photos || []).length === 1 ? '' : 's'}`))))))));
+}
+
+async function screenAlbum(slug) {
+  mark(addr('gallery', slug));
+  render(el('p', { class: 'loading' }, 'Loading the album'));
+  let albums, events;
+  try {
+    albums = await loadGallery();
+    events = ((await call({ action: 'load', file: 'events.json' })).data.calendar || []);
+  } catch (e) { return failScreen(e); }
+
+  const isNew = slug === 'new';
+  const found = isNew ? null : albums.find(a => a.slug === slug);
+  if (!isNew && !found) { fix('gallery'); return screenGallery('That album is not there any more.'); }
+
+  const album = found ? JSON.parse(JSON.stringify(found)) : { title: '', date: new Date().toISOString().slice(0, 10), photos: [] };
+  const p = gal.pending = { add: [], remove: new Set(), alts: {}, cover: album.cover || '', dirty: false };
+  const dirty = () => { p.dirty = true; state.dirty = true; };
+
+  const title = el('input', { type: 'text', maxlength: '90', value: album.title || '', placeholder: 'October luncheon' });
+  const date = el('input', { type: 'date', value: album.date || '' });
+  const summary = el('textarea', { rows: '2', maxlength: '400', placeholder: 'Optional. A sentence about the event.' });
+  summary.value = album.summary || '';
+  [title, date, summary].forEach(x => x.addEventListener('input', dirty));
+
+  /* Which calendar event, if any. Picking one on a new album fills in
+     the name and date, which is most of the typing. */
+  const today = new Date().toISOString().slice(0, 10);
+  const back = new Date(Date.now() - 150 * 864e5).toISOString().slice(0, 10);
+  const nearby = events.filter(e => e.id && e.date >= back && e.date <= today).sort((a, b) => b.date.localeCompare(a.date));
+  const ev = el('select', {},
+    el('option', { value: '' }, 'Not a calendar event'),
+    nearby.map(e => el('option', { value: e.id, selected: e.id === album.event }, `${e.date} · ${e.title}`)));
+  ev.addEventListener('change', () => {
+    dirty();
+    const e = nearby.find(x => x.id === ev.value);
+    if (e && isNew) { if (!title.value.trim()) title.value = e.title; date.value = e.date; }
+  });
+
+  const status = el('div', { class: 'flash', role: 'status' });
+  const grid = el('div', { class: 'admin-photos' });
+
+  const tile = (ph, pending) => {
+    const removed = () => p.remove.has(ph.id);
+    const alt = el('input', { type: 'text', maxlength: '200', value: (p.alts[ph.id] ?? ph.alt) || '', placeholder: 'What is in the photo', 'aria-label': 'Describe this photo' });
+    alt.addEventListener('input', () => { if (pending) ph.alt = alt.value; else p.alts[ph.id] = alt.value; dirty(); });
+    const cover = el('input', { type: 'radio', name: 'cover', checked: (p.cover || (album.photos[0] || p.add[0] || {}).id) === ph.id, 'aria-label': 'Use as the album cover' });
+    cover.addEventListener('change', () => { p.cover = ph.id; dirty(); });
+    const box = el('figure', { class: 'admin-photo' + (removed() ? ' gone' : '') },
+      el('img', { src: pending ? ph.url : ph.thumb, alt: '' }),
+      el('figcaption', {},
+        alt,
+        el('label', { class: 'small' }, cover, ' Cover'),
+        el('button', { class: 'linkish', onclick: () => {
+          if (pending) { p.add = p.add.filter(x => x !== ph); box.remove(); }
+          else { removed() ? p.remove.delete(ph.id) : p.remove.add(ph.id); box.classList.toggle('gone', removed()); }
+          dirty();
+        } }, pending ? 'Take out' : 'Remove')));
+    return box;
+  };
+  const drawGrid = () => grid.replaceChildren(...album.photos.map(ph => tile(ph, false)), ...p.add.map(ph => tile(ph, true)));
+  drawGrid();
+
+  const picker = el('input', { type: 'file', accept: 'image/jpeg,image/png,image/heic,image/webp', multiple: true, id: 'pickphotos' });
+  picker.addEventListener('change', async () => {
+    const files = [...picker.files];
+    picker.value = '';
+    const problems = [];
+    let n = 0;
+    for (const f of files) {
+      n++;
+      status.textContent = `Getting photo ${n} of ${files.length} ready`;
+      try {
+        const full = await shrink(f, 1600, 0.82);
+        const thumb = await shrink(f, 640, 0.78);
+        const up = await call({ action: 'gallery-blob', full: full.data, thumb: thumb.data });
+        p.add.push({ ...up, w: full.w, h: full.h, url: thumb.url, alt: '' });
+        URL.revokeObjectURL(full.url);
+        grid.append(tile(p.add[p.add.length - 1], true));
+        dirty();
+      } catch (e) {
+        problems.push(`${f.name}: ${/shrink|decode|createImageBitmap|source/i.test(e.message) ? 'this browser cannot open that kind of photo. Save it as a JPEG first.' : e.message}`);
+      }
+    }
+    status.textContent = `${files.length - problems.length} ready. Press Save to publish them.` + (problems.length ? ` Not added: ${problems.join('; ')}` : '');
+  });
+
+  const save = async () => {
+    if (!title.value.trim()) { status.textContent = 'Give the album a name.'; title.focus(); return; }
+    if (!album.photos.length && !p.add.length) { status.textContent = 'Add at least one photo.'; return; }
+    status.textContent = 'Saving';
+    document.querySelectorAll('#admin button').forEach(b => { b.disabled = true; });
+    try {
+      const out = await call({
+        action: 'gallery-save', who: state.who,
+        album: { slug: found ? found.slug : '', title: title.value, date: date.value, summary: summary.value, event: ev.value, cover: p.cover },
+        add: p.add.map(x => ({ id: x.id, sha: x.sha, tsha: x.tsha, w: x.w, h: x.h, alt: x.alt })),
+        remove: [...p.remove], alts: p.alts
+      });
+      p.add.forEach(x => URL.revokeObjectURL(x.url));
+      gal.pending = null; state.dirty = false;
+      fix('gallery');
+      screenGallery(`Saved. The album has ${out.photos} photo${out.photos === 1 ? '' : 's'} and will be live at /gallery/${out.slug}/ in about a minute.`);
+    } catch (e) {
+      document.querySelectorAll('#admin button').forEach(b => { b.disabled = false; });
+      status.replaceChildren(el('span', { class: 'err' }, e.message));
+    }
+  };
+
+  const del = async () => {
+    if (!confirm(`Delete "${found.title}" and all ${found.photos.length} of its photos from the website? This cannot be undone here.`)) return;
+    status.textContent = 'Deleting';
+    try {
+      await call({ action: 'gallery-delete', slug: found.slug, who: state.who });
+      gal.pending = null; state.dirty = false;
+      fix('gallery');
+      screenGallery('Deleted. It comes off the website in about a minute.');
+    } catch (e) { status.replaceChildren(el('span', { class: 'err' }, e.message)); }
+  };
+
+  render(el('div', {},
+    el('button', { class: 'back', onclick: () => screenGallery() }, 'All albums'),
+    el('h1', {}, isNew ? 'New album' : found.title),
+    el('div', { class: 'field' }, el('label', {}, 'Which event'), el('span', { class: 'help' }, 'Optional. Fills in the name and date for you.'), ev),
+    el('div', { class: 'field' }, el('label', {}, 'Album name'), title),
+    el('div', { class: 'field' }, el('label', {}, 'Date of the event'), date),
+    el('div', { class: 'field' }, el('label', {}, 'About it'), summary),
+    el('div', { class: 'field' },
+      el('label', { for: 'pickphotos' }, 'Add photos'),
+      el('span', { class: 'help' }, 'Pick as many as you like at once. They are shrunk to website size before they go anywhere. Nothing is public until you press Save.'),
+      picker),
+    grid,
+    el('p', { class: 'help' }, 'The box under each photo describes it for people using a screen reader. "Shawn presenting the plaque to Rising Sun Cafe" beats leaving it blank. Blank uses the album name.'),
+    el('div', { class: 'row' },
+      el('button', { class: 'btn primary', onclick: save }, 'Save and publish'),
+      found && el('button', { class: 'btn danger', onclick: del }, 'Delete album')),
+    status));
+}
+
 /* ---------- ChamberMaster export ---------------------------------------------
    The directory, laid out in GrowthZone's standard member import template
    (std_import.xls), for whatever reporting still runs through
@@ -1540,6 +1823,191 @@ async function screenDues(flash) {
   applySearch();
 }
 
+/* ---------- sponsorship invoices ----------------------------------------------
+   Notes at the top of api/_lib/sponsorships.js. The menu of sponsorships
+   and their prices is its own section, Sponsorship menu, so whoever runs
+   this screen picks rather than types. */
+
+const spForm = { nonce: '' };
+const newNonce = () => Array.from(crypto.getRandomValues(new Uint8Array(10)), b => b.toString(36).padStart(2, '0')).join('').slice(0, 16);
+const toCents = v => Math.round(Number(String(v || '').replace(/[$,\s]/g, '')) * 100) || 0;
+
+async function screenSponsorships(flash) {
+  mark('invoices');
+  render(el('p', { class: 'loading' }, 'Loading sponsorship invoices'));
+  let d;
+  try {
+    await loadDirectory();
+    d = await call({ action: 'sp-status', year: new Date().getFullYear() }, ST);
+  } catch (e) { return failScreen(e); }
+  if (!spForm.nonce) spForm.nonce = newNonce();
+
+  const status = el('div', { class: 'flash', role: 'status' }, flash || '');
+
+  /* Who. */
+  const who = el('select', { 'aria-label': 'Who the invoice is for' },
+    el('option', { value: '' }, 'Pick a member'),
+    el('option', { value: '_other' }, 'A business that is not a member'),
+    DIRECTORY.map(m => el('option', { value: m.slug }, m.name)));
+  const otherName = el('input', { type: 'text', maxlength: '120', placeholder: 'Business name' });
+  const email = el('input', { type: 'email', maxlength: '160', placeholder: 'Leave blank to use the email on file' });
+  const otherBox = el('div', { class: 'field', hidden: true }, el('label', {}, 'Business name'), otherName);
+
+  /* What. One line to start; add more. */
+  const lines = el('div', { class: 'sp-lines' });
+  const addLine = () => {
+    const pick = el('select', { 'aria-label': 'Sponsorship' },
+      el('option', { value: '' }, 'Pick a sponsorship'),
+      d.menu.map(x => el('option', { value: x.id }, `${x.name} (${money(x.cents)})`)),
+      el('option', { value: '_custom' }, 'Something not on the menu'));
+    const name = el('input', { type: 'text', maxlength: '120', placeholder: 'What it is', hidden: true, 'aria-label': 'Description' });
+    const amt = el('input', { type: 'text', inputmode: 'decimal', placeholder: '$', class: 'sp-amt', 'aria-label': 'Amount in dollars' });
+    const row = el('div', { class: 'sp-line' }, pick, name, amt,
+      el('button', { class: 'linkish', onclick: () => { row.remove(); total(); } }, 'Remove'));
+    row.read = () => {
+      const m = d.menu.find(x => x.id === pick.value);
+      return { name: m ? m.name : name.value.trim(), detail: m ? m.detail : '', cents: toCents(amt.value) };
+    };
+    pick.addEventListener('change', () => {
+      const m = d.menu.find(x => x.id === pick.value);
+      name.hidden = pick.value !== '_custom';
+      if (m) amt.value = (m.cents / 100).toString();
+      if (pick.value === '_custom') name.focus();
+      total();
+    });
+    amt.addEventListener('input', total);
+    lines.append(row);
+  };
+
+  /* Credit. Only for members who have some left. */
+  const useCredit = el('input', { type: 'checkbox', id: 'sp-credit' });
+  const creditAmt = el('input', { type: 'text', inputmode: 'decimal', class: 'sp-amt', 'aria-label': 'Credit to use, in dollars' });
+  const creditLabel = el('label', { for: 'sp-credit' });
+  const creditBox = el('div', { class: 'field check', hidden: true }, useCredit, creditLabel, creditAmt);
+  const days = el('input', { type: 'number', min: '1', max: '90', value: String(d.days), class: 'sp-amt', 'aria-label': 'Days to pay' });
+  const sum = el('p', { class: 'sp-total' });
+  const send = el('button', { class: 'btn primary', disabled: !d.ready }, 'Send the invoice');
+
+  const left = () => (who.value && who.value !== '_other' && d.credit[who.value]) || 0;
+  function subtotal() { return [...lines.children].reduce((t, r) => t + r.read().cents, 0); }
+  function credit() { return useCredit.checked && !creditBox.hidden ? Math.min(toCents(creditAmt.value), left(), subtotal()) : 0; }
+  function total() {
+    const st = subtotal();
+    if (!creditBox.hidden && !creditAmt.dataset.touched) creditAmt.value = (Math.min(left(), st) / 100).toString();
+    const cr = credit();
+    sum.textContent = st ? (cr ? `${money(st)} less ${money(cr)} credit: ${money(st - cr)} to pay.` : `Total ${money(st)}.`) : '';
+    send.textContent = st && st === cr ? 'Record it as covered by credit' : 'Send the invoice';
+    send.disabled = !(st && st === cr) && !d.ready;
+  }
+  creditAmt.addEventListener('input', () => { creditAmt.dataset.touched = '1'; total(); });
+  useCredit.addEventListener('change', total);
+  who.addEventListener('change', () => {
+    otherBox.hidden = who.value !== '_other';
+    email.placeholder = who.value === '_other' ? 'Where the invoice goes' : 'Leave blank to use the email on file';
+    const l = left();
+    creditBox.hidden = !l;
+    useCredit.checked = Boolean(l);
+    delete creditAmt.dataset.touched;
+    creditLabel.textContent = ` Take off sponsorship credit (${money(l)} left for ${d.creditYear})`;
+    total();
+  });
+
+  send.addEventListener('click', async () => {
+    const ls = [...lines.children].map(r => r.read()).filter(l => l.name || l.cents);
+    if (!who.value) { status.textContent = 'Pick who the invoice is for.'; return; }
+    if (!ls.length) { status.textContent = 'Add a sponsorship.'; return; }
+    const st = subtotal(), cr = credit();
+    const name = who.value === '_other' ? otherName.value.trim() : nameFor(who.value);
+    if (!confirm(st === cr
+      ? `Record ${ls.map(l => l.name).join(', ')} for ${name} as covered by ${money(cr)} of their sponsorship credit?`
+      : `Send ${name} an invoice for ${money(st - cr)}${cr ? ` (after ${money(cr)} credit)` : ''}? Stripe emails it straight away.`)) return;
+    send.disabled = true;
+    status.textContent = 'Sending';
+    try {
+      const out = await call({
+        action: 'sp-send', nonce: spForm.nonce, who: state.who, days: days.value,
+        ...(who.value === '_other' ? { name: otherName.value } : { member: who.value }),
+        email: email.value, lines: ls, creditCents: cr
+      }, ST);
+      spForm.nonce = '';
+      const r = out.record;
+      screenSponsorships(r.status === 'covered'
+        ? `Recorded. ${money(r.credit)} of credit logged for ${r.to.name}.`
+        : `Sent to ${r.to.email}.${r.credit ? ` ${money(r.credit)} of credit logged in the benefits tracker.` : ''}${r.creditProblem ? ' ' + r.creditProblem : ''}`);
+    } catch (e) {
+      send.disabled = false;
+      status.replaceChildren(el('span', { class: 'err' }, e.message));
+    }
+  });
+
+  addLine();
+
+  const refresh = async () => {
+    status.textContent = 'Asking Stripe';
+    try {
+      const out = await call({ action: 'sp-refresh', year: d.year }, ST);
+      screenSponsorships(out.changed ? `${out.changed} updated from Stripe.` : `Checked ${out.checked}. Nothing new from Stripe.`);
+    } catch (e) { status.textContent = e.message; }
+  };
+
+  const WORD = { sent: 'Invoiced, not paid', paid: 'Paid', covered: 'Covered by credit', void: 'Voided', uncollectible: 'Marked uncollectible' };
+  const inv = d.invoices;
+  const paid = inv.filter(r => r.status === 'paid' || r.status === 'covered');
+  const waiting = inv.filter(r => r.status === 'sent');
+  const total$ = list => list.reduce((t, r) => t + r.subtotal, 0);
+
+  render(el('div', {},
+    el('button', { class: 'back', onclick: goHome }, 'All sections'),
+    el('h1', {}, 'Sponsorship invoices'),
+    el('p', { class: 'lede' }, inv.length
+      ? `${d.year}: ${paid.length} paid or covered (${money(total$(paid))} in sponsorships), ${waiting.length} waiting (${money(waiting.reduce((t, r) => t + r.total, 0))} to collect).`
+      : `Nothing sent in ${d.year} yet.`),
+    !d.ready && el('p', { class: 'note warn' }, 'Stripe is not connected. Set STRIPE_SECRET_KEY in Vercel to send invoices. Sponsorships fully covered by credit can still be recorded.'),
+    d.ready && d.test && el('p', { class: 'note' }, 'Stripe is in test mode. Nothing real is charged, and Stripe does not email test invoices to anyone. Open the invoice from the list to see it.'),
+    !d.menu.length && el('p', { class: 'note' }, 'The sponsorship menu is empty. Add what the chamber sells, with prices, under Sponsorship menu on the home screen, or type one in below for now.'),
+    d.creditNote && el('p', { class: 'note warn' }, d.creditNote),
+
+    el('div', { class: 'panel' },
+      el('h2', {}, 'New invoice'),
+      el('div', { class: 'field' }, el('label', {}, 'Who it is for'), who),
+      otherBox,
+      el('div', { class: 'field' }, el('label', {}, 'Send it to'), email),
+      el('div', { class: 'field' }, el('label', {}, 'Sponsorships'), lines,
+        el('button', { class: 'linkish', onclick: () => addLine() }, 'Add another line')),
+      creditBox,
+      el('div', { class: 'field' }, el('label', {}, 'Days to pay'), days),
+      sum,
+      el('div', { class: 'row' }, send),
+      status),
+
+    el('h2', { style: 'margin-top:30px' }, `Sent in ${d.year}`),
+    el('div', { class: 'row' },
+      el('button', { class: 'btn', disabled: !d.ready || !waiting.length, onclick: refresh }, 'Check Stripe'),
+      el('button', { class: 'btn', disabled: !inv.length, onclick: () => download(`sponsorships-${d.year}.csv`, csv([
+        ['For', 'Email', 'Sponsorships', 'Amount', 'Credit', 'To pay', 'Status', 'Invoice', 'Sent', 'Due', 'Paid'],
+        ...inv.map(r => [r.to.name, r.to.email, r.lines.map(l => l.name).join('; '), r.subtotal / 100, r.credit / 100, r.total / 100,
+          WORD[r.status] || r.status, r.number || '', r.sentAt.slice(0, 10), r.due || '', (r.paidAt || '').slice(0, 10)])
+      ])) }, 'Download the list')),
+    inv.length ? el('ul', { class: 'list' }, inv.map(r => el('li', { 'data-state': r.status === 'covered' ? 'paid' : r.status },
+      el('div', { class: 'row-open static' },
+        el('span', { class: 'who' },
+          el('strong', {}, r.to.name),
+          el('span', {}, [
+            r.lines.map(l => l.name).join(', '),
+            r.credit ? `${money(r.subtotal)} less ${money(r.credit)} credit` : money(r.subtotal),
+            WORD[r.status] || r.status,
+            r.status === 'sent' && r.due ? `due ${r.due}` : null,
+            r.status === 'paid' && r.paidAt ? `paid ${r.paidAt.slice(0, 10)}` : null,
+            r.creditReturned ? 'credit put back' : null,
+            r.creditProblem || null
+          ].filter(Boolean).join(' · ')))),
+      el('div', { class: 'row-actions' },
+        r.url && ['sent', 'paid'].includes(r.status) && el('a', { class: 'btn', href: r.url, target: '_blank', rel: 'noopener' }, 'Invoice')))))
+      : el('p', { class: 'help' }, 'Nothing yet.'),
+    el('p', { class: 'help' }, 'To cancel an invoice, void it in the Stripe dashboard, then press Check Stripe. Any credit it used goes back to the member by itself.')));
+  total();
+}
+
 /* ---------- shell --------------------------------------------------------- */
 
 function render(node, chrome = true) {
@@ -1685,6 +2153,12 @@ async function route(hash) {
       return screenNewsletter();
     case 'digest':
       return screenDigest();
+    case 'weekly':
+      return screenWeekly();
+    case 'gallery':
+      return sub ? screenAlbum(sub) : screenGallery();
+    case 'invoices':
+      return screenSponsorships();
     case 'dues':
       return screenDues();
     case 'message':

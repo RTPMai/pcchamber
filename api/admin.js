@@ -47,6 +47,7 @@ import { statsFor } from './_lib/stats.js';
 import { readContent } from './_lib/github.js';
 import { storeReady, storeMissing } from './_lib/store.js';
 import { parseStarters, loadStarters, STARTER_DAYS } from './_lib/starters.js';
+import { galleryBlob, gallerySave, galleryDelete } from './_lib/gallery.js';
 
 const COOKIE = 'pcc_admin';
 const MAX_AGE = 60 * 60 * 8;   // a working day, then sign in again
@@ -55,7 +56,8 @@ const MAX_AGE = 60 * 60 * 8;   // a working day, then sign in again
 const ALLOWED = new Set([
   'members.json', 'events.json', 'jobs.json',
   'news.json', 'board.json', 'referrals.json',
-  'benefits.json'
+  'benefits.json', 'deals.json', 'gallery.json',
+  'sponsorships.json'
 ]);
 
 const api = () => ({
@@ -454,6 +456,21 @@ export default async function handler(req, res) {
         return;
       }
       res.status(200).json({ ok: true, ...out });
+      return;
+    }
+
+    /* Event photos. See api/_lib/gallery.js. */
+    if (action === 'gallery-blob') {
+      res.status(200).json(await galleryBlob(body));
+      return;
+    }
+    if (action === 'gallery-save' || action === 'gallery-delete') {
+      const who = String(body.who || '').trim();
+      if (!who) {
+        res.status(400).json({ error: 'no_name', message: 'Say who you are before saving.' });
+        return;
+      }
+      res.status(200).json(action === 'gallery-save' ? await gallerySave(body, who) : await galleryDelete(body, who));
       return;
     }
 

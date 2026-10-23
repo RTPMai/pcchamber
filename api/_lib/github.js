@@ -146,3 +146,82 @@ export async function deleteAsset(path, message, author) {
     console.error('could not remove old logo', path, err);
   }
 }
+
+/* ---------- several files in one commit -------------------------------------
+
+   Every commit rebuilds the site. Uploading thirty event photos one file
+   at a time would be thirty rebuilds, and the plan limits how many a day
+   are allowed. So photos go up first as loose blobs, which GitHub stores
+   without committing anything, and then one commit adds all of them and
+   the change to the content file together. One save, one rebuild.
+
+   Blobs that never make it into a commit (somebody closed the tab) are
+   cleaned up by GitHub on its own. */
+
+async function git(path, options = {}) {
+  const { repo, token } = gh();
+  const res = await fetch(`https://api.github.com/repos/${repo}/git/${path}`, {
+    ...options,
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: 'application/vnd.github+json',
+      'X-GitHub-Api-Version': '2022-11-28',
+      'User-Agent': 'polk-city-chamber',
+      ...(options.body ? { 'Content-Type': 'application/json' } : {}),
+      ...(options.headers || {})
+    }
+  });
+  return res;
+}
+
+async function gitJson(path, options, what) {
+  const res = await git(path, options);
+  if (!res.ok) {
+    throw Object.assign(new Error(`GitHub refused ${what} (${res.status}).`), { status: res.status === 422 ? 409 : 502, detail: await res.text(), gitStatus: res.status });
+  }
+  return res.json();
+}
+
+export async function createBlob(base64) {
+  const out = await gitJson('blobs', { method: 'POST', body: JSON.stringify({ content: base64, encoding: 'base64' }) }, 'the upload');
+  return out.sha;
+}
+
+/* files: [{ path, sha }] to add (sha from createBlob), or { path, sha: null }
+   to delete. content: { name, apply } changes one file in content/ in the
+   same commit, applied to the copy in that exact commit, and retried on top
+   of anything somebody else committed in the meantime. */
+export async function commitFiles({ files = [], content }, message, author, attempts = 3) {
+  const { branch } = gh();
+  for (let i = 0; i < attempts; i++) {
+    const ref = await gitJson(`ref/heads/${encodeURIComponent(branch)}`, {}, 'reading the branch');
+    const head = ref.object.sha;
+    const commit = await gitJson(`commits/${head}`, {}, 'reading the last commit');
+
+    /* The content change runs first: it may decide which files go in
+       (a new album's folder name, say), so files is read after it. */
+    let result, json = null;
+    if (content) {
+      const res = await call(`content/${content.name}?ref=${head}`);
+      let data = {};
+      if (res.ok) data = JSON.parse(Buffer.from((await res.json()).content, 'base64').toString('utf8'));
+      else if (res.status !== 404) throw Object.assign(new Error(`Could not read content/${content.name} (${res.status}).`), { status: 502 });
+      result = content.apply(data);
+      json = JSON.stringify(data, null, 2) + '\n';
+    }
+    const entries = files.map(f => ({ path: f.path, mode: '100644', type: 'blob', sha: f.sha }));
+    if (content) entries.push({ path: `content/${content.name}`, mode: '100644', type: 'blob', content: json });
+
+    const tree = await gitJson('trees', { method: 'POST', body: JSON.stringify({ base_tree: commit.tree.sha, tree: entries }) }, 'the change');
+    const who = { name: author, email: 'admin@polkcitychamber.com', date: new Date().toISOString() };
+    const next = await gitJson('commits', { method: 'POST', body: JSON.stringify({ message, tree: tree.sha, parents: [head], author: who, committer: who }) }, 'the commit');
+    const move = await git(`refs/heads/${encodeURIComponent(branch)}`, { method: 'PATCH', body: JSON.stringify({ sha: next.sha, force: false }) });
+    if (move.ok) return { commit: next.sha.slice(0, 7), result };
+    if (move.status !== 422) {
+      throw Object.assign(new Error(`GitHub refused the save (${move.status}).`), { status: 502, detail: await move.text() });
+    }
+    /* Somebody else committed first. Start again on top of theirs. */
+    await new Promise(r => setTimeout(r, 300 * (i + 1)));
+  }
+  throw Object.assign(new Error('Somebody else was saving at the same time. Please press Save again.'), { status: 409 });
+}

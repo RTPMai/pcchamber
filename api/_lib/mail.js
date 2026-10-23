@@ -13,7 +13,37 @@
    A newsletter to more than 100 people in one day does not, and needs the
    paid plan or sending over two days. The newsletter screen says so before
    anything goes out.
+
+   COUNTING
+
+   Every send is counted against the day in the store (mail:day:<date>,
+   by the UTC day, which is the day Resend counts by). The Monday digest
+   uses the count to send only what fits today and carry the rest to
+   tomorrow. MAIL_DAILY_LIMIT changes the limit, for a paid Resend plan.
    ========================================================================== */
+
+import { kv, storeReady } from './store.js';
+
+export const dailyLimit = () => {
+  const n = parseInt(process.env.MAIL_DAILY_LIMIT || '', 10);
+  return n > 0 ? n : 100;
+};
+
+const dayKey = () => 'mail:day:' + new Date().toISOString().slice(0, 10);
+
+/* Never lets a counting problem stop an email that already went. */
+async function count(n) {
+  if (!n || !storeReady()) return;
+  try {
+    await kv('INCRBY', dayKey(), n);
+    await kv('EXPIRE', dayKey(), 3 * 86400);
+  } catch (err) { console.error('could not count sent mail', err); }
+}
+
+export async function sentToday() {
+  if (!storeReady()) return 0;
+  try { return Number(await kv('GET', dayKey())) || 0; } catch { return 0; }
+}
 
 export function mailMissing() {
   return [
@@ -38,14 +68,16 @@ async function resend(path, payload) {
 }
 
 /* One message. to can be one address or several. */
-export function sendMail({ to, subject, text, html, headers }) {
-  return resend('/emails', {
+export async function sendMail({ to, subject, text, html, headers }) {
+  const out = await resend('/emails', {
     from: from(),
     to: Array.isArray(to) ? to : [to],
     subject, text,
     ...(html ? { html } : {}),
     ...(headers ? { headers } : {})
   });
+  await count((Array.isArray(to) ? to : [to]).length);
+  return out;
 }
 
 /* Many different messages, up to 100 per call to Resend. Each one gets
@@ -63,6 +95,7 @@ export async function sendMany(messages) {
     }));
     await resend('/emails/batch', chunk);
     sent += chunk.length;
+    await count(chunk.length);
   }
   return sent;
 }

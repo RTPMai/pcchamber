@@ -15,7 +15,8 @@
                topics at the top. The names are what shows after the # in
                the address bar: calendar, members, deals, jobs, posts,
                board, referrals, events, benefits, dues, newsletter,
-               message, digest. An empty string means the home screen.
+               message, digest, weekly, gallery, invoices, sponsorships.
+               An empty string means the home screen.
      words     extra words people might search for that are not in the title
      steps     one line each, in order
      note      optional. Anything worth knowing that is not a step.
@@ -387,6 +388,70 @@ export const HELP = [
       'Go to /setup/ on the website. It lists what is in place and what is missing.',
       'Those settings live in Vercel, not in the admin. Pass the list on to whoever looks after the website\'s hosting.'
     ]
+  },
+
+
+  {
+    title: 'Turn on the Monday email',
+    screens: ['weekly', 'newsletter'],
+    words: 'weekly digest monday automatic deals luncheon',
+    steps: [
+      'Open Monday email from the home screen.',
+      'Press Preview this week\u2019s and read it. It is built from the events calendar and member deals, so if something is wrong, fix the event or the deal.',
+      'Send yourself a test and look at it on your phone.',
+      'Tick Send it automatically every Monday morning.'
+    ],
+    note: 'It goes out around 7 am Central. A week with nothing on is skipped. If the list is bigger than the day\u2019s email allowance, the rest go out the next morning by themselves.'
+  },
+
+  {
+    title: 'Post photos from an event',
+    screens: ['gallery'],
+    words: 'pictures album gallery upload luncheon ribbon cutting',
+    steps: [
+      'Open Event photos from the home screen and press New album.',
+      'Pick the event from Which event. The name and date fill in.',
+      'Press Add photos and pick them all at once. Wait for "ready".',
+      'Type a few words under any photo with people in it, saying who and what.',
+      'Press Save and publish. It is live at /gallery/ in about a minute.'
+    ],
+    note: 'Photos from an iPhone sometimes will not open in Chrome on a Windows computer. If one is refused, AirDrop or email it to yourself as a JPEG first, or use Safari.'
+  },
+
+  {
+    title: 'Take a photo down',
+    screens: ['gallery'],
+    words: 'remove delete picture',
+    steps: [
+      'Open Event photos and the album.',
+      'Press Remove under the photo. It greys out.',
+      'Press Save and publish.'
+    ]
+  },
+
+  {
+    title: 'Invoice somebody for a sponsorship',
+    screens: ['invoices', 'sponsorships'],
+    words: 'sponsor bill stripe golf credit',
+    steps: [
+      'Open Sponsorship invoices from the home screen.',
+      'Pick who it is for. Not a member? Pick "A business that is not a member" and type their name and email.',
+      'Pick the sponsorship. The price fills in. Change it for this invoice if needed.',
+      'If they have sponsorship credit, it is ticked and taken off for you. Untick it if they want to save it.',
+      'Press Send the invoice. Stripe emails it with a Pay button.'
+    ],
+    note: 'The credit is logged in the benefits tracker as soon as the invoice goes. Void the invoice in Stripe and press Check Stripe, and the credit goes back.'
+  },
+
+  {
+    title: 'Change what sponsorships cost',
+    screens: ['sponsorships', 'invoices'],
+    words: 'price menu sponsorship list',
+    steps: [
+      'Open Sponsorship menu from the home screen.',
+      'Open the sponsorship, change the price, press Keep changes, then Save.'
+    ],
+    note: 'Invoices already sent keep the price they went out at.'
   },
 
   {

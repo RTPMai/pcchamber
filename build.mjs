@@ -27,6 +27,7 @@ import { JOBS } from './data/jobs.js';
 import { REFERRALS } from './data/referrals.js';
 import { DEALS } from './data/deals.js';
 import { NEWCOMERS } from './data/newcomers.js';
+import { ALBUMS, coverOf } from './data/gallery.js';
 import { JOIN_FORM, EVENT_FORM } from './data/forms.js';
 import { SIZES } from './data/dues.js';
 import { scopeCss } from './tools/scope-policy-css.mjs';
@@ -214,7 +215,7 @@ function newsletterPage() {
 <div class="pagehead" data-season="winter">
   <div class="wrap">
     <h1>Chamber news by email</h1>
-    <p>What is coming up, what is new, and deals from local businesses. About once a month, never sold or shared.</p>
+    <p>A short email on Monday mornings: the next luncheon, what is on in the next two weeks, and deals from local businesses. Plus the occasional newsletter. Never sold or shared.</p>
   </div>
 </div>
 <div class="wrap band"><div class="col">
@@ -235,6 +236,7 @@ function newsletterPage() {
   var say={ confirmed:'You are on the list. Thanks for signing up.',
             unsubscribed:'You are off the list. Sorry to see you go.',
             memberout:'Done. You will not get member messages from the chamber any more. Your sign in, dues invoices and the quarterly email about your listing are not affected.',
+            weeklyout:'Done. No more Monday emails. Anything else you get from the chamber carries on as before.',
             expired:'That confirmation link has expired or was already used. Sign up again below.' };
   if(s && say[s]){ var p=document.getElementById('nlstatus'); p.textContent=say[s]; p.hidden=false; }
 })();
@@ -429,6 +431,7 @@ function footer() {
           <li><a href="/jobs/">Jobs</a></li>
           <li><a href="/news/">News and spotlights</a></li>
           <li><a href="/deals/">Member deals</a></li>
+          <li><a href="/gallery/">Event photos</a></li>
           <li><a href="/new-to-polk-city/">New to Polk City</a></li>
           <li><a href="/policy-center/">Business Policy Center<span class="memberonly"> (members)</span></a></li>
           <li><a href="/members/">Member sign in</a></li>
@@ -1042,7 +1045,7 @@ function eventsPage() {
 <div class="wrap band">
   <h2>Have something to add?</h2>
   <p>The community calendar is open to anyone running something in the area, member or not. Send the date, place, and a sentence about what it is.</p>
-  <div class="btnrow"><a class="btn" href="/events/add/">Add your event</a></div>
+  <div class="btnrow"><a class="btn" href="/events/add/">Add your event</a>${ALBUMS.length ? '<a class="btn ghost" href="/gallery/">Photos from past events</a>' : ''}</div>
 </div>
 ${eventLd.map(o => `<script type="application/ld+json">${JSON.stringify(o)}</script>`).join('')}
 <script>
@@ -1719,6 +1722,111 @@ function postPage(p) {
 }
 
 /* ---------- job board ----------------------------------------------------- */
+
+/* ---------- event photos --------------------------------------------------- */
+
+const altFor = (a, p) => p.alt || `Photo from ${a.title}`;
+
+function galleryIndex() {
+  const cards = ALBUMS.map(a => {
+    const c = coverOf(a);
+    return `<a class="album-card" href="/gallery/${a.slug}/">
+  <img src="${esc(c.thumb)}" width="${c.w}" height="${c.h}" alt="" loading="lazy" decoding="async">
+  <span class="album-meta">
+    <strong>${esc(a.title)}</strong>
+    <span>${esc(longDate(a.date))} &middot; ${a.photos.length} photo${a.photos.length === 1 ? '' : 's'}</span>
+  </span>
+</a>`;
+  }).join('');
+
+  const body = `
+<div class="pagehead" data-season="spring">
+  <div class="wrap">
+    <h1>Event photos</h1>
+    <p>Luncheons, ribbon cuttings, the golf tournament and everything in between.</p>
+  </div>
+</div>
+<div class="band"><div class="wrap">
+  ${cards ? `<div class="album-grid">${cards}</div>` : '<div class="empty"><p>No photos posted yet.</p></div>'}
+</div></div>
+<div class="band warm">
+  <div class="wrap"><div class="col">
+    <h2>In one of these and want a copy?</h2>
+    <p>Every photo here opens full size, and you are welcome to save and share it. If you would rather a photo of you came down, email the chamber and it will.</p>
+    <div class="btnrow"><a class="btn sun" href="mailto:${SITE.email}?subject=Event%20photos">Email the chamber</a><a class="btn ghost" href="/events/">What is coming up</a></div>
+  </div></div>
+</div>`;
+
+  return page({
+    title: 'Event photos',
+    description: 'Photos from Polk City Area Chamber of Commerce luncheons, ribbon cuttings and community events.',
+    canonical: '/gallery/',
+    season: 'spring'
+  }, body);
+}
+
+/* The grid is plain links to the full-size photos, so it works with no
+   JavaScript at all. The script on top turns the links into a viewer
+   with next and previous, arrow keys, and Escape to close. */
+const VIEWER = `<script>
+(function(){
+  var links=[].slice.call(document.querySelectorAll('.photo-grid a'));
+  var box=document.getElementById('viewer');
+  if(!links.length||!box||!box.showModal) return;
+  var img=box.querySelector('img'), cap=box.querySelector('figcaption'), at=0;
+  function show(i){
+    at=(i+links.length)%links.length;
+    var a=links[at], t=a.querySelector('img');
+    img.src=a.href; img.alt=t.alt; img.width=a.getAttribute('data-w'); img.height=a.getAttribute('data-h');
+    var c=a.getAttribute('data-caption');
+    cap.textContent=(c?c+' \u00b7 ':'')+(at+1)+' of '+links.length;
+  }
+  links.forEach(function(a,i){ a.addEventListener('click',function(e){ e.preventDefault(); show(i); box.showModal(); }); });
+  box.querySelector('[data-go=prev]').addEventListener('click',function(){ show(at-1); });
+  box.querySelector('[data-go=next]').addEventListener('click',function(){ show(at+1); });
+  box.querySelector('[data-go=close]').addEventListener('click',function(){ box.close(); });
+  box.addEventListener('keydown',function(e){
+    if(e.key==='ArrowLeft'){ show(at-1); e.preventDefault(); }
+    if(e.key==='ArrowRight'){ show(at+1); e.preventDefault(); }
+  });
+  box.addEventListener('click',function(e){ if(e.target===box) box.close(); });
+  box.addEventListener('close',function(){ links[at].focus(); });
+})();
+</script>`;
+
+function albumPage(a) {
+  const tiles = a.photos.map(p => `<a href="${esc(p.src)}" data-w="${p.w}" data-h="${p.h}"${p.alt ? ` data-caption="${esc(p.alt)}"` : ''}>
+  <img src="${esc(p.thumb)}" width="${p.w}" height="${p.h}" alt="${esc(altFor(a, p))}" loading="lazy" decoding="async">
+</a>`).join('');
+
+  const body = `
+<div class="pagehead" data-season="spring">
+  <div class="wrap">
+    <p class="crumb"><a href="/gallery/">Event photos</a></p>
+    <h1>${esc(a.title)}</h1>
+    <p>${esc(longDate(a.date))}${a.summary ? `. ${esc(a.summary)}` : ''}</p>
+  </div>
+</div>
+<div class="band"><div class="wrap">
+  <div class="photo-grid">${tiles}</div>
+  <p class="album-more"><a href="/gallery/">Every album</a></p>
+</div></div>
+<dialog id="viewer" class="viewer" aria-label="Photo viewer">
+  <figure><img src="" alt=""><figcaption></figcaption></figure>
+  <div class="viewer-bar">
+    <button type="button" class="btn ghost" data-go="prev">Previous</button>
+    <button type="button" class="btn ghost" data-go="next">Next</button>
+    <button type="button" class="btn sun" data-go="close">Close</button>
+  </div>
+</dialog>`;
+
+  return page({
+    title: a.title,
+    description: `${a.photos.length} photo${a.photos.length === 1 ? '' : 's'} from ${a.title}, ${longDate(a.date)}, Polk City Area Chamber of Commerce.`,
+    canonical: `/gallery/${a.slug}/`,
+    season: 'spring'
+  }, body, VIEWER);
+}
 
 function liveJobs() {
   const t = todayISO();
@@ -3299,6 +3407,8 @@ async function main() {
   await put('privacy', privacyPage());
   await put('news', newsIndex());
   for (const post of POSTS) await put(path.join('news', post.slug), postPage(post));
+  await put('gallery', galleryIndex());
+  for (const a of ALBUMS) await put(path.join('gallery', a.slug), albumPage(a));
   await put('jobs', jobsPage());
   await put('join', joinPage());
   await put(path.join('events', 'add'), eventFormPage());
@@ -3344,10 +3454,11 @@ async function main() {
 
   await cp('assets', path.join(OUT, 'assets'), { recursive: true });
 
-  const urls = ['/', '/directory/', '/events/', '/membership/', '/resources/', '/about/', '/get-involved/', '/privacy/', '/news/', '/jobs/', '/join/', '/events/add/', '/resources/who-to-call/', '/deals/', '/new-to-polk-city/', '/newsletter/']
+  const urls = ['/', '/directory/', '/events/', '/membership/', '/resources/', '/about/', '/get-involved/', '/privacy/', '/news/', '/jobs/', '/join/', '/events/add/', '/resources/who-to-call/', '/deals/', '/new-to-polk-city/', '/newsletter/', '/gallery/']
     .concat(RESOURCE_GROUPS.map(g => `/resources/${g.slug}/`))
     .concat(MEMBERS.map(m => `/directory/${m.slug}/`))
-    .concat(POSTS.map(p => `/news/${p.slug}/`));
+    .concat(POSTS.map(p => `/news/${p.slug}/`))
+    .concat(ALBUMS.map(a => `/gallery/${a.slug}/`));
 
   await writeFile(path.join(OUT, 'sitemap.xml'),
 `<?xml version="1.0" encoding="UTF-8"?>

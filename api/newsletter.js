@@ -44,24 +44,20 @@
    MEMBER_SECRET, so nobody can opt other people out.
    ========================================================================== */
 
-import { randomBytes, createHmac } from 'node:crypto';
+import { randomBytes } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { kv, kvBump, storeReady, storeMissing, hashToObject } from './_lib/store.js';
+import { okEmail, subscribers, memberAddrs, optSig } from './_lib/lists.js';
+import { stopWeekly } from './_lib/weekly.js';
 import { isAdmin, readBody, visitorKey, fail } from './_lib/adminauth.js';
 import { sendMail, sendMany, mailMissing } from './_lib/mail.js';
 import { renderEmail } from './_lib/emailhtml.js';
 import { SITE } from '../data/site.js';
 
 const read = f => JSON.parse(readFileSync(new URL(`../content/${f}`, import.meta.url), 'utf8'));
-const okEmail = s => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s);
 const DAILY_LIMIT = 100;
 
 const origin = req => `https://${req.headers['x-forwarded-host'] || req.headers.host || new URL(SITE.url).host}`;
-
-async function subscribers() {
-  const raw = hashToObject(await kv('HGETALL', 'nl:subs'));
-  return Object.entries(raw).map(([email, v]) => ({ email, ...JSON.parse(v) }));
-}
 
 /* ---------- the draft -------------------------------------------------------- */
 
@@ -161,14 +157,6 @@ async function unsubscribe(req, res) {
 }
 
 /* ---------- messages to members -------------------------------------------------- */
-
-const memberAddrs = m => {
-  const list = Array.isArray(m.access) && m.access.length ? m.access : (m.contact?.email ? [m.contact.email] : []);
-  return [...new Set(list.map(x => String(x).trim().toLowerCase()).filter(okEmail))];
-};
-
-const optSig = email => createHmac('sha256', (process.env.MEMBER_SECRET || process.env.ADMIN_PASSCODE || '').trim())
-  .update('pcc-member-optout:' + email).digest('hex').slice(0, 24);
 
 async function memberOptOut(req, res) {
   const email = String(req.query.e || '').toLowerCase();
@@ -369,6 +357,12 @@ export default async function handler(req, res) {
     if (req.query?.confirm) return await confirm(req, res);
     if (req.query?.unsub) return await unsubscribe(req, res);
     if (req.query?.mout) return await memberOptOut(req, res);
+    if (req.query?.wout) {
+      await stopWeekly(String(req.query.e || '').toLowerCase(), String(req.query.wout || ''));
+      if (req.method === 'POST') { res.status(200).json({ ok: true }); return; }
+      res.redirect(302, '/newsletter/?status=weeklyout');
+      return;
+    }
 
     const body = await readBody(req);
     if (body.action === 'subscribe') return await subscribe(req, res, body);

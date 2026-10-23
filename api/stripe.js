@@ -13,18 +13,21 @@
    Every call is checked against STRIPE_WEBHOOK_SECRET, so nobody can post
    a fake payment here. See api/_lib/guestfee.js for setup.
 
-   It also hears about membership dues invoices being paid or voided,
-   and updates the admin's dues list. See api/_lib/dues.js.
+   It also hears about membership dues and sponsorship invoices being
+   paid or voided, and updates the admin's lists. See api/_lib/dues.js
+   and api/_lib/sponsorships.js.
 
    THE ADMIN'S DUES SCREEN
 
    Posts here with the admin cookie and no Stripe signature. Actions:
-   status, send, refresh.
+   status, send, refresh. The sponsorship screen's are the same with sp-
+   in front.
    ========================================================================== */
 
 import { createHmac, timingSafeEqual } from 'node:crypto';
 import { recordPaid } from './_lib/guestfee.js';
 import { duesEvent, duesStatus, sendDues, refreshDues, stripeReady, BATCH } from './_lib/dues.js';
+import { spStatus, spSend, spRefresh, spEvent } from './_lib/sponsorships.js';
 import { isAdmin } from './_lib/adminauth.js';
 import { storeReady, storeMissing } from './_lib/store.js';
 
@@ -57,6 +60,17 @@ async function admin(req, res, body) {
     res.status(503).json({ error: 'not_configured', message: `Not set up yet. Missing in Vercel: ${storeMissing().join(', ')}.` });
     return;
   }
+  /* Sponsorship invoices. See api/_lib/sponsorships.js. */
+  if (String(body.action || '').startsWith('sp-')) {
+    const y = Number(body.year) || new Date().getUTCFullYear();
+    if (body.action === 'sp-status') { res.status(200).json(await spStatus(y)); return; }
+    if (body.action === 'sp-send') { res.status(200).json(await spSend(body, String(body.who || 'the chamber').slice(0, 80))); return; }
+    if (body.action === 'sp-refresh') {
+      if (!stripeReady()) { res.status(503).json({ error: 'not_configured', message: 'Stripe is not connected. Set STRIPE_SECRET_KEY in Vercel.' }); return; }
+      res.status(200).json(await spRefresh(y)); return;
+    }
+  }
+
   const year = Number(body.year);
   if (!Number.isInteger(year) || year < 2025 || year > 2100) {
     res.status(400).json({ error: 'bad_year', message: 'Pick a membership year.' });
@@ -103,7 +117,10 @@ export default async function handler(req, res) {
     }
     const event = JSON.parse(body);
     if (event.type === 'checkout.session.completed') await recordPaid(event.data.object);
-    else if (event.type.startsWith('invoice.')) await duesEvent(event);
+    else if (event.type.startsWith('invoice.')) {
+      await duesEvent(event);
+      await spEvent(event);
+    }
     res.status(200).json({ received: true });
   } catch (err) {
     console.error('stripe failed', err, err.detail || '');

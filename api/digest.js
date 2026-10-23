@@ -29,6 +29,14 @@
      GITHUB_REPO, GITHUB_TOKEN           to read the benefits log
      CRON_SECRET                         set by Vercel for scheduled runs
      DIGEST_AUTO=on                      when you want it automatic
+
+   THIS FUNCTION ALSO RUNS THE MONDAY DIGEST
+
+   The weekly email of luncheons, events and member deals lives in
+   api/_lib/weekly.js. It shares this function for the same reason the
+   monthly audit does: the plan has a limit on functions and on scheduled
+   jobs. One schedule, /api/digest?job=daily, runs every morning and does
+   the audit on the 1st and the Monday digest's sending every day.
    ========================================================================== */
 
 import { readFileSync } from 'node:fs';
@@ -39,6 +47,8 @@ import { readContent, ghMissing } from './_lib/github.js';
 import { statsFor, lastQuarter, statsLine } from './_lib/stats.js';
 import { renderEmail } from './_lib/emailhtml.js';
 import { runAudit, auditEmail, auditTo } from './_lib/audit.js';
+import * as weekly from './_lib/weekly.js';
+import { dailyLimit, sentToday } from './_lib/mail.js';
 import { summarize, describe, thisYear, TIER_NAMES } from '../data/benefits.js';
 import { SITE } from '../data/site.js';
 
@@ -141,6 +151,87 @@ async function sendAll(ctx, by) {
   return record;
 }
 
+async function scheduledAudit() {
+  if ((process.env.AUDIT_AUTO || '').trim().toLowerCase() !== 'on') return { skipped: 'AUDIT_AUTO is not on' };
+  if (mailMissing().length || !auditTo().length) return { skipped: 'not set up', missing: [...mailMissing(), ...(auditTo().length ? [] : ['AUDIT_TO'])] };
+  const findings = await runAudit();
+  const { subject, text } = auditEmail(findings);
+  await sendMail({ to: auditTo(), subject, text });
+  return { findings: findings.length };
+}
+
+/* ---------- the Monday digest, from the admin -------------------------------------- */
+
+async function weeklyAdmin(req, res, body, base, who) {
+  if (!storeReady()) {
+    res.status(503).json({ error: 'not_configured', message: `Not set up yet. Missing in Vercel: ${storeMissing().join(', ')}.` });
+    return;
+  }
+  const a = body.action;
+
+  if (a === 'wk-settings') {
+    const s = await weekly.saveSettings({
+      ...(typeof body.auto === 'boolean' ? { auto: body.auto } : {}),
+      ...(typeof body.members === 'boolean' ? { members: body.members } : {})
+    });
+    res.status(200).json({ ok: true, settings: s, message: 'Saved.' });
+    return;
+  }
+
+  if (a === 'wk-status') {
+    const s = await weekly.settings();
+    const c = weekly.content(base);
+    const to = await weekly.audience(s);
+    res.status(200).json({
+      settings: s, missing: mailMissing(), counts: c.counts, empty: c.empty, subject: c.subject,
+      week: weekly.thisMonday(), current: await weekly.current(),
+      audience: { total: to.length, subscribers: to.filter(r => r.kind !== 'm').length, members: to.filter(r => r.kind !== 'nl').length },
+      limit: dailyLimit(), sentToday: await sentToday()
+    });
+    return;
+  }
+
+  if (a === 'wk-preview') {
+    const c = weekly.content(base);
+    const { html } = weekly.render(c, null, base);
+    res.status(200).json({ subject: c.subject, html, empty: c.empty });
+    return;
+  }
+
+  if (mailMissing().length) {
+    res.status(503).json({ error: 'not_configured', message: `Email is not set up. Missing in Vercel: ${mailMissing().join(', ')}.` });
+    return;
+  }
+
+  if (a === 'wk-test') {
+    const to = String(body.to || '').trim();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(to)) {
+      res.status(400).json({ error: 'bad_email', message: 'Put in the address to send the test to.' });
+      return;
+    }
+    const c = weekly.content(base);
+    const { html, text } = weekly.render(c, { email: to, kind: 'm' }, base);
+    await sendMail({ to, subject: '[Test] ' + c.subject, html, text });
+    res.status(200).json({ ok: true, message: `Test sent to ${to}.` });
+    return;
+  }
+
+  /* Build this week's now, if the schedule has not, and send what fits. */
+  if (a === 'wk-start') {
+    const made = await weekly.createIssue(base, who);
+    if (made.skipped) {
+      res.status(200).json({ ok: true, message: `Not sent. ${made.skipped}` });
+      return;
+    }
+    const r = await weekly.drain(base);
+    res.status(200).json({ ok: true, ...r, message: (made.exists ? 'This week\u2019s was already made. ' : '') +
+      `Sent ${r.sent}.` + (r.left ? ` ${r.left} left over the day\u2019s email limit. They go out tomorrow morning by themselves.` : '') });
+    return;
+  }
+
+  res.status(400).json({ error: 'unknown_action', message: 'That is not something this page does.' });
+}
+
 function missing() {
   return [...mailMissing(), ...storeMissing(), ...ghMissing()];
 }
@@ -157,20 +248,21 @@ export default async function handler(req, res) {
         return;
       }
       /* The monthly content audit shares this function, and its schedule,
-         to stay inside the plan's limit on functions. See api/_lib/audit.js. */
-      if (req.query?.job === 'audit') {
-        if ((process.env.AUDIT_AUTO || '').trim().toLowerCase() !== 'on') {
-          res.status(200).json({ ok: true, skipped: 'AUDIT_AUTO is not on' });
-          return;
+         to stay inside the plan's limit on functions. See api/_lib/audit.js.
+         job=daily runs every morning: the audit on the 1st, and the
+         Monday digest every day. job=audit still works on its own. */
+      const job = req.query?.job;
+      if (job === 'audit' || job === 'daily') {
+        const out = { ok: true };
+        if (job === 'audit' || weekly.localDate().endsWith('-01')) out.audit = await scheduledAudit();
+        if (job === 'daily') {
+          if (mailMissing().length || storeMissing().length) out.weekly = { skipped: 'email or store not set up' };
+          else {
+            try { out.weekly = await weekly.morning(`https://${new URL(SITE.url).host}`); }
+            catch (err) { console.error('weekly digest failed', err, err.detail || ''); out.weekly = { error: err.message }; }
+          }
         }
-        if (mailMissing().length || !auditTo().length) {
-          res.status(503).json({ error: 'not_configured', missing: [...mailMissing(), ...(auditTo().length ? [] : ['AUDIT_TO'])] });
-          return;
-        }
-        const findings = await runAudit();
-        const { subject, text } = auditEmail(findings);
-        await sendMail({ to: auditTo(), subject, text });
-        res.status(200).json({ ok: true, findings: findings.length });
+        res.status(200).json(out);
         return;
       }
       if ((process.env.DIGEST_AUTO || '').trim().toLowerCase() !== 'on') {
@@ -192,6 +284,9 @@ export default async function handler(req, res) {
     }
     const body = await readBody(req);
     const who = String(body.who || 'the chamber').slice(0, 80);
+
+    /* The Monday digest's screen. */
+    if (String(body.action || '').startsWith('wk-')) return await weeklyAdmin(req, res, body, `https://${host}`, who);
 
     /* The same audit, for the admin home screen. */
     if (body.action === 'audit') {

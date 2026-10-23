@@ -205,3 +205,6 @@ export async function duesEvent(event) {
   if (!r || r.id !== inv.id) return;
   await put(meta.year, meta.slug, { ...r, status, ...(status === 'paid' ? { paidAt: new Date().toISOString() } : {}) });
 }
+
+/* The sponsorship invoices use the same Stripe account, the same way. */
+export { stripe as stripeApi };

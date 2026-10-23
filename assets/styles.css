@@ -1143,3 +1143,31 @@ img.face{ display:block; }
 .gate-note{ font-size:.9rem; color:var(--navy-soft); margin:10px 0 0; }
 .gate-msg{ margin:10px 0 0; font-weight:600; }
 .gate-form{ margin-top:12px; }
+
+/* ---------- event photos --------------------------------------------------- */
+
+.album-grid{ display:grid; gap:22px; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); }
+.album-card{ display:flex; flex-direction:column; background:var(--paper); border:1px solid var(--rule);
+  border-radius:var(--radius); overflow:hidden; text-decoration:none; color:var(--navy); }
+.album-card img{ width:100%; height:auto; aspect-ratio:4/3; object-fit:cover; display:block; background:var(--rule-soft); }
+.album-card .album-meta{ display:flex; flex-direction:column; gap:4px; padding:14px 16px 16px; }
+.album-card .album-meta span{ color:var(--navy-soft); font-size:.94rem; }
+.album-card:hover strong, .album-card:focus-visible strong{ text-decoration:underline; }
+
+.photo-grid{ display:grid; gap:10px; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); }
+.photo-grid a{ display:block; border-radius:8px; overflow:hidden; background:var(--rule-soft); }
+.photo-grid img{ width:100%; height:auto; aspect-ratio:1; object-fit:cover; display:block; transition:transform .2s; }
+.photo-grid a:hover img{ transform:scale(1.03); }
+.photo-grid a:focus-visible{ outline:3px solid var(--sun); outline-offset:2px; }
+@media (max-width:560px){ .photo-grid{ grid-template-columns:repeat(2,1fr); gap:6px; } }
+@media (prefers-reduced-motion:reduce){ .photo-grid img{ transition:none; } .photo-grid a:hover img{ transform:none; } }
+
+.viewer{ border:0; padding:0; background:transparent; max-width:min(1200px,96vw); max-height:96vh; width:auto; }
+.viewer::backdrop{ background:rgba(6,39,52,.92); }
+.viewer figure{ margin:0; text-align:center; }
+.viewer img{ max-width:100%; max-height:80vh; width:auto; height:auto; display:block; margin:0 auto; border-radius:6px; }
+.viewer figcaption{ color:#fff; font-size:.95rem; margin-top:10px; }
+.viewer-bar{ display:flex; gap:10px; justify-content:center; margin-top:12px; flex-wrap:wrap; }
+.viewer-bar .btn.ghost{ color:#fff; border-color:rgba(255,255,255,.6); }
+.viewer-bar .btn.ghost:hover{ color:var(--navy); }
+.album-more{ margin-top:24px; }
