@@ -1,3 +1,49 @@
 {
-  "jobs": []
+  "jobs": [
+    {
+      "id": "demo-screen-printer-2026-10-26",
+      "member": "p-and-m-apparel",
+      "title": "Screen Printing Production Assistant",
+      "type": "Full time",
+      "pay": "$17 to $20 an hour",
+      "summary": "Load, print and fold apparel orders on a busy production floor. No experience needed, we train.",
+      "apply": {
+        "label": "Ask the chamber",
+        "href": "mailto:admin@polkcitychamber.com?subject=Job%20board"
+      },
+      "posted": "2026-10-26",
+      "closes": "2026-11-30",
+      "demo": true
+    },
+    {
+      "id": "demo-line-cook-2026-10-26",
+      "member": "papas-pizzeria",
+      "title": "Line Cook",
+      "type": "Part time",
+      "pay": "$15 to $17 an hour",
+      "summary": "Evening and weekend shifts making pizzas and prepping for service.",
+      "apply": {
+        "label": "Ask the chamber",
+        "href": "mailto:admin@polkcitychamber.com?subject=Job%20board"
+      },
+      "posted": "2026-10-26",
+      "closes": "2026-11-30",
+      "demo": true
+    },
+    {
+      "id": "demo-teller-2026-10-26",
+      "member": "luana-savings-bank",
+      "title": "Part-Time Teller",
+      "type": "Part time",
+      "pay": "$17 to $19 an hour",
+      "summary": "Help customers with deposits, withdrawals and account questions at the Polk City branch.",
+      "apply": {
+        "label": "Ask the chamber",
+        "href": "mailto:admin@polkcitychamber.com?subject=Job%20board"
+      },
+      "posted": "2026-10-26",
+      "closes": "2026-11-30",
+      "demo": true
+    }
+  ]
 }

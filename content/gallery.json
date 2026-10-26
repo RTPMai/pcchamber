@@ -1,3 +1,270 @@
 {
-  "albums": []
+  "albums": [
+    {
+      "slug": "trunk-or-treat-2026",
+      "title": "Trunk or Treat on the Square",
+      "date": "2026-10-25",
+      "summary": "Local businesses, first responders and a lot of costumes on the Polk City square.",
+      "event": "trunk-or-treat-2026-10-25",
+      "cover": "ff454cf3ee",
+      "photos": [
+        {
+          "id": "ccfdbe946d",
+          "src": "/assets/gallery/trunk-or-treat-2026/ccfdbe946d.jpg",
+          "thumb": "/assets/gallery/trunk-or-treat-2026/ccfdbe946d-t.jpg",
+          "w": 1600,
+          "h": 1597,
+          "alt": "Kids playing a game on the square"
+        },
+        {
+          "id": "90f1ee3f8d",
+          "src": "/assets/gallery/trunk-or-treat-2026/90f1ee3f8d.jpg",
+          "thumb": "/assets/gallery/trunk-or-treat-2026/90f1ee3f8d-t.jpg",
+          "w": 1272,
+          "h": 1600,
+          "alt": "Booth draped in blue streamers under a \"we can do that\" tent"
+        },
+        {
+          "id": "ff454cf3ee",
+          "src": "/assets/gallery/trunk-or-treat-2026/ff454cf3ee.jpg",
+          "thumb": "/assets/gallery/trunk-or-treat-2026/ff454cf3ee-t.jpg",
+          "w": 1600,
+          "h": 747,
+          "alt": "Polk City fire truck parked on the square"
+        },
+        {
+          "id": "07d8ee847a",
+          "src": "/assets/gallery/trunk-or-treat-2026/07d8ee847a.jpg",
+          "thumb": "/assets/gallery/trunk-or-treat-2026/07d8ee847a-t.jpg",
+          "w": 1600,
+          "h": 1475,
+          "alt": "Costumed crew outside Hacienda Vieja"
+        },
+        {
+          "id": "c4fb88b308",
+          "src": "/assets/gallery/trunk-or-treat-2026/c4fb88b308.jpg",
+          "thumb": "/assets/gallery/trunk-or-treat-2026/c4fb88b308-t.jpg",
+          "w": 1373,
+          "h": 1600,
+          "alt": "Home State Bank table with a monster-eyes display"
+        },
+        {
+          "id": "e3fcaa0219",
+          "src": "/assets/gallery/trunk-or-treat-2026/e3fcaa0219.jpg",
+          "thumb": "/assets/gallery/trunk-or-treat-2026/e3fcaa0219-t.jpg",
+          "w": 1442,
+          "h": 1600,
+          "alt": "Decorated booth under a blue tent"
+        },
+        {
+          "id": "08274c7c88",
+          "src": "/assets/gallery/trunk-or-treat-2026/08274c7c88.jpg",
+          "thumb": "/assets/gallery/trunk-or-treat-2026/08274c7c88-t.jpg",
+          "w": 1553,
+          "h": 1600,
+          "alt": "Firefighters in front of an ambulance"
+        },
+        {
+          "id": "afc8b2b88e",
+          "src": "/assets/gallery/trunk-or-treat-2026/afc8b2b88e.jpg",
+          "thumb": "/assets/gallery/trunk-or-treat-2026/afc8b2b88e-t.jpg",
+          "w": 1600,
+          "h": 1200,
+          "alt": "Witch-themed trunk with skeleton decorations"
+        },
+        {
+          "id": "61059e7302",
+          "src": "/assets/gallery/trunk-or-treat-2026/61059e7302.jpg",
+          "thumb": "/assets/gallery/trunk-or-treat-2026/61059e7302-t.jpg",
+          "w": 1200,
+          "h": 1600,
+          "alt": "Volunteers dressed as Buzz Lightyear and a Minion"
+        },
+        {
+          "id": "add4862c75",
+          "src": "/assets/gallery/trunk-or-treat-2026/add4862c75.jpg",
+          "thumb": "/assets/gallery/trunk-or-treat-2026/add4862c75-t.jpg",
+          "w": 1241,
+          "h": 1600,
+          "alt": "Trunk decorated with a skeleton and pumpkins"
+        },
+        {
+          "id": "fd1d780246",
+          "src": "/assets/gallery/trunk-or-treat-2026/fd1d780246.jpg",
+          "thumb": "/assets/gallery/trunk-or-treat-2026/fd1d780246-t.jpg",
+          "w": 1200,
+          "h": 1600,
+          "alt": "Trunk with a toxic waste barrel decoration"
+        },
+        {
+          "id": "696ed43b8a",
+          "src": "/assets/gallery/trunk-or-treat-2026/696ed43b8a.jpg",
+          "thumb": "/assets/gallery/trunk-or-treat-2026/696ed43b8a-t.jpg",
+          "w": 900,
+          "h": 1600,
+          "alt": "Polk City Area Chamber of Commerce table"
+        },
+        {
+          "id": "e59c1231a1",
+          "src": "/assets/gallery/trunk-or-treat-2026/e59c1231a1.jpg",
+          "thumb": "/assets/gallery/trunk-or-treat-2026/e59c1231a1-t.jpg",
+          "w": 1475,
+          "h": 1600,
+          "alt": "Roofing, siding and gutters tent lined with jack-o'-lanterns"
+        },
+        {
+          "id": "43e530327e",
+          "src": "/assets/gallery/trunk-or-treat-2026/43e530327e.jpg",
+          "thumb": "/assets/gallery/trunk-or-treat-2026/43e530327e-t.jpg",
+          "w": 1600,
+          "h": 1597,
+          "alt": "Reading-themed table hosted by a witch"
+        },
+        {
+          "id": "158c3f4fc1",
+          "src": "/assets/gallery/trunk-or-treat-2026/158c3f4fc1.jpg",
+          "thumb": "/assets/gallery/trunk-or-treat-2026/158c3f4fc1-t.jpg",
+          "w": 1522,
+          "h": 1428,
+          "alt": "White pumpkin and Halloween table display"
+        },
+        {
+          "id": "4770b2239c",
+          "src": "/assets/gallery/trunk-or-treat-2026/4770b2239c.jpg",
+          "thumb": "/assets/gallery/trunk-or-treat-2026/4770b2239c-t.jpg",
+          "w": 1495,
+          "h": 1600,
+          "alt": "101 Dalmatians-themed trunk"
+        },
+        {
+          "id": "0a33ddaf14",
+          "src": "/assets/gallery/trunk-or-treat-2026/0a33ddaf14.jpg",
+          "thumb": "/assets/gallery/trunk-or-treat-2026/0a33ddaf14-t.jpg",
+          "w": 1600,
+          "h": 1020,
+          "alt": "Trunk with a giant spider web"
+        },
+        {
+          "id": "c1119835ca",
+          "src": "/assets/gallery/trunk-or-treat-2026/c1119835ca.jpg",
+          "thumb": "/assets/gallery/trunk-or-treat-2026/c1119835ca-t.jpg",
+          "w": 1600,
+          "h": 1541,
+          "alt": "Cupp Insurance team at their table"
+        },
+        {
+          "id": "d6fa2c5ffe",
+          "src": "/assets/gallery/trunk-or-treat-2026/d6fa2c5ffe.jpg",
+          "thumb": "/assets/gallery/trunk-or-treat-2026/d6fa2c5ffe-t.jpg",
+          "w": 1600,
+          "h": 1088,
+          "alt": "Group in costumes in front of a decorated trunk"
+        },
+        {
+          "id": "98f398a3d8",
+          "src": "/assets/gallery/trunk-or-treat-2026/98f398a3d8.jpg",
+          "thumb": "/assets/gallery/trunk-or-treat-2026/98f398a3d8-t.jpg",
+          "w": 1023,
+          "h": 1600,
+          "alt": "North Polk Family Medicine table with a skeleton display"
+        },
+        {
+          "id": "6941b62523",
+          "src": "/assets/gallery/trunk-or-treat-2026/6941b62523.jpg",
+          "thumb": "/assets/gallery/trunk-or-treat-2026/6941b62523-t.jpg",
+          "w": 1253,
+          "h": 1600,
+          "alt": "Kids in costume at an Iowa-themed trunk"
+        },
+        {
+          "id": "40c182f505",
+          "src": "/assets/gallery/trunk-or-treat-2026/40c182f505.jpg",
+          "thumb": "/assets/gallery/trunk-or-treat-2026/40c182f505-t.jpg",
+          "w": 1200,
+          "h": 1600,
+          "alt": "Farm Bureau Financial Services table"
+        },
+        {
+          "id": "0b5b7d83d6",
+          "src": "/assets/gallery/trunk-or-treat-2026/0b5b7d83d6.jpg",
+          "thumb": "/assets/gallery/trunk-or-treat-2026/0b5b7d83d6-t.jpg",
+          "w": 991,
+          "h": 1600,
+          "alt": "Rising Sun Cafe trunk with costumed kids"
+        },
+        {
+          "id": "4a488280eb",
+          "src": "/assets/gallery/trunk-or-treat-2026/4a488280eb.jpg",
+          "thumb": "/assets/gallery/trunk-or-treat-2026/4a488280eb-t.jpg",
+          "w": 1216,
+          "h": 1600,
+          "alt": "Trunk decorated with blue and white balloons"
+        },
+        {
+          "id": "c93c07eba1",
+          "src": "/assets/gallery/trunk-or-treat-2026/c93c07eba1.jpg",
+          "thumb": "/assets/gallery/trunk-or-treat-2026/c93c07eba1-t.jpg",
+          "w": 1448,
+          "h": 1600,
+          "alt": "Hocus Pocus-themed trunk"
+        },
+        {
+          "id": "5f2f97b087",
+          "src": "/assets/gallery/trunk-or-treat-2026/5f2f97b087.jpg",
+          "thumb": "/assets/gallery/trunk-or-treat-2026/5f2f97b087-t.jpg",
+          "w": 900,
+          "h": 1600,
+          "alt": "Concierge Girl trunk with a red tablecloth"
+        },
+        {
+          "id": "a1593a77bf",
+          "src": "/assets/gallery/trunk-or-treat-2026/a1593a77bf.jpg",
+          "thumb": "/assets/gallery/trunk-or-treat-2026/a1593a77bf-t.jpg",
+          "w": 1600,
+          "h": 1539,
+          "alt": "Booths under a white tent"
+        },
+        {
+          "id": "ddaf68517d",
+          "src": "/assets/gallery/trunk-or-treat-2026/ddaf68517d.jpg",
+          "thumb": "/assets/gallery/trunk-or-treat-2026/ddaf68517d-t.jpg",
+          "w": 1200,
+          "h": 1600,
+          "alt": "Nova MedSpa table with Halloween decorations"
+        },
+        {
+          "id": "4585673a57",
+          "src": "/assets/gallery/trunk-or-treat-2026/4585673a57.jpg",
+          "thumb": "/assets/gallery/trunk-or-treat-2026/4585673a57-t.jpg",
+          "w": 900,
+          "h": 1600,
+          "alt": "Two attendees in Halloween makeup"
+        },
+        {
+          "id": "e610b3de3f",
+          "src": "/assets/gallery/trunk-or-treat-2026/e610b3de3f.jpg",
+          "thumb": "/assets/gallery/trunk-or-treat-2026/e610b3de3f-t.jpg",
+          "w": 1527,
+          "h": 1600,
+          "alt": "Couple at a tent with a ghost decoration"
+        },
+        {
+          "id": "58cb7c42c2",
+          "src": "/assets/gallery/trunk-or-treat-2026/58cb7c42c2.jpg",
+          "thumb": "/assets/gallery/trunk-or-treat-2026/58cb7c42c2-t.jpg",
+          "w": 1303,
+          "h": 1600,
+          "alt": "Police officer handing out candy from a patrol SUV"
+        },
+        {
+          "id": "a32b84f5ff",
+          "src": "/assets/gallery/trunk-or-treat-2026/a32b84f5ff.jpg",
+          "thumb": "/assets/gallery/trunk-or-treat-2026/a32b84f5ff-t.jpg",
+          "w": 1175,
+          "h": 1600,
+          "alt": "Castle-themed trunk with costumed families"
+        }
+      ]
+    }
+  ]
 }

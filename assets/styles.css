@@ -460,6 +460,7 @@ a:hover{ color:var(--tint-ink); }
 /* Tier badges in the directory. Fixed color per level, overriding the
    card's category season, so two Investors never look different. Heavier
    the higher the level. */
+.badge.demo{ background:var(--sun); color:var(--navy); border-color:var(--sun); vertical-align:middle; font-size:.62em; letter-spacing:.08em; text-transform:uppercase; }
 .badge[data-tier="partner"] { background:var(--spring-wash); color:var(--spring-ink); border-color:var(--spring); }
 .badge[data-tier="investor"]{ background:var(--autumn-wash); color:var(--autumn-ink); border-color:var(--autumn); }
 .badge[data-tier="sponsor"] { background:var(--sun);         color:var(--navy);       border-color:var(--sun); }

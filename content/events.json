@@ -159,6 +159,20 @@
       "detail": "Register through the club ahead of the date and pick your meal."
     },
     {
+      "id": "np-coffee-2026-11-13",
+      "date": "2026-11-13",
+      "start": "07:30",
+      "end": "09:00",
+      "title": "Coffee and Collaboration in the Communities",
+      "where": "Polk City City Hall",
+      "address": "Polk City, IA 50226",
+      "summary": "A community dialogue with the North Polk Community School District, focused on district updates. Meet neighbors, share ideas, get involved.",
+      "detail": "Hosted by the North Polk Community School District. One of four sessions across the district: Polk City, Elkhart, Sheldahl and North Ankeny.",
+      "cost": "Free",
+      "audience": "public",
+      "season": "winter"
+    },
+    {
       "id": "coffee-2026-11-19",
       "date": "2026-11-19",
       "start": "07:45",
@@ -200,6 +214,20 @@
       "season": "autumn"
     },
     {
+      "id": "np-coffee-2026-12-04",
+      "date": "2026-12-04",
+      "start": "07:30",
+      "end": "09:00",
+      "title": "Coffee and Collaboration in the Communities",
+      "where": "Elkhart Veterans Memorial Community Center",
+      "address": "Elkhart, IA 50073",
+      "summary": "A community dialogue with the North Polk Community School District, focused on district updates. Meet neighbors, share ideas, get involved.",
+      "detail": "Hosted by the North Polk Community School District. One of four sessions across the district: Polk City, Elkhart, Sheldahl and North Ankeny.",
+      "cost": "Free",
+      "audience": "public",
+      "season": "winter"
+    },
+    {
       "id": "luncheon-2026-12-09",
       "date": "2026-12-09",
       "start": "11:30",
@@ -229,6 +257,33 @@
       "where": "Rising Sun Cafe",
       "address": "107 N 2nd St, Polk City, IA 50226",
       "summary": "Early networking before the day starts. Turn up, buy a coffee, talk to people.",
+      "cost": "Free",
+      "audience": "public",
+      "season": "winter"
+    },
+    {
+      "id": "np-coffee-2027-01-15",
+      "date": "2027-01-15",
+      "start": "07:30",
+      "end": "09:00",
+      "title": "Coffee and Collaboration in the Communities",
+      "where": "Sheldahl Community Center (The Cabin)",
+      "address": "Sheldahl, IA 50243",
+      "summary": "A community dialogue with the North Polk Community School District, focused on district updates. Meet neighbors, share ideas, get involved.",
+      "detail": "Hosted by the North Polk Community School District. One of four sessions across the district: Polk City, Elkhart, Sheldahl and North Ankeny.",
+      "cost": "Free",
+      "audience": "public",
+      "season": "winter"
+    },
+    {
+      "id": "np-coffee-2027-03-05",
+      "date": "2027-03-05",
+      "start": "07:30",
+      "end": "09:00",
+      "title": "Coffee and Collaboration in the Communities",
+      "where": "North Ankeny, location to be announced",
+      "summary": "A community dialogue with the North Polk Community School District, focused on district updates. Meet neighbors, share ideas, get involved.",
+      "detail": "Hosted by the North Polk Community School District. One of four sessions across the district: Polk City, Elkhart, Sheldahl and North Ankeny.",
       "cost": "Free",
       "audience": "public",
       "season": "winter"

@@ -205,7 +205,7 @@ export const COLLECTIONS = [
     note: 'A posting comes off the site on its own the day after it closes. Only post jobs a member has actually sent you.',
     sort: 'posted',
     label: j => j.title,
-    sub: j => [j.type, j.closes ? 'closes ' + j.closes : null].filter(Boolean).join(' · '),
+    sub: j => [j.demo ? 'DEMO' : null, j.type, j.closes ? 'closes ' + j.closes : null].filter(Boolean).join(' · '),
     fields: [
       { id: 'title', label: 'Job title', type: 'text', required: true },
       { id: 'member', label: 'Which member is hiring', type: 'members', max: 1, required: true },
@@ -220,6 +220,8 @@ export const COLLECTIONS = [
       { id: 'posted', label: 'Date posted', type: 'date', required: true },
       { id: 'closes', label: 'Closing date', type: 'date', required: true,
         help: 'It comes off the site the day after this.' },
+      { id: 'demo', label: 'Demo posting', type: 'check',
+        help: 'Shows a DEMO tag and keeps it out of Google. For showing the board how it works, not for real openings.' },
       { id: 'id', label: 'Reference', type: 'text', required: true, advanced: true,
         derive: j => slug(`${j.title || 'job'}-${j.posted || ''}`),
         help: 'Filled in for you. Never reuse one.' }

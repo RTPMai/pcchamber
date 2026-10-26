@@ -1882,7 +1882,7 @@ function jobsPage() {
     const m = MEMBERS.find(x => x.slug === j.member);
     return `<article class="event" data-season="spring">
   <div class="date">${esc(j.type)}${j.pay ? ` &middot; ${esc(j.pay)}` : ''}</div>
-  <h3>${esc(j.title)}</h3>
+  <h3>${j.demo ? '<span class="badge demo">Demo</span> ' : ''}${esc(j.title)}</h3>
   <div class="meta">${m ? `<a href="/directory/${m.slug}/">${esc(m.name)}</a>` : 'Chamber member'} &middot; Closes ${esc(longDate(j.closes))}</div>
   <p>${esc(j.summary)}</p>
   ${j.detail ? `<p>${esc(j.detail)}</p>` : ''}
@@ -1890,7 +1890,8 @@ function jobsPage() {
 </article>`;
   };
 
-  const ld = live.map(j => {
+  /* Demo postings are for showing the board off, not for Google. */
+  const ld = live.filter(j => !j.demo).map(j => {
     const m = MEMBERS.find(x => x.slug === j.member);
     return {
       '@context': 'https://schema.org',
