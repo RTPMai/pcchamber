@@ -87,10 +87,16 @@ export async function handleForm(req, res, raw) {
   const subject = form.subject + (name ? ': ' + name.value.slice(0, 80) : '');
   const listed = answers.map(a => `${a.label}: ${a.value}`).join('\n');
 
+  /* Said first, in plain words, because this lands in an inbox among
+     everything else and comes from an address nobody recognizes. */
+  const who = answers.find(a => /name/i.test(a.label) && a !== name);
+  const intro = `Someone filled in the ${form.subject.toLowerCase()} form on the chamber website.\n`
+    + `Hit Reply and your answer goes straight to them${who ? ', ' + who.value : ''} at ${email}.\n`;
+
   await sendMail({
     to: formsTo(),
-    subject,
-    text: `${listed}\n\nSent from ${SITE.url}. Reply to this email to answer them directly.`,
+    subject: 'Website form: ' + subject,
+    text: `${intro}\n${listed}\n\nSent automatically by ${SITE.url}.`,
     headers: { 'Reply-To': email }
   });
 

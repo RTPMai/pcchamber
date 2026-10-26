@@ -49,6 +49,7 @@ One call per member gets all three at once: a sentence about what they do, the e
 - [ ] Two days before: lower the TTL on the GoDaddy records to 600 seconds
 - [ ] Add polkcitychamber.com and www in Vercel, then change only the website records at GoDaddy (A to Vercel's address, www CNAME to `cname.vercel-dns.com`)
 - [ ] **Leave MX and any email records alone.** Moving the website must not move the chamber's email
+- [ ] Vercel: set `SITE_URL=https://polkcitychamber.com` and redeploy (canonical links, sitemap and email links follow it)
 - [ ] Update the Stripe webhook address to `https://polkcitychamber.com/api/stripe`
 - [ ] Open `/setup/` on the live domain. Everything green
 - [ ] Old addresses: click through a few from Google results and check they redirect

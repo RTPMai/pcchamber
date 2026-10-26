@@ -23,6 +23,25 @@
    ========================================================================== */
 
 import { kv, storeReady } from './store.js';
+import { SITE } from '../../data/site.js';
+
+/* REPLIES
+
+   MEMBER_EMAIL_FROM is a sending address, not a mailbox anyone reads. So
+   every email carries a Reply-To, and a reply always reaches a person:
+   whatever the caller asked for (a form sends the person who filled it
+   in), otherwise the chamber's own address in data/site.js. It goes in
+   Resend's reply_to field, not a raw header, because some mail programs
+   ignore the raw one. */
+const replyFields = headers => {
+  const h = { ...(headers || {}) };
+  const asked = h['Reply-To'];
+  delete h['Reply-To'];
+  return {
+    reply_to: asked || SITE.email,
+    ...(Object.keys(h).length ? { headers: h } : {})
+  };
+};
 
 export const dailyLimit = () => {
   const n = parseInt(process.env.MAIL_DAILY_LIMIT || '', 10);
@@ -74,7 +93,7 @@ export async function sendMail({ to, subject, text, html, headers }) {
     to: Array.isArray(to) ? to : [to],
     subject, text,
     ...(html ? { html } : {}),
-    ...(headers ? { headers } : {})
+    ...replyFields(headers)
   });
   await count((Array.isArray(to) ? to : [to]).length);
   return out;
@@ -91,7 +110,7 @@ export async function sendMany(messages) {
       to: Array.isArray(m.to) ? m.to : [m.to],
       subject: m.subject, text: m.text,
       ...(m.html ? { html: m.html } : {}),
-      ...(m.headers ? { headers: m.headers } : {})
+      ...replyFields(m.headers)
     }));
     await resend('/emails/batch', chunk);
     sent += chunk.length;

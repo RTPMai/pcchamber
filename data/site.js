@@ -10,9 +10,13 @@ export const SITE = {
   shortName: 'Polk City Area Chamber',
   tagline: 'The business network for Polk City, Alleman, Elkhart and Sheldahl.',
 
-  // Set this to the real address before launch. It is used for canonical
-  // links, the sitemap, and the social share card.
-  url: 'https://polkcitychamber.com',
+  // The address the site lives at. Used for canonical links, the sitemap,
+  // the social share card, and every link in the emails the site sends.
+  // Until the domain moves to Vercel this has to stay on the vercel.app
+  // address, or those links land on the old GoDaddy site.
+  // AT CUTOVER: set SITE_URL=https://polkcitychamber.com in Vercel and
+  // redeploy. No code change needed.
+  url: ((typeof process !== 'undefined' && process.env && process.env.SITE_URL) || 'https://pcchamber.vercel.app').replace(/\/+$/, ''),
 
   email: 'admin@polkcitychamber.com',
   phone: '515-229-0812',
