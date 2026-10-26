@@ -59,7 +59,9 @@ function longDate(iso) {
   return `${names[day]}, ${MONTHS[m - 1]} ${d}`;
 }
 
-const todayISO = () => new Date().toISOString().slice(0, 10);
+/* Today in Polk City, not in UTC. A build at 8 pm Central would otherwise
+   think it was already tomorrow and drop that day's events. */
+const todayISO = () => new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Chicago' }).format(new Date());
 
 /* "1100 S 5th St., Polk City, IA, 50226" into the parts search engines
    want. Falls back to the plain string when an address does not split
@@ -507,12 +509,51 @@ function page(meta, body, extraScript = '') {
 
 function nextEvent() {
   const t = todayISO();
-  return CALENDAR.filter(e => e.date >= t).sort((a, b) => a.date.localeCompare(b.date))[0];
+  return CALENDAR.filter(e => e.date >= t).sort((a, b) => (a.date + (a.start || '')).localeCompare(b.date + (b.start || '')))[0];
+}
+
+/* NEXT UP, KEPT CURRENT
+
+   The strip is written when the site builds, which only happens when
+   something is saved. So the page also carries the next dozen events and
+   moves the strip along in the browser once an event is over (its end
+   time, or its start time, or the end of its day, Central time). On a day
+   with a morning coffee and an evening mixer, the mixer takes over once
+   the coffee ends, and nothing goes stale between saves. */
+function nextUpScript(nextLine) {
+  const t = todayISO();
+  const list = CALENDAR.filter(e => e.date >= t)
+    .sort((a, b) => (a.date + (a.start || '')).localeCompare(b.date + (b.start || '')))
+    .slice(0, 12)
+    .map(e => ({ until: e.date + 'T' + (e.end || e.start || '23:59'), ...nextLine(e) }));
+  const json = JSON.stringify(list).replace(/</g, '\\u003c');
+  return `<script>
+(function(){
+  var list=${json}, box=document.getElementById('next-up'); if(!box) return;
+  var now; try{ now=new Intl.DateTimeFormat('sv-SE',{timeZone:'America/Chicago',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hour12:false}).format(new Date()).replace(' ','T'); }catch(e){ return; }
+  var n=null; for(var i=0;i<list.length;i++){ if(list[i].until>now){ n=list[i]; break; } }
+  if(!n){ box.hidden=true; return; }
+  box.setAttribute('data-season',n.season);
+  var a=box.querySelector('.whole'); a.href=n.href;
+  box.querySelector('.when').textContent=n.when;
+  box.querySelector('.what').textContent=n.what;
+  var go=box.querySelector('.go');
+  if(n.go){ if(!go){ go=document.createElement('a'); go.className='go'; box.querySelector('.wrap').appendChild(go); } go.href=n.go.href; go.textContent=n.go.label; }
+  else if(go){ go.remove(); }
+})();
+</script>`;
 }
 
 function homePage() {
   const n = nextEvent();
-  const strip = n ? `<div class="next" data-season="${n.season}">
+  const nextLine = e => ({
+    season: e.season || 'sun',
+    href: '/events/' + (e.id ? '#' + e.id : ''),
+    when: 'Next up: ' + longDate(e.date),
+    what: e.title + ' at ' + e.where + (e.time ? ', ' + e.time : ''),
+    go: e.rsvp ? { href: publicHref(e), label: e.rsvp.label } : null
+  });
+  const strip = n ? `<div class="next" id="next-up" data-season="${n.season}">
   <div class="wrap">
     <a class="whole" href="/events/${n.id ? `#${esc(n.id)}` : ''}">
       <span class="when">Next up: ${esc(longDate(n.date))}</span>
@@ -520,7 +561,7 @@ function homePage() {
     </a>
     ${n.rsvp ? `<a class="go" href="${esc(publicHref(n))}">${esc(n.rsvp.label)}</a>` : ''}
   </div>
-</div>` : '';
+</div>${nextUpScript(nextLine)}` : '';
 
   const org = {
     '@context': 'https://schema.org',

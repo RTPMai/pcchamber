@@ -255,6 +255,14 @@ export default async function handler(req, res) {
       if (job === 'audit' || job === 'daily') {
         const out = { ok: true };
         if (job === 'audit' || weekly.localDate().endsWith('-01')) out.audit = await scheduledAudit();
+        /* A fresh build every morning, so anything dated (the events
+           page, the home page strip, the alert bar, deals that expire)
+           moves on even in a week nobody saves anything. DEPLOY_HOOK_URL
+           is a Deploy Hook from Vercel: Settings, Git, Deploy Hooks. */
+        if (job === 'daily' && (process.env.DEPLOY_HOOK_URL || '').trim()) {
+          try { out.rebuild = (await fetch(process.env.DEPLOY_HOOK_URL.trim(), { method: 'POST' })).ok ? 'started' : 'refused'; }
+          catch (err) { console.error('daily rebuild failed', err); out.rebuild = 'failed'; }
+        }
         if (job === 'daily') {
           if (mailMissing().length || storeMissing().length) out.weekly = { skipped: 'email or store not set up' };
           else {

@@ -56,6 +56,8 @@ One call per member gets all three at once: a sentence about what they do, the e
 
 ## Mixer week (Oct 26 to 29)
 
+- [ ] Vercel: create a Deploy Hook (Settings, Git, Deploy Hooks, branch `main`) and put its URL in `DEPLOY_HOOK_URL`. The daily 7 am job uses it to rebuild, so dated things move on by themselves. Needs `CRON_SECRET` set too
+
 - [ ] Admin home: nothing under "Fix soon"
 - [ ] Oct 29: unveil the site and the membership levels
 
