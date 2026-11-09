@@ -84,31 +84,5 @@ export const SITE = {
   ]
 };
 
-/* The four doors on the home page. One sentence each, before anyone clicks.
-   Same rule as the Policy Center: say what it is, not what it is called. */
-export const DOORS = [
-  {
-    href: '/directory/',
-    season: 'spring',
-    title: 'Find a local business',
-    blurb: 'Every chamber member, sorted by what they actually do, with a real page for each one that shows up in search.'
-  },
-  {
-    href: '/events/',
-    season: 'sun',
-    title: 'Come to something',
-    blurb: 'The monthly luncheon, the golf tournament, ribbon cuttings, and what is happening around town.'
-  },
-  {
-    href: '/membership/',
-    season: 'autumn',
-    title: 'Join the chamber',
-    blurb: 'What it costs, what you get for it, and how to sign up. Prices are on the page, not behind a form.'
-  },
-  {
-    href: '/resources/',
-    season: 'winter',
-    title: 'Get help running your business',
-    blurb: 'Grants, permits, hiring help, and what is changing in state law that affects you.'
-  }
-];
+/* The four doors on the home page now live in content/text.json and are
+   edited in the admin under Website wording. */

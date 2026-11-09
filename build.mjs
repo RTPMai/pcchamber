@@ -15,13 +15,18 @@ import { mkdir, writeFile, readFile, rm, cp } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import path from 'node:path';
 
-import { SITE, DOORS } from './data/site.js';
+import { SITE } from './data/site.js';
 import { CATEGORIES, TIERS, MEMBERS, ALL_MEMBERS } from './data/members.js';
 import { RECURRING, CALENDAR } from './data/events.js';
 import { eventIcs, feedIcs, googleUrl, outlookUrl } from './tools/calendar-files.mjs';
-import { MEMBERSHIP, TIER_LIST, WHY, JOIN_FAQ } from './data/membership.js';
+import { MEMBERSHIP, TIER_LIST } from './data/membership.js';
+import { t, paragraphs, TEXT, FAQ_ALL, SETTINGS } from './data/text.js';
 import { ABOUT, FAQ, RESOURCE_GROUPS } from './data/pages.js';
 import { INVOLVED, PRIVACY } from './data/involved.js';
+
+const DOORS = TEXT.doors;
+const WHY = TEXT.reasons;
+const JOIN_FAQ = FAQ_ALL.filter(f => f.page === 'membership');
 import { POSTS } from './data/news.js';
 import { JOBS } from './data/jobs.js';
 import { REFERRALS } from './data/referrals.js';
@@ -43,9 +48,13 @@ const esc = s => String(s ?? '')
 
 /* Turns [label](https://address) into a link. Nothing else. */
 const linkify = s => esc(s).replace(
-  /\[([^\]]+)\]\((https?:\/\/[^)\s]+)\)/g,
+  /\[([^\]]+)\]\(((?:https?:\/\/|mailto:|\/)[^)\s]*)\)/g,
   (_, label, href) => `<a href="${href}">${label}</a>`
 );
+
+/* Admin-edited wording: a blank line makes a new paragraph, and
+   [label](address) makes a link. */
+const prose = (s, cls) => paragraphs(s).map(p => `<p${cls ? ` class="${cls}"` : ''}>${linkify(p)}</p>`).join('\n');
 
 const swapPolicy = s => String(s).replace(/\{POLICY\}/g, SITE.policyCenterUrl);
 
@@ -590,8 +599,8 @@ function homePage() {
         <span class="mark"><img src="/assets/mark.svg" alt="" width="56" height="56"></span>
         <img class="wordmark" src="/assets/wordmark-white.svg" alt="Polk City Area Chamber of Commerce" width="210" height="38">
       </span>
-      <h1>The business network for Polk City, Alleman, Elkhart and Sheldahl.</h1>
-      <p>We connect local businesses to customers, to each other, and to the information they need to run. Find a member, come to a luncheon, or join.</p>
+      <h1>${esc(t('home.headline'))}</h1>
+      ${prose(t('home.intro'))}
     </div>
   </div>
   <div class="hero-stage">
@@ -611,9 +620,9 @@ ${strip}
 </section>
 <section class="band warm">
   <div class="wrap"><div class="col">
-    <h2>What the chamber is for</h2>
-    <p class="lede">${esc(ABOUT.lede)}</p>
-    <p>${esc(ABOUT.body[1])}</p>
+    <h2>${esc(t('home.about.title'))}</h2>
+    <p class="lede">${linkify(ABOUT.lede)}</p>
+    <p>${linkify(ABOUT.body[1] || ABOUT.body[0] || '')}</p>
     <div class="btnrow">
       <a class="btn sun" href="/membership/">See what it costs to join</a>
       <a class="btn ghost" href="/about/">More about the chamber</a>
@@ -1327,12 +1336,12 @@ function membershipPage() {
 
   const why = WHY.map(w => `<div class="reason" data-season="${w.season}">
   <h3>${esc(w.title)}</h3>
-  <p>${esc(w.body)}</p>
+  ${prose(w.body)}
 </div>`).join('');
 
   const faq = JOIN_FAQ.map(f => `<details class="faq">
   <summary>${esc(f.q)}</summary>
-  <div class="ans"><p>${esc(f.a)}</p></div>
+  <div class="ans">${prose(f.a)}</div>
 </details>`).join('');
 
   const draft = MEMBERSHIP.draft ? `<div class="draft">
@@ -1343,7 +1352,7 @@ function membershipPage() {
 <div class="pagehead" data-season="autumn">
   <div class="wrap">
     <h1>Membership levels and benefits</h1>
-    <p>What each level of chamber membership costs and what comes with it.</p>
+    ${prose(t('membership.intro'))}
   </div>
 </div>
 <div class="wrap band">
@@ -1352,13 +1361,13 @@ function membershipPage() {
 </div>
 <div class="band warm">
   <div class="wrap">
-    <h2>Why businesses here pay for this</h2>
+    <h2>${esc(t('membership.why.title'))}</h2>
     <div class="reasons">${why}</div>
   </div>
 </div>
 <div class="wrap band" id="join">
-  <h2>Not sure which level fits?</h2>
-  <p class="lede">Tell us about the business and we will say which level makes sense. No pressure and no salesperson.</p>
+  <h2>${esc(t('membership.notsure.title'))}</h2>
+  ${prose(t('membership.notsure.text'), 'lede')}
   <div class="btnrow">
     <a class="btn sun" href="/join/">Start a membership</a>
     <a class="btn ghost" href="/events/">Come to a luncheon first</a>
@@ -1366,7 +1375,7 @@ function membershipPage() {
 </div>
 <div class="band warm">
   <div class="wrap"><div class="col">
-    <h2>Before you ask</h2>
+    <h2>${esc(t('membership.faq.title'))}</h2>
     ${faq}
   </div></div>
 </div>`;
@@ -1395,7 +1404,7 @@ function resourcesPage() {
 <div class="pagehead" data-season="winter">
   <div class="wrap">
     <h1>Business resources</h1>
-    <p>Sorted by the problem you are trying to solve rather than by who runs the program.</p>
+    ${prose(t('resources.intro'))}
   </div>
 </div>
 <div class="wrap band">
@@ -1409,8 +1418,7 @@ function resourcesPage() {
 <div class="band warm">
   <div class="wrap"><div class="col">
     <h2>The Business Policy Center</h2>
-    <p>The pages above are the official ones, written for people who already know the jargon. The chamber keeps its own separate resource that says what changed, who it applies to, and whether you should care, in plain language, with every claim linked to its source.</p>
-    <p>It is a member benefit and sits behind the member passcode. Every level of membership includes it.</p>
+    ${prose(t('resources.policy'))}
     <div class="btnrow">
       <a class="btn sun" href="/policy-center/">Open the Policy Center</a>
       <a class="btn ghost" href="/join/">Join to get access</a>
@@ -1431,7 +1439,7 @@ function resourceSectionPage(g) {
 
   const links = g.links.map(l => `<li>
   <a href="${esc(l.href)}">${esc(l.label)}</a>
-  <span>${esc(l.note)}</span>
+  <span>${linkify(l.note || '')}</span>
 </li>`).join('');
 
   const body = `
@@ -1444,7 +1452,7 @@ function resourceSectionPage(g) {
 </div>
 <div class="wrap band" data-season="${g.season}">
   <div class="col">
-    <p class="lede">${esc(g.intro)}</p>
+    ${prose(g.intro || '', 'lede')}
   </div>
   <section class="group">
     <ul>${links}</ul>
@@ -1517,29 +1525,29 @@ ${gaps.length ? `<div class="band warm">
 function aboutPage() {
   const faq = FAQ.map(f => `<details class="faq">
   <summary>${esc(f.q)}</summary>
-  <div class="ans"><p>${linkify(f.a)}</p></div>
+  <div class="ans">${prose(f.a)}</div>
 </details>`).join('');
 
   const body = `
 <div class="pagehead" data-season="navy">
   <div class="wrap">
     <h1>About the chamber</h1>
-    <p>${esc(ABOUT.lede)}</p>
+    <p>${linkify(ABOUT.lede)}</p>
   </div>
 </div>
 <div class="wrap band"><div class="col">
-  ${ABOUT.body.map(p => `<p>${esc(p)}</p>`).join('')}
+  ${ABOUT.body.map(p => `<p>${linkify(p)}</p>`).join('')}
 </div></div>
 <div class="band warm">
   <div class="wrap"><div class="col">
-    <h2>Questions people ask</h2>
-    <p>Can't find your answer? Email <a href="mailto:${SITE.email}">${SITE.email}</a>.</p>
+    <h2>${esc(t('about.faq.title'))}</h2>
+    ${prose(t('about.faq.note'))}
     ${faq}
   </div></div>
 </div>
 <div class="wrap band"><div class="col">
   <h2>Get in touch</h2>
-  <p>Email is the fastest way to reach a person.</p>
+  ${prose(t('about.contact'))}
   <p><a href="mailto:${SITE.email}">${SITE.email}</a><br>${esc(SITE.mail)}<br>${esc(SITE.phone)}</p>
 </div></div>`;
 
@@ -1555,7 +1563,7 @@ function aboutPage() {
 function involvedPage() {
   const ways = INVOLVED.ways.map(w => `<article class="event" data-season="${w.season}">
   <h3>${esc(w.title)}</h3>
-  <p>${esc(w.body)}</p>
+  ${prose(w.body)}
   <p class="cost">What it takes: ${esc(w.ask)}</p>
   <div class="btnrow"><a class="btn" href="${esc(w.action.href.replace('{EMAIL}', SITE.email))}">${esc(w.action.label)}</a></div>
 </article>`).join('');
@@ -1585,11 +1593,11 @@ function involvedPage() {
 <div class="pagehead" data-season="sun">
   <div class="wrap">
     <h1>Get involved</h1>
-    <p>${esc(INVOLVED.lede)}</p>
+    <p>${linkify(INVOLVED.lede)}</p>
   </div>
 </div>
 <div class="wrap band"><div class="col">
-  <p class="lede">${esc(INVOLVED.intro)}</p>
+  ${prose(INVOLVED.intro, 'lede')}
 </div></div>
 <div class="wrap band">
   ${ways}
@@ -1597,11 +1605,11 @@ function involvedPage() {
 <div class="band warm">
   <div class="wrap"><div class="col">
     <h2>Who is on the board</h2>
-    <p>Directors are elected by the membership and serve as volunteers. They set the budget, approve programs, and decide what the chamber says on behalf of local business.</p>
+    ${prose(t('involved.board'))}
   </div>
   <div class="people">${board}</div>
   <div class="col">
-    <p style="font-size:.94rem;color:var(--navy-soft);margin-top:22px">Seats come open at the annual meeting. If you want one, say so before then rather than after.</p>
+    <p style="font-size:.94rem;color:var(--navy-soft);margin-top:22px">${linkify(t('involved.seats'))}</p>
   </div></div>
 </div>`;
 
@@ -1615,7 +1623,7 @@ function involvedPage() {
 
 function privacyPage() {
   const secs = PRIVACY.sections.map(s => `<h3>${esc(s.title)}</h3>
-<p>${esc(s.body)}</p>`).join('');
+${prose(s.body)}`).join('');
 
   const body = `
 <div class="pagehead" data-season="navy">
@@ -1625,7 +1633,7 @@ function privacyPage() {
   </div>
 </div>
 <div class="wrap band"><div class="col">
-  <p class="lede">${esc(PRIVACY.intro)}</p>
+  ${prose(PRIVACY.intro, 'lede')}
   ${secs}
   <h3>Questions</h3>
   <p>Email <a href="mailto:${SITE.email}">${SITE.email}</a>.</p>
@@ -2080,7 +2088,40 @@ function formPage(form, { canonical, season, aside }) {
   }, body);
 }
 
+/* Applications can be held until a date, set in the admin under Website
+   wording. Until then /join/ explains when they open instead of showing
+   the form. The site rebuilds every morning, so the form comes back on
+   the day by itself. */
+function applicationsClosed() {
+  const a = (SETTINGS.applications || []).find(x => x.id === 'join');
+  return a && a.opens && todayISO() < a.opens ? a : null;
+}
+
+function joinClosedPage(a) {
+  const body = `
+<div class="pagehead" data-season="autumn">
+  <div class="wrap">
+    <h1>${esc(a.closedTitle || 'Membership applications open soon')}</h1>
+  </div>
+</div>
+<div class="wrap band"><div class="col">
+  ${prose(a.closedText || '')}
+  <div class="btnrow">
+    <a class="btn sun" href="/membership/">See the membership levels</a>
+    <a class="btn ghost" href="/events/">Come to a luncheon</a>
+  </div>
+</div></div>`;
+  return page({
+    title: 'Join the chamber',
+    description: 'Joining the Polk City Area Chamber of Commerce.',
+    canonical: '/join/',
+    season: 'autumn'
+  }, body);
+}
+
 function joinPage() {
+  const closed = applicationsClosed();
+  if (closed) return joinClosedPage(closed);
   const aside = `<aside class="card">
   <h4>What happens next</h4>
   <ol style="margin:0;padding-left:1.1em;font-size:.95rem">

@@ -30,6 +30,33 @@ export const HELP_STUCK = 'Every save is recorded with your name and the date, s
 
 export const HELP = [
 
+  /* ---------- website wording ---------- */
+
+  {
+    title: 'Change the words on a page',
+    screens: ['', 'wording', 'blocks', 'faq', 'doors', 'reasons', 'ways', 'sections', 'links', 'privacy'],
+    words: 'wording text copy verbiage headline paragraph edit page about home membership resources privacy faq question',
+    steps: [
+      'From the home screen open Website wording.',
+      'Pick the section. Page text has the headlines and paragraphs, listed by page. Questions and answers, Resource links and the rest each have their own.',
+      'Open an entry, change the words, and press Keep changes.',
+      'Press Save changes at the top of the list and say who you are. The website updates in about a minute.'
+    ],
+    note: 'To make a link, write [the words](the address), for example [membership page](/membership/). A blank line starts a new paragraph. Membership prices and benefits are not in here on purpose: they are set by the board and the benefits tracker counts against them.'
+  },
+
+  {
+    title: 'Hold or open membership applications',
+    screens: ['wording', 'applications'],
+    words: 'join form application closed open december hold',
+    steps: [
+      'Website wording, then Membership applications.',
+      'Set the date applications open, or clear it to open them now.',
+      'Edit the heading and message people see until then, then Keep changes and Save changes.'
+    ],
+    note: 'The site rebuilds every morning, so the form comes back on the day without anyone touching it.'
+  },
+
   /* ---------- the basics ---------- */
 
   {

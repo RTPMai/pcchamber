@@ -57,7 +57,9 @@ const ALLOWED = new Set([
   'members.json', 'events.json', 'jobs.json',
   'news.json', 'board.json', 'referrals.json',
   'benefits.json', 'deals.json', 'gallery.json',
-  'sponsorships.json'
+  'sponsorships.json',
+  /* Website wording */
+  'text.json', 'faq.json', 'resources.json', 'privacy.json', 'settings.json'
 ]);
 
 const api = () => ({

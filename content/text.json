@@ -1,0 +1,231 @@
+{
+  "blocks": [
+    {
+      "id": "home.headline",
+      "page": "Home",
+      "label": "Big headline",
+      "text": "The business network for Polk City, Alleman, Elkhart and Sheldahl."
+    },
+    {
+      "id": "home.intro",
+      "page": "Home",
+      "label": "Sentence under the headline",
+      "text": "We connect local businesses to customers, to each other, and to the information they need to run. Find a member, come to a luncheon, or join."
+    },
+    {
+      "id": "home.about.title",
+      "page": "Home",
+      "label": "Heading over the About summary",
+      "help": "The text under it is the first sentence and second paragraph of the About page, so it stays in step with that page.",
+      "text": "What the chamber is for"
+    },
+    {
+      "id": "about.lede",
+      "page": "About",
+      "label": "Opening sentence",
+      "help": "Also shows on the home page.",
+      "text": "The chamber is a nonprofit run by local business owners. It exists to make it easier to start, run, and grow a business in the Polk City area."
+    },
+    {
+      "id": "about.body",
+      "page": "About",
+      "label": "Main text",
+      "help": "Leave a blank line between paragraphs. The second paragraph also shows on the home page.",
+      "text": "Polk City is one of the faster growing communities in Iowa, and growth cuts both ways for a small business. More rooftops mean more customers, and they also mean more competition, higher rents, and a city government making decisions that land directly on your operation.\n\nThe chamber is how local businesses keep track of that together. It runs the monthly luncheon, the golf tournament, and the ribbon cuttings. It maintains the member directory. It watches what the legislature and the county are doing and translates it. And it speaks for local business when the city is deciding something that affects them.\n\nIt is not part of city government and it does not endorse candidates."
+    },
+    {
+      "id": "about.faq.title",
+      "page": "About",
+      "label": "Heading over the questions",
+      "help": "The questions themselves are under Questions and answers.",
+      "text": "Questions people ask"
+    },
+    {
+      "id": "about.faq.note",
+      "page": "About",
+      "label": "Line under that heading",
+      "text": "Can’t find your answer? Email [admin@polkcitychamber.com](mailto:admin@polkcitychamber.com)."
+    },
+    {
+      "id": "about.contact",
+      "page": "About",
+      "label": "Get in touch",
+      "help": "The email, mailing address and phone are added under it automatically.",
+      "text": "Email is the fastest way to reach a person."
+    },
+    {
+      "id": "membership.intro",
+      "page": "Membership",
+      "label": "Sentence under the page title",
+      "text": "What each level of chamber membership costs and what comes with it."
+    },
+    {
+      "id": "membership.why.title",
+      "page": "Membership",
+      "label": "Heading over the reasons to join",
+      "help": "The reasons themselves are under Reasons to join.",
+      "text": "Why businesses here pay for this"
+    },
+    {
+      "id": "membership.notsure.title",
+      "page": "Membership",
+      "label": "Heading near the bottom",
+      "text": "Not sure which level fits?"
+    },
+    {
+      "id": "membership.notsure.text",
+      "page": "Membership",
+      "label": "Text under that heading",
+      "text": "Tell us about the business and we will say which level makes sense. No pressure and no salesperson."
+    },
+    {
+      "id": "membership.faq.title",
+      "page": "Membership",
+      "label": "Heading over the questions",
+      "help": "The questions themselves are under Questions and answers.",
+      "text": "Before you ask"
+    },
+    {
+      "id": "resources.intro",
+      "page": "Resources",
+      "label": "Sentence under the page title",
+      "text": "Sorted by the problem you are trying to solve rather than by who runs the program."
+    },
+    {
+      "id": "resources.policy",
+      "page": "Resources",
+      "label": "Business Policy Center text",
+      "help": "Leave a blank line between paragraphs.",
+      "text": "The pages above are the official ones, written for people who already know the jargon. The chamber keeps its own separate resource that says what changed, who it applies to, and whether you should care, in plain language, with every claim linked to its source.\n\nIt is a member benefit and sits behind the member passcode. Every level of membership includes it."
+    },
+    {
+      "id": "involved.lede",
+      "page": "Get involved",
+      "label": "Sentence under the page title",
+      "text": "Membership pays for the chamber. Volunteers are what make it do anything."
+    },
+    {
+      "id": "involved.intro",
+      "page": "Get involved",
+      "label": "Opening paragraph",
+      "text": "There is no full-time staff. Every event, every ribbon cutting, and every page of this website exists because somebody with a business to run decided to spend an evening on it. Here is where the help is actually needed."
+    },
+    {
+      "id": "involved.board",
+      "page": "Get involved",
+      "label": "Text over the board list",
+      "help": "The board members themselves are under Board.",
+      "text": "Directors are elected by the membership and serve as volunteers. They set the budget, approve programs, and decide what the chamber says on behalf of local business."
+    },
+    {
+      "id": "involved.seats",
+      "page": "Get involved",
+      "label": "Line under the board list",
+      "text": "Seats come open at the annual meeting. If you want one, say so before then rather than after."
+    },
+    {
+      "id": "privacy.updated",
+      "page": "Privacy",
+      "label": "Last updated",
+      "help": "Change this whenever the policy changes, for example November 2026.",
+      "text": "November 2026"
+    },
+    {
+      "id": "privacy.intro",
+      "page": "Privacy",
+      "label": "Opening sentence",
+      "help": "The sections are under Privacy policy.",
+      "text": "Short version: the chamber collects almost nothing, does not sell anything to anyone, and does not run advertising trackers on this site."
+    }
+  ],
+  "doors": [
+    {
+      "href": "/directory/",
+      "season": "spring",
+      "title": "Find a local business",
+      "blurb": "Every chamber member, sorted by what they actually do, with a real page for each one that shows up in search."
+    },
+    {
+      "href": "/events/",
+      "season": "sun",
+      "title": "Come to something",
+      "blurb": "The monthly luncheon, the golf tournament, ribbon cuttings, and what is happening around town."
+    },
+    {
+      "href": "/membership/",
+      "season": "autumn",
+      "title": "Join the chamber",
+      "blurb": "What it costs, what you get for it, and how to sign up. Prices are on the page, not behind a form."
+    },
+    {
+      "href": "/resources/",
+      "season": "winter",
+      "title": "Get help running your business",
+      "blurb": "Grants, permits, hiring help, and what is changing in state law that affects you."
+    }
+  ],
+  "reasons": [
+    {
+      "season": "spring",
+      "title": "People find you",
+      "body": "Your directory page is a real page with a real address, so it turns up when somebody searches for what you do plus Polk City. Most chamber directories are invisible to search engines. This one is not."
+    },
+    {
+      "season": "sun",
+      "title": "You are the one referred",
+      "body": "Referral exclusivity means that when the chamber gets a call asking who to use for what you do, you are the answer. In a town this size that is most of the value."
+    },
+    {
+      "season": "winter",
+      "title": "Somebody reads the boring documents",
+      "body": "The chamber tracks what the legislature, the county, and the city are doing to businesses here and writes it in plain language in the Business Policy Center. That is a member benefit, not a public page."
+    },
+    {
+      "season": "autumn",
+      "title": "You get a say",
+      "body": "The chamber speaks for local business to the city and the county. What it says is shaped by members who show up."
+    }
+  ],
+  "ways": [
+    {
+      "season": "sun",
+      "title": "Join a committee",
+      "body": "Committees do the work between board meetings. Events, membership, and communications each meet about once a month and each could use two more people.",
+      "ask": "A couple of hours a month.",
+      "action": {
+        "label": "Ask which committee needs people",
+        "href": "mailto:{EMAIL}?subject=Committee%20interest"
+      }
+    },
+    {
+      "season": "spring",
+      "title": "Help at an event",
+      "body": "The golf tournament needs about fifteen people for one morning. The luncheon needs one person to run the sign-in table. Neither requires a commitment beyond the day.",
+      "ask": "One morning.",
+      "action": {
+        "label": "Put your name down",
+        "href": "mailto:{EMAIL}?subject=Event%20volunteer"
+      }
+    },
+    {
+      "season": "autumn",
+      "title": "Sponsor something",
+      "body": "Sponsorship is how the chamber funds programs without raising dues. The golf tournament has hole sponsorships. Luncheons have a speaker slot. New programs need a first backer.",
+      "ask": "Money, and your logo in front of the local business community.",
+      "action": {
+        "label": "See what is available",
+        "href": "mailto:{EMAIL}?subject=Sponsorship"
+      }
+    },
+    {
+      "season": "winter",
+      "title": "Run for the board",
+      "body": "Board seats come open at the annual meeting. Directors set the budget, approve programs, and decide what the chamber says on behalf of local business.",
+      "ask": "A monthly meeting and a real say in what happens.",
+      "action": {
+        "label": "Ask about open seats",
+        "href": "mailto:{EMAIL}?subject=Board%20interest"
+      }
+    }
+  ]
+}

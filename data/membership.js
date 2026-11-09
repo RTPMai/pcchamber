@@ -147,53 +147,7 @@ export const TIER_LIST = [
   }
 ];
 
-/* Why a business here pays for this, written for someone deciding. */
-export const WHY = [
-  {
-    season: 'spring',
-    title: 'People find you',
-    body: 'Your directory page is a real page with a real address, so it turns up when somebody searches for what you do plus Polk City. Most chamber directories are invisible to search engines. This one is not.'
-  },
-  {
-    season: 'sun',
-    title: 'You are the one referred',
-    body: 'Referral exclusivity means that when the chamber gets a call asking who to use for what you do, you are the answer. In a town this size that is most of the value.'
-  },
-  {
-    season: 'winter',
-    title: 'Somebody reads the boring documents',
-    body: 'The chamber tracks what the legislature, the county, and the city are doing to businesses here and writes it in plain language in the Business Policy Center. That is a member benefit, not a public page.'
-  },
-  {
-    season: 'autumn',
-    title: 'You get a say',
-    body: 'The chamber speaks for local business to the city and the county. What it says is shaped by members who show up.'
-  }
-];
-
-export const JOIN_FAQ = [
-  {
-    q: 'Do I have to be in Polk City?',
-    a: 'No. The chamber covers the wider area, including Alleman, Elkhart, and Sheldahl, and plenty of members are based elsewhere in the metro and do business here.'
-  },
-  {
-    q: 'How is Basic Business priced?',
-    a: 'By headcount, so a one-person business is not paying what a thirty-person employer pays. Nonprofits pay $150 at any size.'
-  },
-  {
-    q: 'What does referral exclusivity actually mean?',
-    a: 'When somebody asks the chamber who to call for what you do, you are the name given. It is the one benefit a larger chamber cannot copy, because it only works when the list is short.'
-  },
-  {
-    q: 'Can I come to a luncheon before I join?',
-    a: 'Yes. Guests are welcome at the guest rate. Come to one before you spend anything.'
-  },
-  {
-    q: 'What happens after I apply?',
-    a: 'You get an invoice and a short form asking how you want your directory listing written. Your page is live within a week.'
-  },
-  {
-    q: 'Is this the same as the city?',
-    a: 'No. The chamber is an independent nonprofit. The city is at polkcityia.gov.'
-  }
-];
+/* The reasons to join and the membership questions used to be here. They
+   are website wording now, in content/text.json and content/faq.json,
+   edited in the admin. This file stays free of anything that reads files,
+   because the admin loads it in the browser. */

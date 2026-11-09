@@ -97,6 +97,7 @@ main{ padding:32px 0 80px; }
   border:1px solid var(--rule); border-radius:10px; padding:0 14px;
 }
 .row-del:hover{ border-color:var(--alert); color:var(--alert); }
+.row-del.row-up:hover{ border-color:var(--navy); color:var(--navy); }
 
 .field{ margin:0 0 22px; }
 .field label{ display:block; font-weight:600; margin-bottom:3px; }

@@ -1,4 +1,19 @@
-# Launch: working back from the October 29 mixer
+# Launch: November 23, 2026
+
+Update, November 9. The October dates below slipped. Crystal is aiming to announce the site by November 23. What is left, in order:
+
+- [ ] Crystal edits the wording in the admin under **Website wording** (new). Prices and benefits are not in there on purpose.
+- [ ] Membership applications are held until **December 1** (admin, Website wording, Membership applications). Until then /join/ says when they open. Sponsorships get settled with the board before or after the November meeting, then applications open.
+- [ ] Check `DEPLOY_HOOK_URL` and `CRON_SECRET` are set in Vercel. The daily rebuild is what reopens the join form on December 1 by itself. Without it, the form comes back on the next deploy after that date.
+- [ ] Stripe: Crystal opening the account now. Test key first, then live. 2027 dues can go out any time per Mary.
+- [ ] Domain cutover (steps below under Cutover). Everything from the old GoDaddy site has been checked across: FAQ, business resources, privacy policy.
+- [ ] After the cutover, and only once the new site has been live a couple of weeks: turn off GoDaddy **website hosting only**. The domain registration and the chamber email may also be billed through GoDaddy. Those must stay on, or the site and the admin@ inbox go dark.
+- [ ] Cancel JotForm once nothing points at it. The new site's forms do not use it.
+- [ ] Close Square once Stripe has handled a full month.
+
+---
+
+# Original plan: working back from the October 29 mixer
 
 Status as of September 29, from the repo itself. The admin home screen now shows the same "Needs attention" list live, so most of this can be ticked off there and watched clear.
 

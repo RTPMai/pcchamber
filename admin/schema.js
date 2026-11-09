@@ -23,6 +23,14 @@
    runs on add, never on an existing entry, because these become permanent
    web addresses the moment they are published.
 
+   Section options for the Website wording group
+     group     'wording' puts the section under Website wording instead of
+               on the home screen
+     fixed     the entries are set in the code. People change what they
+               say but cannot add or remove them
+     reorder   shows Up buttons so the order on the page can be changed
+     helpFrom  on a field: take its help sentence from the entry itself
+
    help is the sentence under the label. Write it for somebody who has never
    done this before, and say what happens as a result of the choice, not what
    the field is called.
@@ -303,6 +311,178 @@ export const COLLECTIONS = [
       { id: 'id', label: 'Reference', type: 'text', required: true, advanced: true,
         derive: r => slug(r.need || ''),
         help: 'Filled in for you.' }
+    ]
+  },
+  /* ---------- website wording ------------------------------------------- */
+
+  {
+    id: 'blocks',
+    group: 'wording',
+    file: 'text.json',
+    key: 'blocks',
+    season: 'navy',
+    fixed: true,
+    title: 'Page text',
+    blurb: 'Headlines, intros and paragraphs on the home, About, Membership, Resources, Get involved and Privacy pages.',
+    note: 'Each entry is one piece of text on one page. Change the words and save. The page updates in about a minute.',
+    label: b => `${b.page}: ${b.label}`,
+    sub: b => String(b.text || '').replace(/\s+/g, ' ').slice(0, 90),
+    fields: [
+      { id: 'text', label: 'Wording', type: 'textarea', required: true, helpFrom: 'help',
+        extraHelp: 'To make a link, write [the words](the address). A blank line starts a new paragraph.' }
+    ]
+  },
+
+  {
+    id: 'faq',
+    group: 'wording',
+    file: 'faq.json',
+    key: 'faq',
+    season: 'sun',
+    reorder: true,
+    title: 'Questions and answers',
+    blurb: 'The questions on the About page and the Membership page.',
+    note: 'Questions show in this order. Use Up to move one higher.',
+    label: f => f.q || 'New question',
+    sub: f => f.page === 'membership' ? 'Membership page' : 'About page',
+    fields: [
+      { id: 'q', label: 'Question', type: 'text', required: true },
+      { id: 'a', label: 'Answer', type: 'textarea', required: true, help: 'To make a link, write [the words](the address). A blank line starts a new paragraph.' },
+      { id: 'page', label: 'Shows on', type: 'select', required: true, options: ['about', 'membership'],
+        labels: { about: 'About page', membership: 'Membership page' } }
+    ]
+  },
+
+  {
+    id: 'doors',
+    group: 'wording',
+    file: 'text.json',
+    key: 'doors',
+    season: 'spring',
+    fixed: true,
+    title: 'Home page boxes',
+    blurb: 'The four boxes under the video on the home page.',
+    label: d => d.title,
+    sub: d => d.href,
+    fields: [
+      { id: 'title', label: 'Heading', type: 'text', required: true },
+      { id: 'blurb', label: 'Sentence', type: 'textarea', required: true, help: 'One sentence. Say what is behind the box, not what it is called.' },
+      { id: 'href', label: 'Goes to', type: 'text', required: true, advanced: true },
+      { id: 'season', label: 'Color', type: 'select', options: ['sun', 'autumn', 'spring', 'winter'], labels: { sun: 'Orange', autumn: 'Brown', spring: 'Green', winter: 'Blue' }, help: 'Cosmetic.' }
+    ]
+  },
+
+  {
+    id: 'reasons',
+    group: 'wording',
+    file: 'text.json',
+    key: 'reasons',
+    season: 'autumn',
+    reorder: true,
+    title: 'Reasons to join',
+    blurb: 'The boxes on the Membership page explaining why businesses join.',
+    label: r => r.title || 'New reason',
+    fields: [
+      { id: 'title', label: 'Heading', type: 'text', required: true },
+      { id: 'body', label: 'Text', type: 'textarea', required: true, help: 'To make a link, write [the words](the address). A blank line starts a new paragraph.' },
+      { id: 'season', label: 'Color', type: 'select', options: ['sun', 'autumn', 'spring', 'winter'], labels: { sun: 'Orange', autumn: 'Brown', spring: 'Green', winter: 'Blue' }, help: 'Cosmetic.' }
+    ]
+  },
+
+  {
+    id: 'ways',
+    group: 'wording',
+    file: 'text.json',
+    key: 'ways',
+    season: 'sun',
+    reorder: true,
+    title: 'Ways to get involved',
+    blurb: 'Committees, volunteering, sponsorship and board seats on the Get involved page.',
+    label: w => w.title || 'New way',
+    fields: [
+      { id: 'title', label: 'Heading', type: 'text', required: true },
+      { id: 'body', label: 'Text', type: 'textarea', required: true, help: 'To make a link, write [the words](the address). A blank line starts a new paragraph.' },
+      { id: 'ask', label: 'What it takes', type: 'text', help: 'Shows as "What it takes:" and then this.' },
+      { id: 'actionLabel', label: 'Button text', type: 'text', path: 'action.label' },
+      { id: 'actionHref', label: 'Button link', type: 'text', path: 'action.href',
+        help: 'A web address, or mailto:{EMAIL}?subject=Your%20subject to open an email to the chamber.' },
+      { id: 'season', label: 'Color', type: 'select', options: ['sun', 'autumn', 'spring', 'winter'], labels: { sun: 'Orange', autumn: 'Brown', spring: 'Green', winter: 'Blue' }, help: 'Cosmetic.' }
+    ]
+  },
+
+  {
+    id: 'resourceSections',
+    group: 'wording',
+    file: 'resources.json',
+    key: 'sections',
+    season: 'winter',
+    fixed: true,
+    title: 'Resource sections',
+    blurb: 'The five sections of the Business resources page: their names and intros.',
+    note: 'The links inside each section are under Resource links.',
+    label: g => g.label,
+    sub: g => g.blurb,
+    fields: [
+      { id: 'label', label: 'Section name', type: 'text', required: true },
+      { id: 'blurb', label: 'One sentence', type: 'textarea', required: true, help: 'Shows on the card before anyone clicks.' },
+      { id: 'intro', label: 'Intro paragraph', type: 'textarea', help: 'At the top of the section\u2019s own page. ' + 'To make a link, write [the words](the address). A blank line starts a new paragraph.' },
+      { id: 'season', label: 'Color', type: 'select', options: ['sun', 'autumn', 'spring', 'winter'], labels: { sun: 'Orange', autumn: 'Brown', spring: 'Green', winter: 'Blue' }, help: 'Cosmetic.' }
+    ]
+  },
+
+  {
+    id: 'resourceLinks',
+    group: 'wording',
+    file: 'resources.json',
+    key: 'links',
+    season: 'winter',
+    reorder: true,
+    title: 'Resource links',
+    blurb: 'Every link on the Business resources pages, with the sentence under it.',
+    note: 'Links show in this order within their section.',
+    label: l => l.label || 'New link',
+    sub: l => l.section,
+    fields: [
+      { id: 'label', label: 'Link text', type: 'text', required: true },
+      { id: 'href', label: 'Address', type: 'text', required: true, help: 'The full web address, starting https://. A page on this site can start with /.' },
+      { id: 'note', label: 'What it is for', type: 'textarea', help: 'One or two sentences. Say who it helps.' },
+      { id: 'section', label: 'Section', type: 'select', from: 'sections', required: true }
+    ]
+  },
+
+  {
+    id: 'privacy',
+    group: 'wording',
+    file: 'privacy.json',
+    key: 'privacy',
+    season: 'navy',
+    reorder: true,
+    title: 'Privacy policy',
+    blurb: 'The sections of the privacy policy.',
+    note: 'After changing the policy, change "Last updated" under Page text, Privacy.',
+    label: p => p.title || 'New section',
+    fields: [
+      { id: 'title', label: 'Heading', type: 'text', required: true },
+      { id: 'body', label: 'Text', type: 'textarea', required: true, help: 'To make a link, write [the words](the address). A blank line starts a new paragraph.' }
+    ]
+  },
+
+  {
+    id: 'applications',
+    group: 'wording',
+    file: 'settings.json',
+    key: 'applications',
+    season: 'autumn',
+    fixed: true,
+    title: 'Membership applications',
+    blurb: 'Hold the join form until a date, and what people see until then.',
+    label: a => a.label,
+    sub: a => a.opens ? `Opens ${a.opens}` : 'Open',
+    fields: [
+      { id: 'opens', label: 'Applications open on', type: 'date',
+        help: 'Until this date the Join page shows the message below instead of the form. The form comes back by itself on the day. Clear the date to open applications now.' },
+      { id: 'closedTitle', label: 'Heading while closed', type: 'text' },
+      { id: 'closedText', label: 'Message while closed', type: 'textarea', help: 'To make a link, write [the words](the address). A blank line starts a new paragraph.' }
     ]
   }
 ];

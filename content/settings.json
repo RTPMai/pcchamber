@@ -1,0 +1,11 @@
+{
+  "applications": [
+    {
+      "id": "join",
+      "label": "Membership applications",
+      "opens": "2026-12-01",
+      "closedTitle": "Membership applications open December 1",
+      "closedText": "The chamber is getting 2027 membership ready. Applications open December 1.\n\nIn the meantime, the [membership page](/membership/) has every level and what it costs, and you are welcome at a luncheon as a guest. Questions? Email [admin@polkcitychamber.com](mailto:admin@polkcitychamber.com)."
+    }
+  ]
+}

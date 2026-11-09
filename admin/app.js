@@ -195,7 +195,27 @@ function screenHome() {
         el('button', { class: 'card', 'data-season': 'spring', onclick: () => screenDigest() },
           el('strong', {}, 'Quarterly member email'),
           el('span', {}, 'Each member\u2019s listing stats and unused benefits, once a quarter.')),
-        COLLECTIONS.map(c =>
+        el('button', { class: 'card', 'data-season': 'navy', onclick: () => screenWording() },
+          el('strong', {}, 'Website wording'),
+          el('span', {}, 'The words on the home, About, Membership, Resources and Privacy pages. Change them here, no code.')),
+        COLLECTIONS.filter(c => !c.group).map(c =>
+          el('button', { class: 'card', 'data-season': c.season, onclick: () => openCollection(c) },
+            el('strong', {}, c.title),
+            el('span', {}, c.blurb))))
+    ));
+}
+
+/* The page wording, kept off the home screen as one card so the everyday
+   sections stay easy to find. */
+function screenWording() {
+  mark('wording');
+  render(
+    el('div', {},
+      el('button', { class: 'back', onclick: () => up('', screenHome) }, 'All sections'),
+      el('h1', {}, 'Website wording'),
+      el('p', { class: 'note' }, 'Change the words, press Keep changes, then Save changes. The page updates on the website in about a minute. Every save is recorded with your name, so anything can be put back.'),
+      el('div', { class: 'cards' },
+        COLLECTIONS.filter(c => c.group === 'wording').map(c =>
           el('button', { class: 'card', 'data-season': c.season, onclick: () => openCollection(c) },
             el('strong', {}, c.title),
             el('span', {}, c.blurb))))
@@ -276,7 +296,8 @@ function screenList() {
         el('strong', {}, c.label(item)),
         el('span', {}, c.sub ? c.sub(item) : ''),
         c.flag && c.flag(item) && el('em', { class: 'flag' }, c.flagNote)),
-      el('button', { class: 'row-del', title: 'Remove', onclick: () => removeItem(i) }, 'Remove')));
+      c.reorder && i > 0 && el('button', { class: 'row-del row-up', title: 'Move up', onclick: () => moveUp(i) }, 'Up'),
+      !c.fixed && el('button', { class: 'row-del', title: 'Remove', onclick: () => removeItem(i) }, 'Remove')));
 
   const applySearch = () => {
     state.q[c.key] = search.value;
@@ -299,7 +320,7 @@ function screenList() {
 
   render(
     el('div', {},
-      el('button', { class: 'back', onclick: leaveCollection }, 'All sections'),
+      el('button', { class: 'back', onclick: leaveCollection }, c.group ? 'Website wording' : 'All sections'),
       el('h1', {}, c.title),
       c.note && el('p', { class: 'note' }, c.note),
       c.key === 'members' && items().some(m => m.sizeRequested) && el('p', { class: 'note warn' },
@@ -307,7 +328,7 @@ function screenList() {
       needing > 0 && el('p', { class: 'note warn' },
         `${needing} of ${items().length} still ${c.flagNote ? c.flagNote.toLowerCase() : 'need attention'}.`),
       el('div', { class: 'row' },
-        el('button', { class: 'btn primary', onclick: () => openItem(-1) }, 'Add new'),
+        !c.fixed && el('button', { class: 'btn primary', onclick: () => openItem(-1) }, 'Add new'),
         c.key === 'members' && el('button', { class: 'btn', onclick: downloadChamberMaster }, 'Download for ChamberMaster'),
         state.dirty && el('button', { class: 'btn', onclick: save }, 'Save changes'),
         state.dirty && el('span', { class: 'unsaved' }, 'Not saved yet')),
@@ -321,8 +342,19 @@ function screenList() {
 
 function leaveCollection() {
   if (state.dirty && !confirm('You have changes that are not saved. Leave anyway?')) return;
+  const back = state.collection && state.collection.group ? 'wording' : '';
   state.collection = null; state.file = null; state.dirty = false;
-  up('', screenHome);
+  up(back, back ? screenWording : screenHome);
+}
+
+/* Swaps an entry with the one above it in the file, which is the order
+   the website shows them in. Only for sections with no sort of their own. */
+function moveUp(i) {
+  const list = items();
+  if (i <= 0) return;
+  [list[i - 1], list[i]] = [list[i], list[i - 1]];
+  state.dirty = true;
+  screenList();
 }
 
 function removeItem(i) {
@@ -455,7 +487,7 @@ function openItem(i) {
 
   const body = el('div', {},
     c.fields.filter(f => !f.advanced).map(f => fieldRow(f, item, onchange)),
-    el('details', { class: 'advanced' },
+    c.fields.some(f => f.advanced) && el('details', { class: 'advanced' },
       el('summary', {}, 'Settings you probably should not change'),
       c.fields.filter(f => f.advanced).map(f => fieldRow(f, item, onchange)))
   );
@@ -542,7 +574,8 @@ function fieldRow(f, item, onchange) {
   const id = 'f-' + f.id;
   return el('div', { class: 'field' + (f.type === 'check' ? ' check' : '') },
     el('label', { for: id }, f.label, f.required && el('span', { class: 'req' }, 'required')),
-    f.help && el('span', { class: 'help' }, f.help),
+    (f.help || (f.helpFrom && item[f.helpFrom])) && el('span', { class: 'help' }, f.help || item[f.helpFrom]),
+    f.extraHelp && el('span', { class: 'help' }, f.extraHelp),
     fieldControl(f, item, onchange));
 }
 
@@ -2163,6 +2196,8 @@ async function route(hash) {
       return screenDues();
     case 'message':
       return screenMessage();
+    case 'wording':
+      return screenWording();
     default:
       if (head) fix('');
       return screenHome();
