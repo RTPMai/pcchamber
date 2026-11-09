@@ -49,7 +49,7 @@ export const INVOLVED = {
 };
 
 export const PRIVACY = {
-  updated: 'September 2026',
+  updated: 'November 2026',
   intro: 'Short version: the chamber collects almost nothing, does not sell anything to anyone, and does not run advertising trackers on this site.',
   sections: [
     {
@@ -59,6 +59,10 @@ export const PRIVACY = {
     {
       title: 'What you give us on purpose',
       body: 'If you email the chamber, apply for membership, or register for an event, the chamber keeps what you sent so it can respond and keep records. Membership records include business contact details and payment history.'
+    },
+    {
+      title: 'Signing in',
+      body: 'Members and chamber admins who sign in get one cookie that keeps them signed in. It does nothing else and is not used for tracking or advertising. Signing out or closing the session ends it.'
     },
     {
       title: 'Listing stats',
@@ -73,12 +77,36 @@ export const PRIVACY = {
       body: 'Your directory listing is public by design, because being found is the point. Nothing else is shared, sold, or rented. Event registration handled by a venue is subject to that venue\u2019s own policy.'
     },
     {
+      title: 'Services that run the site',
+      body: 'A few outside companies handle parts of the work and only see what they need to do it: Stripe processes online payments, Resend delivers email, and Vercel hosts the site. Card numbers go straight to Stripe and never reach the chamber. Each company has its own privacy policy.'
+    },
+    {
+      title: 'Keeping it safe',
+      body: 'The whole site runs over an encrypted connection. Member and admin areas need a sign in, and only the board members and volunteers who need records for chamber work can see them.'
+    },
+    {
       title: 'How long it is kept',
       body: 'Membership and financial records are kept as long as the chamber is required to keep them for accounting and nonprofit reporting. Email is kept until it is no longer useful.'
     },
     {
       title: 'Changing or removing your information',
-      body: 'Email the chamber and it gets changed. A member who leaves can ask for their directory page to come down, and it will.'
+      body: 'Email the chamber at admin@polkcitychamber.com and it gets changed. A member who leaves can ask for their directory page to come down, and it will.'
+    },
+    {
+      title: 'Links to other sites',
+      body: 'This site links to a lot of other organizations, from state agencies to member websites. Once you leave, their privacy practices apply, not the chamber\u2019s.'
+    },
+    {
+      title: 'Children',
+      body: 'This site is meant for adults and businesses. The chamber does not knowingly collect information from children under 13.'
+    },
+    {
+      title: 'Changes to this policy',
+      body: 'If this policy changes, the new version goes on this page with a new date at the top.'
+    },
+    {
+      title: 'Questions',
+      body: 'Email admin@polkcitychamber.com with any question about this policy or your information.'
     }
   ]
 };

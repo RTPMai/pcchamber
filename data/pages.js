@@ -16,6 +16,14 @@ export const ABOUT = {
 
 export const FAQ = [
   {
+    q: 'What is the chamber\'s mission?',
+    a: 'The mission of the Polk City Area Chamber of Commerce is to promote economic growth and development in the local community by supporting and advocating for businesses.'
+  },
+  {
+    q: 'What does the chamber offer members?',
+    a: 'Networking at the monthly luncheon and other events, ribbon cuttings, a listing in the member directory, a spot on the job board and community calendar, the Business Policy Center, and a voice when the city or state is deciding something that affects local business. The [membership page](/join/) lists what comes with each level.'
+  },
+  {
     q: 'Is the chamber part of the city?',
     a: 'No. The chamber is an independent nonprofit that works alongside the city and other partners. For city business, permits, and council information, go to [polkcityia.gov](https://www.polkcityia.gov).'
   },
@@ -146,6 +154,8 @@ export const RESOURCE_GROUPS = [
       { label: 'Catch Des Moines', href: 'https://www.catchdesmoines.com/', note: 'Regional tourism listings. Worth it if you get visitor traffic from Saylorville and Big Creek.' },
       { label: 'Greater Des Moines Partnership', href: 'https://www.dsmpartnership.com/', note: 'Metro-wide business network. Basic Business membership includes reciprocal membership.' },
       { label: 'North Polk Living', href: 'https://www.iowalivingmagazines.com/north-polk', note: 'The local monthly magazine. Openings, milestones, and events are free to send in. Press releases go to tammy@iowalivingmagazines.com.' },
+      { label: 'Better Business Bureau serving Greater Iowa', href: 'https://www.bbb.org/local-bbb/iowa', note: 'BBB Accreditation, customer reviews, and complaint handling. Also a quick way to check out a vendor before you hire them.' },
+      { label: 'ISU Extension and Outreach', href: 'https://www.extension.iastate.edu/', note: 'Iowa State\'s statewide extension service. Its Community and Economic Development team offers small business support, retail trade data, and county-level numbers.' },
       { label: 'Goldman Sachs 10,000 Small Businesses', href: 'https://www.iowa10ksb.com/', note: 'A no-cost growth program for established businesses, run through DMACC and the other Iowa community colleges. Offices on the Ankeny campus. Take the eligibility quiz before you apply.' },
       { label: 'Iowa APEX Accelerator', href: 'https://www.ciras.iastate.edu/government-contracting/', note: 'Free help selling to federal, state, and local government: registration, bids, and certifications. Run by Iowa State\'s CIRAS.' },
       { label: 'IASourceLink', href: 'https://www.iasourcelink.com/', note: 'Searchable directory of 360+ nonprofit business resources across Iowa. Start here when nothing above fits.' }

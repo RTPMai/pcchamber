@@ -1533,6 +1533,7 @@ function aboutPage() {
 <div class="band warm">
   <div class="wrap"><div class="col">
     <h2>Questions people ask</h2>
+    <p>Can't find your answer? Email <a href="mailto:${SITE.email}">${SITE.email}</a>.</p>
     ${faq}
   </div></div>
 </div>

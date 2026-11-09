@@ -310,7 +310,7 @@
         "phone": "515-230-3872",
         "email": "eliteconstruction515@gmail.com",
         "web": "https://www.eliteconstruction515.com",
-        "address": "808 7th Street, Boone, IA, 50036"
+        "address": "702 Keeler Street, Boone, IA, 50036"
       },
       "access": [
         "joegermain@eliteconstruction515.com",
@@ -610,6 +610,19 @@
         "sandql2@nationwide.com",
         "ljsandquist@gmail.com"
       ]
+    },
+    {
+      "slug": "lotus-and-lime",
+      "name": "Lotus & Lime Asian Kitchen",
+      "category": "food",
+      "tier": "basic",
+      "city": "Polk City",
+      "summary": "Asian kitchen in Polk City.",
+      "contact": {
+        "web": "https://lotusandlimeiowa.com",
+        "address": "1010 Tyler St, Polk City, IA, 50226"
+      },
+      "access": []
     },
     {
       "slug": "luana-savings-bank",
